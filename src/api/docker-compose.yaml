@@ -1,0 +1,161 @@
+networks:
+  nkst-network:
+    driver: bridge
+
+volumes:
+  nkst_announcement_db:
+  nkst_auth_db:
+  nkst_api_db:
+  kafka-data:
+  redis-data:
+
+services:
+  # ──────────────────────────────────────────────
+  # Infrastructure
+  # ──────────────────────────────────────────────
+  kafka:
+    image: apache/kafka:latest
+    container_name: identity-kafka
+    networks:
+      - nkst-network
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    container_name: identity-redis
+    image: redis:7-alpine
+    networks:
+      - nkst-network
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+
+  # ──────────────────────────────────────────────
+  # Micro Services
+  # ──────────────────────────────────────────────
+  # auth-service:
+  #   container_name: identity-auth-service
+  #   build:
+  #     context: ./services/auth-service
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - nkst-network
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     auth-db:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/nkst_auth_db
+  #     SPRING_DATASOURCE_USERNAME: sa
+  #     SPRING_DATASOURCE_PASSWORD: password
+  #     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+
+  # api-service:
+  #   container_name: identity-api-service
+  #   build:
+  #     context: ./services/api-service
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - nkst-network
+  #   ports:
+  #     - "8082:8082"
+  #   depends_on:
+  #     api-db:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://api-db:3306/nkst_api_db
+  #     SPRING_DATASOURCE_USERNAME: sa
+  #     SPRING_DATASOURCE_PASSWORD: password
+  #     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+
+  # ──────────────────────────────────────────────
+  # Databases
+  # ──────────────────────────────────────────────
+  auth-db:
+    container_name: identity-auth-db
+    image: mysql:8.0
+    networks:
+      - nkst-network
+    volumes:
+      - nkst_auth_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: nkst_auth_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u sa -p password || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api-db:
+    container_name: identity-api-db
+    image: mysql:8.0
+    networks:
+      - nkst-network
+    volumes:
+      - nkst_api_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: nkst_api_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u sa -p password || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  announcement-db:
+    container_name: identity-announcement-db
+    image: mysql:8.0
+    networks:
+      - nkst-network
+    volumes:
+      - nkst_announcement_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: nkst_announcement_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - 3309:3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u sa -p password || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

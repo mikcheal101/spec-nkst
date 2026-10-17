@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1781558885918" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="identity_seq" />
+            </not>
+        </preConditions>
+        <createSequence sequenceName="identity_seq" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="1781558885919" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="churches" />
+            </not>
+        </preConditions>
+        <createTable tableName="churches">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Church Fields -->
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="address" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tel_number" type="VARCHAR(50)"/>
+            <column name="email_address" type="VARCHAR(255)"/>
+
+            <!-- Relationship to Parent Church -->
+            <column name="church_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+
+            <!-- Audit Fields (assuming standard Auditable implementation) -->
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <!-- Foreign Key Constraint for Self-Referencing Relationship -->
+        <addForeignKeyConstraint baseTableName="churches"
+                                 baseColumnNames="church_id"
+                                 constraintName="fk_church_parent_id"
+                                 referencedTableName="churches"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1781558898661" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="pastor_roles" />
+            </not>
+        </preConditions>
+        <createTable tableName="pastor_roles">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1781558894859" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="pastors" />
+            </not>
+        </preConditions>
+        <createTable tableName="pastors">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tel" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="VARCHAR(255)"/>
+            <column name="email_address" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+
+            <column name="church_id" type="BIGINT"/>
+            <column name="pastor_role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="pastors"
+                                 baseColumnNames="church_id"
+                                 constraintName="fk_pastor_church"
+                                 referencedTableName="churches"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="pastors"
+                                 baseColumnNames="pastor_role_id"
+                                 constraintName="fk_pastor_role"
+                                 referencedTableName="pastor_roles"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
+    <changeSet id="1781633534193" author="hemen.hirekaan">
+        <preConditions>
+            <not>
+                <tableExists tableName="baptism_record" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="baptism_record">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Auditable -->
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+
+            <!-- table columns -->
+            <column name="serial_number" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_of_baptism" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="worship_center" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bible_verse" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="baptized_by" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" type="TEXT"/>
+            <column name="address" type="TEXT"/>
+            <column name="image_uri" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1781633225699" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="members" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="members">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tel" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="VARCHAR(255)"/>
+            <column name="email_address" type="VARCHAR(500)">
+                <constraints unique="true"/>
+            </column>
+            <column name="gender" type="VARCHAR(20)" />
+            <column name="is_baptised" type="BOOLEAN" defaultValueBoolean="false" />
+            <column name="baptism_record_id" type="BIGINT" />
+
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="members"
+                                 baseColumnNames="baptism_record_id"
+                                 constraintName="fk_members_baptism_record"
+                                 referencedTableName="baptism_record"
+                                 referencedColumnNames="id" />
+    </changeSet>
+
+</databaseChangeLog>

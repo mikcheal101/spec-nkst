@@ -1,0 +1,16 @@
+package com.mikkytrionze.nkst.member.api.request;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+
+import java.lang.annotation.*;
+
+@Documented
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = BaptismRecordValidator.class)
+public @interface ValidateBaptismRecord {
+    String message() default "Baptism details are required when a member is marked as baptised.";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
+}

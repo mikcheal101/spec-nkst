@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1781559381945" author="hemen.hirekaan">
+        <preConditions>
+            <tableExists tableName="pastors" />
+            <columnExists tableName="pastors" columnName="church_id" />
+        </preConditions>
+
+        <dropNotNullConstraint tableName="pastors" columnName="church_id" columnDataType="BIGINT" />
+    </changeSet>
+    
+    <changeSet id="1781560080749" author="hemen.hirekaan">
+        <preConditions>
+            <tableExists tableName="churches" />
+            <columnExists tableName="churches" columnName="church_id" />
+        </preConditions>
+
+        <dropNotNullConstraint tableName="churches" columnName="church_id" columnDataType="BIGINT" />
+    </changeSet>
+
+    <changeSet id="1781561669924" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="pastors" />
+        </preConditions>
+
+        <addColumn tableName="pastors">
+            <column name="gender" type="VARCHAR(255)" defaultValue="M" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="1781633654835" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="pastors" />
+        </preConditions>
+
+        <addColumn tableName="pastors">
+            <column name="member_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="pastors"
+                                 baseColumnNames="member_id"
+                                 constraintName="fk_pastor_member"
+                                 referencedTableName="members"
+                                 referencedColumnNames="id"/>
+
+        <dropColumn tableName="pastors" columnName="tel"/>
+        <dropColumn tableName="pastors" columnName="last_name"/>
+        <dropColumn tableName="pastors" columnName="first_name"/>
+        <dropColumn tableName="pastors" columnName="middle_name"/>
+        <dropColumn tableName="pastors" columnName="email_address"/>
+    </changeSet>
+
+    <changeSet id="1781987728088" author="hemen.hirekaan">
+        <preConditions onError="MARK_RAN">
+            <tableExists tableName="pastors" />
+            <columnExists tableName="pastors" columnName="gender" />
+        </preConditions>
+
+        <dropColumn tableName="pastors" columnName="gender" />
+    </changeSet>
+
+    <changeSet id="1782249467664" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="members" />
+        </preConditions>
+
+        <addColumn tableName="members">
+            <column name="church_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="members"
+                                 baseColumnNames="church_id"
+                                 constraintName="fk_member_church"
+                                 referencedTableName="churches"
+                                 referencedColumnNames="id" />
+    </changeSet>
+
+    <changeSet id="1783115113258" author="hemen.hirekaan">
+        <preConditions>
+            <tableExists tableName="pastors" />
+            <columnExists tableName="pastors" columnName="member_id" />
+            <columnExists tableName="pastors" columnName="church_id" />
+        </preConditions>
+        
+        <addUniqueConstraint tableName="pastors"
+                             columnNames="member_id"
+                             constraintName="uk_pastor_member" />
+        <addUniqueConstraint tableName="pastors"
+                             columnNames="member_id, church_id"
+                             constraintName="uk_pastor_member_church" />
+    </changeSet>
+    
+    <changeSet id="1784331135891" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="members" />
+        </preConditions>
+        
+        <addColumn tableName="members">
+            <column name="address" type="TEXT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    
+    <changeSet id="1784331141638" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="baptism_record" />
+            <columnExists tableName="baptism_record" columnName="address" />
+        </preConditions>
+
+        <dropColumn tableName="baptism_record" columnName="address" />
+    </changeSet>
+
+    <changeSet id="1784332997123" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="members" />
+        </preConditions>
+
+        <addColumn tableName="members">
+            <column name="is_admin" defaultValueBoolean="false" type="BOOLEAN">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

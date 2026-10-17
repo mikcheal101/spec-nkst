@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+    
+    <changeSet id="1785602005756" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="announcements" />
+            <not>
+                <columnExists tableName="announcements" columnName="expires_at" />
+            </not>
+        </preConditions>
+        
+        <addColumn tableName="announcements">
+            <column name="expires_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+    
+    <changeSet id="1785679372397" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="announcements" />
+            <columnExists tableName="announcements" columnName="title" />
+            <columnExists tableName="announcements" columnName="church_id" />
+        </preConditions>
+        
+        <addUniqueConstraint tableName="announcements"
+                             columnNames="title, church_id"
+                             constraintName="uk_announcement_church_title" />
+    </changeSet>
+</databaseChangeLog>

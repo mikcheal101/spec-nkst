@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+
+    <changeSet id="008-create-sequence-tables" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="permissions_seq"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users_seq">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="users_seq">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+
+        <createTable tableName="roles_seq">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="roles_seq">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+
+        <createTable tableName="permissions_seq">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="permissions_seq">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+
+        <createTable tableName="refresh_tokens_seq">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="refresh_tokens_seq">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

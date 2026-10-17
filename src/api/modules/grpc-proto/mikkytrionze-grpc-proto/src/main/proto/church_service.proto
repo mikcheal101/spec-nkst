@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package com.mikkytrionze.proto.church;
+
+option java_multiple_files = true;
+option java_package = "com.mikkytrionze.proto.church";
+option java_outer_classname = "ChurchServiceProto";
+
+
+service ChurchService {
+  rpc GetChurchByToken (GetChurchRequest) returns (GetChurchResponse);
+}
+
+message GetChurchRequest {
+  string token = 1;
+}
+
+message GetChurchResponse {
+  int64 churchId = 1;
+  string churchName = 2;
+}

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1784418099171" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="elders" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="elders">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="member_id" type="BIGINT"/>
+            <column name="church_id" type="BIGINT"/>
+
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="elders"
+                                 baseColumnNames="church_id"
+                                 constraintName="fk_elder_church"
+                                 referencedTableName="churches"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="elders"
+                                 baseColumnNames="member_id"
+                                 constraintName="fk_elder_member"
+                                 referencedTableName="members"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1784418092285" author="hemen.hirekaan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="deacons" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="deacons">
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="member_id" type="BIGINT"/>
+            <column name="church_id" type="BIGINT"/>
+
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="deacons"
+                                 baseColumnNames="church_id"
+                                 constraintName="fk_deacon_church"
+                                 referencedTableName="churches"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="deacons"
+                                 baseColumnNames="member_id"
+                                 constraintName="fk_deacon_member"
+                                 referencedTableName="members"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

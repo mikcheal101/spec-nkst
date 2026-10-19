@@ -250,9 +250,9 @@ public class MemberServiceImpl implements MemberService {
                 .church(church)
                 .build();
 
-        if (Boolean.TRUE.equals(isBaptised) && baptismalNumber != null && !baptismalNumber.isEmpty()) {
+        if (Boolean.TRUE.equals(isBaptised)) {
             BaptismRecord baptismRecord = BaptismRecord.builder()
-                    .serialNumber(Integer.parseInt(baptismalNumber))
+                    .serialNumber(baptismalNumber != null ? Integer.parseInt(baptismalNumber) : 0)
                     .build();
             member.setBaptismRecord(baptismRecordService.save(baptismRecord));
         }

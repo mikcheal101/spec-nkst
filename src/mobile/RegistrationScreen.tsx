@@ -146,7 +146,7 @@ export const RegistrationScreen = () => {
           thumbColor="#f0f0f0"
           trackColor="#e0e0e0"
         />
-        {isBaptised && (
+        {isBaptised && flagState && (
           <View style={styles.baptismalNumberContainer}>
             <Text style={styles.label}>Baptismal number</Text>
             <TextInput

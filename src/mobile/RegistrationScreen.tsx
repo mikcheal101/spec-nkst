@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, FlatList, ScrollView, Alert, Activity
 import { useNavigation } from '@react-navigation/native'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useFeatureFlag } from './featureFlags'
+import { useBaptism } from './hooks/useBaptism'
 
 interface Church {
   id: string
@@ -19,12 +20,7 @@ export const RegistrationScreen = () => {
   const { state: flagState, isLoading: flagLoading } = useFeatureFlag('nkst.features.memberSelfService')
   const navigation = useNavigation()
   const queryClient = useQueryClient()
-
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [selectedChurchId, setSelectedChurchId] = useState('')
-  const [isBaptised, setIsBaptised] = useState(false)
-  const [baptismalNumber, setBaptismalNumber] = useState('')
+  const { isBaptised, setIsBaptised, baptismalNumber, setBaptismalNumber } = useBaptism()
   const [isLoading, setIsLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const lastTapRef = useRef(Date.now())
@@ -87,7 +83,7 @@ export const RegistrationScreen = () => {
       return
     }
     if (isBaptised && !baptismalNumber) {
-      Alert.alert('Error', 'Please enter baptismal number')
+      Alert.alert('Error', 'Baptismal number is required when baptized')
       return
     }
     mutation.mutate({ username, password, churchId: selectedChurchId, isBaptised, baptismalNumber })
@@ -142,9 +138,7 @@ export const RegistrationScreen = () => {
       </View>
       <View style={styles.baptismGroup}>
         <Text style={styles.label}>
-          <Text>
-            {isBaptised ? 'I am baptized' : 'I am not baptized'}
-          </Text>
+          <Text>{isBaptised ? 'I am baptized' : 'I am not baptized'}</Text>
         </Text>
         <Switch
           value={isBaptised}
@@ -153,13 +147,16 @@ export const RegistrationScreen = () => {
           trackColor="#e0e0e0"
         />
         {isBaptised && (
-          <TextInput
-            placeholder="Baptismal number"
-            value={baptismalNumber}
-            onChangeText={setBaptismalNumber}
-            style={styles.input}
-            autoCapitalize="none"
-          />
+          <View style={styles.baptismalNumberContainer}>
+            <Text style={styles.label}>Baptismal number</Text>
+            <TextInput
+              placeholder="Baptismal number"
+              value={baptismalNumber}
+              onChangeText={setBaptismalNumber}
+              style={styles.input}
+              autoCapitalize="none"
+            />
+          </View>
         )}
       </View>
       <Pressable
@@ -235,6 +232,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   baptismGroup: {
+    marginBottom: 15,
+  },
+  baptismalNumberContainer: {
     marginBottom: 15,
   },
   error: {

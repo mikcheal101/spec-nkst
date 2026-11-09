@@ -4,3 +4,6 @@ dist/
 test-results/
 .github/
 .specify/
+jira/
+tickets/
+specs/

@@ -6,6 +6,5 @@ test-results/
 .specify/
 jira/
 tickets/
-specs/
 completed_tickets.json
 mobile-workspace/

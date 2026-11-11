@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "NKST Church Management",
+    "slug": "nkst-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {}
+  }
+}

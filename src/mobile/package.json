@@ -1,7 +1,14 @@
 {
-  "name": "mobile-workspace",
+  "name": "nkst-mobile",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "main": "expo/AppEntry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
   "dependencies": {
     "expo": "~57.0.29",
     "expo-status-bar": "~57.0.1",
@@ -13,11 +20,8 @@
     "react-native-safe-area-context": "^4.10.1",
     "@react-native-community/netinfo": "^6.0.0"
   },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "private": true
+  "devDependencies": {
+    "typescript": "~5.8.0",
+    "@types/react": "~19.0.0"
+  }
 }

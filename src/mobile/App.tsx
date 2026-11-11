@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { FeatureFlagProvider } from './mobile/featureFlags';
 import { NavigationContainer } from '@react-navigation/native';
 
 const queryClient = new QueryClient();
@@ -9,14 +8,12 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <FeatureFlagProvider>
-        <NavigationContainer>
-          <View style={styles.container}>
-            <Text>Open up App.js to start working on your app!</Text>
-            <StatusBar style="auto" />
-          </View>
-        </NavigationContainer>
-      </FeatureFlagProvider>
+      <NavigationContainer>
+        <View style={styles.container}>
+          <Text>NKST Church Management System</Text>
+          <StatusBar style="auto" />
+        </View>
+      </NavigationContainer>
     </QueryClientProvider>
   );
 }

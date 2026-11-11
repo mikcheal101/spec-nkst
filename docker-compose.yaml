@@ -68,7 +68,7 @@ services:
   auth:
     container_name: identity-auth-service
     build:
-      context: .
+      context: src/api
       dockerfile: auth/Dockerfile
     networks:
       - nkst-network
@@ -100,7 +100,7 @@ services:
   api-service:
     container_name: identity-api-service
     build:
-      context: .
+      context: src/api
       dockerfile: api-service/Dockerfile
     networks:
       - nkst-network
@@ -134,7 +134,7 @@ services:
   announcement:
     container_name: identity-announcement-service
     build:
-      context: .
+      context: src/api
       dockerfile: announcement/Dockerfile
     networks:
       - nkst-network
@@ -158,6 +158,17 @@ services:
       timeout: 5s
       retries: 10
       start_period: 45s
+    restart: unless-stopped
+
+  web:
+    container_name: nkst-web
+    build:
+      context: src/web
+      dockerfile: Dockerfile
+    networks:
+      - nkst-network
+    ports:
+      - "3000:80"
     restart: unless-stopped
 
   # ──────────────────────────────────────────────

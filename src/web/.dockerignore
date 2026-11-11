@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+test-results
+.git
+.gitignore
+*.md
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+e2e
+playwright.config.ts
+tsconfig.tsbuildinfo

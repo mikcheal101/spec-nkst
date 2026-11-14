@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         // set if it is a mobile authentication or not
         Map<String, Object> claims = new HashMap<>();
         claims.put("authorities", authorities);
-        claims.put("is_mobile", Boolean.TRUE.equals(signInRequest.isMobileAuthentication()));
+        claims.put("is_mobile", Boolean.TRUE.equals(signInRequest.getIsMobileAuthentication()));
 
         return SignInResponse.builder()
                 .token(jwtUtil.generateToken(userDetails.getUsername(), claims))

@@ -546,7 +546,7 @@ interface ElderResponse {
   church?: { id: number; name: string } | null
 }
 
-interface DeaconResponse {
+export interface DeaconResponse {
   id: number
   firstName: string
   middleName?: string
@@ -600,7 +600,7 @@ function mapElderToPerson(p: ElderResponse): Person {
   }
 }
 
-function mapDeaconToPerson(p: DeaconResponse): Person {
+export function mapDeaconToPerson(p: DeaconResponse): Person {
   return {
     id: p.id,
     userId: '',
@@ -710,7 +710,7 @@ export const contributionApi = {
     return request(`/api/v1/contribution-requests${query}`, {}, CONTRIBUTION_API_BASE)
   },
   getRequest(id: string) {
-    return request(`/api/v1/contribution-requests/${id}`, {}, CONTRIBUTION_API_BASE)
+    return request<{ id: string }>(`/api/v1/contribution-requests/${id}`, {}, CONTRIBUTION_API_BASE)
   },
   createRequest(data: Record<string, unknown>) {
     return request('/api/v1/contribution-requests', { method: 'POST', body: JSON.stringify(data) }, CONTRIBUTION_API_BASE)
@@ -733,7 +733,7 @@ export const announcementApi = {
       .then((res) => res.error ? { error: res.error } : { data: res.data?.content || [] })
   },
   get(id: string) {
-    return request(`/api/v1/announcements/${id}`, {}, ANNOUNCEMENT_API_BASE)
+    return request<{ id: string }>(`/api/v1/announcements/${id}`, {}, ANNOUNCEMENT_API_BASE)
   },
   create(data: Record<string, unknown>) {
     return request('/api/v1/announcements', { method: 'POST', body: JSON.stringify(data) }, ANNOUNCEMENT_API_BASE)
@@ -769,7 +769,7 @@ export const mediaApi = {
     return request('/api/v1/sermons', {}, MEDIA_API_BASE)
   },
   getSermon(id: string) {
-    return request(`/api/v1/sermons/${id}`, {}, MEDIA_API_BASE)
+    return request<{ id: string }>(`/api/v1/sermons/${id}`, {}, MEDIA_API_BASE)
   },
   createSermon(data: Record<string, unknown>) {
     return request('/api/v1/sermons', { method: 'POST', body: JSON.stringify(data) }, MEDIA_API_BASE)
@@ -827,7 +827,7 @@ export const paymentApi = {
     return request('/api/v1/payments/initialize', { method: 'POST', body: JSON.stringify(data) }, PAYMENT_API_BASE)
   },
   getStatus(reference: string) {
-    return request(`/api/v1/payments/${reference}`, {}, PAYMENT_API_BASE)
+    return request<{ status: string }>(`/api/v1/payments/${reference}`, {}, PAYMENT_API_BASE)
   },
 }
 

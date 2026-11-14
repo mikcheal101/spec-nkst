@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "NKST Church Management",
-    "slug": "nkst-mobile",
+    "name": "Church Management System",
+    "slug": "church-management-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",

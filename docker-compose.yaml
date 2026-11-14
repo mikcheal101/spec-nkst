@@ -1,13 +1,13 @@
-name: nkst
+name: church-management
 
 networks:
-  nkst-network:
+  church-network:
     driver: bridge
 
 volumes:
-  nkst_announcement_db:
-  nkst_auth_db:
-  nkst_api_db:
+  church_announcement_db:
+  church_auth_db:
+  church_api_db:
   kafka-data:
   redis-data:
 
@@ -19,14 +19,14 @@ services:
     image: apache/kafka:latest
     container_name: identity-kafka
     networks:
-      - nkst-network
+      - church-network
     ports:
       # 9092 is used by services inside the compose network
       # 9094 is for clients running on the host (e.g. IDE)
       - "9092:9092"
       - "9094:9094"
     volumes:
-      - kafka-data:/tmp/kraft-combined-logs
+      - kafka-data:/var/lib/kafka/data
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -37,9 +37,9 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -50,7 +50,7 @@ services:
     container_name: identity-redis
     image: redis:7-alpine
     networks:
-      - nkst-network
+      - church-network
     volumes:
       - redis-data:/data
     ports:
@@ -71,7 +71,7 @@ services:
       context: src/api
       dockerfile: auth/Dockerfile
     networks:
-      - nkst-network
+      - church-network
     ports:
       - "81:81"
     depends_on:
@@ -83,7 +83,7 @@ services:
         condition: service_healthy
     environment:
       SERVER_PORT: 81
-      SPRING_DATASOURCE_URL: "jdbc:mysql://auth-db:3306/nkst_auth_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://auth-db:3306/church_auth_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
       SPRING_DATASOURCE_USERNAME: sa
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATA_REDIS_HOST: redis
@@ -103,7 +103,7 @@ services:
       context: src/api
       dockerfile: api-service/Dockerfile
     networks:
-      - nkst-network
+      - church-network
     ports:
       - "82:82"
       - "7075:7075"
@@ -117,7 +117,7 @@ services:
     environment:
       SERVER_PORT: 82
       GRPC_SERVER_PORT: 7075
-      SPRING_DATASOURCE_URL: "jdbc:mysql://api-db:3306/nkst_api_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://api-db:3306/church_api_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false"
       SPRING_DATASOURCE_USERNAME: sa
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATA_REDIS_HOST: redis
@@ -137,7 +137,7 @@ services:
       context: src/api
       dockerfile: announcement/Dockerfile
     networks:
-      - nkst-network
+      - church-network
     ports:
       - "83:83"
     depends_on:
@@ -147,7 +147,7 @@ services:
         condition: service_healthy
     environment:
       SERVER_PORT: 83
-      SPRING_DATASOURCE_URL: "jdbc:mysql://announcement-db:3306/nkst_announcement_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://announcement-db:3306/church_announcement_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
       SPRING_DATASOURCE_USERNAME: sa
       SPRING_DATASOURCE_PASSWORD: password
       GRPC_CHURCH_SERVER_HOST: api-service
@@ -161,12 +161,12 @@ services:
     restart: unless-stopped
 
   web:
-    container_name: nkst-web
+    container_name: church-web
     build:
       context: src/web
       dockerfile: Dockerfile
     networks:
-      - nkst-network
+      - church-network
     ports:
       - "3000:80"
     restart: unless-stopped
@@ -178,12 +178,12 @@ services:
     container_name: identity-auth-db
     image: mysql:8.0
     networks:
-      - nkst-network
+      - church-network
     volumes:
-      - nkst_auth_db:/var/lib/mysql
+      - church_auth_db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: nkst_auth_db
+      MYSQL_DATABASE: church_auth_db
       MYSQL_USER: sa
       MYSQL_PASSWORD: password
     ports:
@@ -200,12 +200,12 @@ services:
     container_name: identity-api-db
     image: mysql:8.0
     networks:
-      - nkst-network
+      - church-network
     volumes:
-      - nkst_api_db:/var/lib/mysql
+      - church_api_db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: nkst_api_db
+      MYSQL_DATABASE: church_api_db
       MYSQL_USER: sa
       MYSQL_PASSWORD: password
     ports:
@@ -222,12 +222,12 @@ services:
     container_name: identity-announcement-db
     image: mysql:8.0
     networks:
-      - nkst-network
+      - church-network
     volumes:
-      - nkst_announcement_db:/var/lib/mysql
+      - church_announcement_db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: nkst_announcement_db
+      MYSQL_DATABASE: church_announcement_db
       MYSQL_USER: sa
       MYSQL_PASSWORD: password
     ports:

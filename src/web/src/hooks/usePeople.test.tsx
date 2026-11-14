@@ -59,16 +59,17 @@ beforeEach(() => { vi.clearAllMocks() })
 
 describe('usePeopleList', () => {
   it('fetches people', async () => {
-    vi.mocked(peopleApi.list).mockResolvedValueOnce({ data: [{ id: 'p1', firstName: 'John' }] })
+    const person = { id: 1, firstName: 'John', lastName: 'Doe', gender: 'Male', isBaptised: false }
+    vi.mocked(peopleApi.list).mockResolvedValueOnce({ data: { content: [person], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
     const { result } = renderHook(() => usePeopleList(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.data).toEqual([{ id: 'p1', firstName: 'John' }])
+    expect(result.current.data?.content).toEqual([person])
   })
 })
 
 describe('useCreatePerson', () => {
   it('calls peopleApi.create', async () => {
-    vi.mocked(peopleApi.create).mockResolvedValueOnce({ data: { id: 'p1' } })
+    vi.mocked(peopleApi.create).mockResolvedValueOnce({ data: { id: 1, firstName: 'John', lastName: 'Doe', gender: 'Male', isBaptised: false } })
     const { result } = renderHook(() => useCreatePerson(), { wrapper: createWrapper() })
     await waitFor(async () => { await result.current.mutateAsync({ firstName: 'John' }) })
     expect(peopleApi.create).toHaveBeenCalledWith({ firstName: 'John' })
@@ -77,7 +78,7 @@ describe('useCreatePerson', () => {
 
 describe('useUpdatePerson', () => {
   it('calls peopleApi.update', async () => {
-    vi.mocked(peopleApi.update).mockResolvedValueOnce({ data: { id: 'p1' } })
+    vi.mocked(peopleApi.update).mockResolvedValueOnce({ data: { id: 1, firstName: 'John', lastName: 'Doe', gender: 'Male', isBaptised: false } })
     const { result } = renderHook(() => useUpdatePerson(), { wrapper: createWrapper() })
     await waitFor(async () => { await result.current.mutateAsync({ id: 'p1', data: { firstName: 'Jane' } }) })
     expect(peopleApi.update).toHaveBeenCalledWith('p1', { firstName: 'Jane' })
@@ -181,7 +182,7 @@ describe('useCreateElder', () => {
 
 describe('useUpdateElder', () => {
   it('calls eldersApi.update', async () => {
-    vi.mocked(eldersApi.update).mockResolvedValueOnce({ data: { id: 2, firstName: 'Jane', gender: 'Female', isBaptised: false } })
+    vi.mocked(eldersApi.update).mockResolvedValueOnce({ data: { id: 2, firstName: 'Jane', lastName: 'Smith', gender: 'Female', isBaptised: false } })
     const { result } = renderHook(() => useUpdateElder(), { wrapper: createWrapper() })
     await waitFor(async () => { await result.current.mutateAsync({ id: '2', data: { firstName: 'Jane' } }) })
     expect(eldersApi.update).toHaveBeenCalledWith('2', { firstName: 'Jane' })
@@ -276,7 +277,7 @@ describe('usePastorRoles', () => {
 
   it('returns an empty array when no roles data', async () => {
     const { pastorRolesApi } = await import('../services/api')
-    vi.mocked(pastorRolesApi.list).mockResolvedValueOnce({ data: undefined })
+    vi.mocked(pastorRolesApi.list).mockResolvedValueOnce({ data: undefined } as any)
     const { result } = renderHook(() => usePastorRoles(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.data).toEqual([]))
   })
@@ -284,7 +285,7 @@ describe('usePastorRoles', () => {
 
 describe('useChurchMembers', () => {
   it('fetches members for a church', async () => {
-    vi.mocked(peopleApi.list).mockResolvedValueOnce({ data: { content: [{ id: 'm1', firstName: 'Mary' }], totalElements: 1, totalPages: 1 } })
+    vi.mocked(peopleApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, firstName: 'Mary', lastName: 'Jane', gender: 'Female', isBaptised: false }], totalElements: 1, totalPages: 1, number: 0, size: 10, last: true, first: true, empty: false } })
     const { result } = renderHook(() => useChurchMembers(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toBeDefined()
@@ -299,7 +300,7 @@ describe('useChurchMembers', () => {
 
 describe('usePerson', () => {
   it('fetches a single person by id', async () => {
-    vi.mocked(peopleApi.get).mockResolvedValueOnce({ data: { id: 'p1', firstName: 'John' } })
+    vi.mocked(peopleApi.get).mockResolvedValueOnce({ data: { id: 1, firstName: 'John', lastName: 'Doe', gender: 'Male', isBaptised: false } })
     const { result } = renderHook(() => usePerson('p1'), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data?.firstName).toBe('John')

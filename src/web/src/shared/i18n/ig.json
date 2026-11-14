@@ -1,5 +1,5 @@
 {
-  "app": { "title": "NKST CMS", "subtitle": "Sistem Nlekọta Chọọchị" },
+  "app": { "title": "ChurchMS", "subtitle": "Sistem Nlekọta Chọọchị" },
   "nav": { "dashboard": "Dashboard", "pastors": "Ndị Pastọ", "elders": "Ndị Okenye", "deacons": "Ndị Dikọn", "people": "Ndị Mmadụ", "churches": "Chọọchị", "announcements": "Ọkwa", "projects": "Ọrụ", "contributions": "Onyinye", "media": "Mgbasa Ozi", "messages": "Ozi", "payments": "Ịkwụ Ụgwọ", "workflow": "Usoro Ọrụ", "settings": "Ntọala" },
   "auth": {
     "login": "Banye", "register": "Deba aha", "logout": "Pụọ",
@@ -8,7 +8,7 @@
     "confirmPassword": "Kwenye Okwuntughe",
     "forgotPassword": "Ị chefuru okwuntughe?",
     "resetPassword": "Tọgharia Okwuntughe",
-    "signInTitle": "Banye na NKST",
+    "signInTitle": "Banye na Church Management System",
     "signInSuccess": "Abanyela nke ọma",
     "signingIn": "Na-abanye...",
     "signIn": "Banye",
@@ -36,7 +36,7 @@
   },
   "dashboard": {
     "welcome": "Nnọọ, {{username}}",
-    "description": "Ị nọ na Sistem Nlekọta Chọọchị NKST.",
+    "description": "Ị nọ na Sistem Nlekọta Chọọchị Church Management System.",
     "church": "Chọọchị",
     "churchDesc": "Jikwaa usoro chọọchị",
     "people": "Ndị Mmadụ",

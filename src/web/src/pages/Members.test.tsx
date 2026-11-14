@@ -18,7 +18,7 @@ const mockAuthUser = vi.fn(() => ({
   login: vi.fn(), logout: vi.fn(), loading: false,
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 
@@ -52,7 +52,7 @@ vi.mock('../hooks/useChurches', () => ({
   })),
 }))
 vi.mock('../shared/components/ConfirmDialog', () => ({
-  default: ({ open, title, message, onConfirm, onCancel, danger, loading }: any) =>
+  default: ({ open, title, message, onConfirm, onCancel, loading }: any) =>
     open ? (
       <div data-testid="confirm-dialog">
         <span>{title}</span>
@@ -64,7 +64,7 @@ vi.mock('../shared/components/ConfirmDialog', () => ({
 }))
 
 import Members from './Members'
-import { usePeopleList, useCreatePerson } from '../hooks/usePeople'
+import { usePeopleList } from '../hooks/usePeople'
 import { useAllChurches } from '../hooks/useChurches'
 
 beforeEach(() => {
@@ -238,7 +238,6 @@ describe('Members', () => {
   })
 
   it('shows already admin badge', async () => {
-    const user = userEvent.setup()
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/Jane/)).toBeInTheDocument() })
     expect(screen.getAllByText('Admin').length).toBeGreaterThan(0)
@@ -639,7 +638,6 @@ describe('Members', () => {
     const user = userEvent.setup()
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/Jane/)).toBeInTheDocument() })
-    const editBtn = document.querySelector('[data-tooltip="Edit"]') as HTMLButtonElement
     const editBtns = document.querySelectorAll('[data-tooltip="Edit"]')
     await user.click(editBtns[1])
     expect(screen.getByText('Church Admin')).toBeInTheDocument()

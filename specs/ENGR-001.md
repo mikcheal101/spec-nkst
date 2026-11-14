@@ -4,13 +4,13 @@
 **Author:** Hirekaan Micheal Hemen  
 **Status:** Draft  
 **Source:** `1.1` Member registration (member self serve) — Sub-Feature of `1` Member Registration and Identity  
-**PRD Reference:** `PRD-NKST-2026-001`, `Section 3`, `Module 1`, `REQ-001`
+**PRD Reference:** `PRD-Church Management System-2026-001`, `Section 3`, `Module 1`, `REQ-001`
 
 ## 5.1 Executive Summary
 
-The system has fully implemented backend registration (`POST /api/v1/auth/register`) and web frontend registration via React pages. However, **the mobile channel is uninitialized** — the `mobile` directory does not exist at the project root, and `src/mobile/` is an empty directory requiring full scaffolding. This delta adds a complete mobile self-serve registration flow for members to register from the mobile app with username (phone/card number), password, church selection from Lagos list, baptism status, and baptismal number. On success, the member lands on the dashboard with an authenticated session. A feature flag `nkst.features.memberSelfService` gates the registration endpoint. The delta includes: root workspace initialization (React Native/Expo bootstrapping), mobile UI screen, API wiring for mobile context, feature flag gating, offline sync support, and baptism-unlocking of financial section.
+The system has fully implemented backend registration (`POST /api/v1/auth/register`) and web frontend registration via React pages. However, **the mobile channel is uninitialized** — the `mobile` directory does not exist at the project root, and `src/mobile/` is an empty directory requiring full scaffolding. This delta adds a complete mobile self-serve registration flow for members to register from the mobile app with username (phone/card number), password, church selection from Lagos list, baptism status, and baptismal number. On success, the member lands on the dashboard with an authenticated session. A feature flag `church.features.memberSelfService` gates the registration endpoint. The delta includes: root workspace initialization (React Native/Expo bootstrapping), mobile UI screen, API wiring for mobile context, feature flag gating, offline sync support, and baptism-unlocking of financial section.
 
-**Configuration Toggles:** `nkst.features.memberSelfService` (default `true`)  
+**Configuration Toggles:** `church.features.memberSelfService` (default `true`)  
 **Default States:** Church defaults to Lagos churches from database; baptism = false; baptismal number optional until baptized  
 **Affected Channels:** Mobile app only (requires root workspace initialization)  
 **Headline Architectural Decisions:** Mobile registration reuses existing `POST /api/v1/auth/register` and `POST /api/v1/members` endpoints; feature flag gates endpoint; baptism status stored via existing `isBaptised` boolean and `BaptismRecord` entity; offline saves follow `4-offline-data-saving-and-sync` outbox pattern; root workspace initialized with React Native/Expo scaffolding before feature implementation.
@@ -30,7 +30,7 @@ Testable technical objectives for the delta:
 1. Root workspace initialized with React Native/Expo scaffolding (via `expo init` or `npx react-native@latest`)
 2. Mobile registration screen accepts username (phone number or card number), password, church selection, baptism toggle, and baptismal number
 3. Submission wires to existing `POST /api/v1/auth/register` and `POST /api/v1/members` endpoints
-4. Feature flag `nkst.features.memberSelfService` gates the registration endpoint; when `false`, endpoint returns `403`
+4. Feature flag `church.features.memberSelfService` gates the registration endpoint; when `false`, endpoint returns `403`
 5. Baptism status stored via `Member.isBaptised` boolean; when `true`, financial section unlocks on dashboard
 6. Baptismal number validated for uniqueness against existing `Member.tel` and baptismal records
 7. Offline submission saves locally in outbox format following `4-offline-data-saving-and-sync`
@@ -40,7 +40,7 @@ Testable technical objectives for the delta:
 11. Duplicate username or baptismal number routes to review case, creates no member record
 
 **Feature Flags:**
-- `nkst.features.memberSelfService` — default `true`, owns ticket `PROJ-002`
+- `church.features.memberSelfService` — default `true`, owns ticket `PROJ-002`
 
 **Backward Compatibility Promises:**
 - No existing endpoints or schemas are modified; only new mobile screen and API client methods are added
@@ -52,14 +52,14 @@ Testable technical objectives for the delta:
 ```mermaid
 sequenceDiagram
     participant Mobile as Mobile App (React Native/Expo)
-    participant FeatureFlag as Feature Flag: nkst.features.memberSelfService
+    participant FeatureFlag as Feature Flag: church.features.memberSelfService
     participant AuthAPI as POST /api/v1/auth/register
     participant MemberAPI as POST /api/v1/members
     participant MemberRepo as MemberRepository
     participant BaptismRepo as BaptismRecordRepository
     participant Session as Authenticated Session
 
-    Mobile->>FeatureFlag: Check nkst.features.memberSelfService
+    Mobile->>FeatureFlag: Check church.features.memberSelfService
     FeatureFlag-->>Mobile: true (default)
     Mobile->>AuthAPI: POST {username, password, churchId, isBaptised, baptismalNumber}
     AuthAPI->>MemberRepo: existsByUsername(username)
@@ -77,7 +77,7 @@ sequenceDiagram
     end
 ```
 
-**Explanation:** The mobile app first checks the feature flag `nkst.features.memberSelfService`. If true, the registration screen is enabled and submission proceeds to `POST /api/v1/auth/register` with full signup payload (username, password, churchId, isBaptised, baptismalNumber). The auth service checks for duplicate username via `MemberRepository.existsByUsername()`. If duplicate, the case is routed to review queue and no member record is created. If clean, a `User` entity is created with hashed password, `Member` entity is created with church assignment and baptism flags, a `BaptismRecord` is created if baptized, and an authenticated session (JWT/session cookie) is returned. The mobile app stores the session and navigates to the dashboard. If `isBaptised=true`, the financial section on the dashboard is unlocked. If the mobile workspace is uninitialized, root setup (`expo init` or `npx react-native@latest`) must precede this flow.
+**Explanation:** The mobile app first checks the feature flag `church.features.memberSelfService`. If true, the registration screen is enabled and submission proceeds to `POST /api/v1/auth/register` with full signup payload (username, password, churchId, isBaptised, baptismalNumber). The auth service checks for duplicate username via `MemberRepository.existsByUsername()`. If duplicate, the case is routed to review queue and no member record is created. If clean, a `User` entity is created with hashed password, `Member` entity is created with church assignment and baptism flags, a `BaptismRecord` is created if baptized, and an authenticated session (JWT/session cookie) is returned. The mobile app stores the session and navigates to the dashboard. If `isBaptised=true`, the financial section on the dashboard is unlocked. If the mobile workspace is uninitialized, root setup (`expo init` or `npx react-native@latest`) must precede this flow.
 
 ## 5.6 Codebase Audit and Implementation Delta Findings
 
@@ -95,7 +95,7 @@ sequenceDiagram
 | `src/mobile/` (directory) | **Uninitialized** | Root workspace scaffolding required (Expo init, navigation, core providers) |
 | Mobile registration screen | **Not Implemented** | Build mobile UI screen (after workspace scaffolding) |
 | Mobile API client methods | **Not Implemented** | Add `authApi.register()` and `peopleApi.create()` for mobile |
-| Feature flag `nkst.features.memberSelfService` | Partially Implemented | Gate existing endpoint; mobile checks flag first |
+| Feature flag `church.features.memberSelfService` | Partially Implemented | Gate existing endpoint; mobile checks flag first |
 | Offline sync integration | **Not Implemented** | Follow `4-offline-data-saving-and-sync` outbox pattern |
 | Duplicate tap debounce | **Not Implemented** | Implement on submission layer |
 
@@ -103,7 +103,7 @@ sequenceDiagram
 - Mobile registration MUST reuse existing backend endpoints; no new backend tables or columns
 - Baptism status must use existing `Member.isBaptised` boolean and `BaptismRecord` entity
 - Church selection defaults to Lagos churches from `ChurchRepository`; same as web flow
-- Feature flag `nkst.features.memberSelfService` must be evaluated before rendering registration screen
+- Feature flag `church.features.memberSelfService` must be evaluated before rendering registration screen
 - Offline saves must use the outbox pattern from `4-offline-data-saving-and-sync`
 - Root workspace must be initialized with React Native/Expo scaffolding before mobile feature implementation
 
@@ -133,9 +133,9 @@ sequenceDiagram
 
 ## 5.9 Where the Setting Is Stored and Checked
 
-**Feature Flag Artifact:** `nkst.features.memberSelfService`  
+**Feature Flag Artifact:** `church.features.memberSelfService`  
 **Storage:** Application configuration (typically `application.yml` or `application-dev.yml`)  
-**Reading Logic:** Before rendering mobile registration screen, evaluate `FeatureFlag.isEnabled("nkst.features.memberSelfService")`. If `false`, hide registration option and show "Coming soon" message. If `true`, render registration screen with full flow.  
+**Reading Logic:** Before rendering mobile registration screen, evaluate `FeatureFlag.isEnabled("church.features.memberSelfService")`. If `false`, hide registration option and show "Coming soon" message. If `true`, render registration screen with full flow.  
 **Default Value:** `true` — registration screen is visible by default.
 
 **Table/Column Definitions:** No new database tables or columns. The flag is purely a runtime configuration toggle.
@@ -164,7 +164,7 @@ sequenceDiagram
 
 ## 5.11 Rules for How This Works
 
-1. The mobile app shall check `nkst.features.memberSelfService` before rendering the registration screen; if the flag is `false`, the registration option is hidden.
+1. The mobile app shall check `church.features.memberSelfService` before rendering the registration screen; if the flag is `false`, the registration option is hidden.
 2. Username input accepts a phone number or a card number; no other formats are permitted.
 3. Church selector choices are bound to the list loaded from the database (Lagos churches); free-text entry of a church not in the list is rejected.
 4. Baptism status is a boolean toggle; when `true`, a baptismal number field is revealed and must be submitted.
@@ -183,7 +183,7 @@ sequenceDiagram
 | `src/mobile/` (new, after root workspace init) | `RegistrationScreen.tsx` | New mobile registration screen component with form for username, password, church, baptism, baptismal number | New file only; no existing files modified |
 | `src/mobile/` (new, after root workspace init) | `useMobileRegister()` hook | New React Query mutation wrapping `authApi.register()` and `peopleApi.create()` | Reuses existing API methods; no backend changes |
 | `src/mobile/` (new, after root workspace init) | `api.ts` (mobile) | Add `authApi.register(data)` and `peopleApi.create(data)` methods pointing to `AUTH_API_BASE` and `PEOPLE_API_BASE` | Reuses existing base URLs; no contract changes |
-| `src/mobile/` (new, after root workspace init) | `featureFlags.ts` | Feature flag check for `nkst.features.memberSelfService` | New config; default `true` |
+| `src/mobile/` (new, after root workspace init) | `featureFlags.ts` | Feature flag check for `church.features.memberSelfService` | New config; default `true` |
 | `expo.json` / `android/app/` / `ios/` | Root workspace config | Initialize with `expo init` or `npx react-native@latest`; add navigation setup, core providers (React Query, feature flag) | Standard Expo/React Native initialization; no custom modifications to existing schemas |
 | `ENGR-002.md` | — | Design document | Reference only |
 | `PROJ-002.md` | — | Jira delivery package | Reference only |
@@ -206,7 +206,7 @@ sequenceDiagram
 - **Decision:** Mobile registration reuses existing `POST /api/v1/auth/register` and `POST /api/v1/members` endpoints. No new backend endpoints are created.
 - **Decision:** Baptism status and baptismal number are stored via existing `Member.isBaptised` boolean and `BaptismRecord` entity. No new database columns.
 - **Decision:** Church selection is a dropdown bound to `ChurchRepository` list; free-text entry is not permitted.
-- **Decision:** Feature flag `nkst.features.memberSelfService` defaults to `true`; gate is evaluated at screen-render time.
+- **Decision:** Feature flag `church.features.memberSelfService` defaults to `true`; gate is evaluated at screen-render time.
 - **Decision:** Offline saves follow the outbox pattern from `4-offline-data-saving-and-sync`; no custom sync logic.
 - **Decision:** Root workspace initialized with `expo init` or `npx react-native@latest`; standard Expo configuration used.
 - **Assumption:** The mobile app has access to the same API base URLs as the web portal (`AUTH_API_BASE`, `PEOPLE_API_BASE`).
@@ -222,7 +222,7 @@ sequenceDiagram
 - `AUTH-REGISTER-FAILURE: username={username}, error={errorMessage}`
 
 **Structured Log Lines (mobile, new):**
-- `MOBILE-REGISTER-START: username={username}, featureFlag=nkst.features.memberSelfService`
+- `MOBILE-REGISTER-START: username={username}, featureFlag=church.features.memberSelfService`
 - `MOBILE-REGISTER-SUCCESS: username={username}, sessionStored=true, navigatedToDashboard=true`
 - `MOBILE-REGISTER-DUPLICATE: username={username}, routedToReview=true`
 - `MOBILE-REGISTER-OFFLINE-SAVE: username={username}, status=pending, savedLocally=true`
@@ -248,7 +248,7 @@ sequenceDiagram
 5. Double tap from mobile: setup: tap submit twice quickly; assertion: exactly one member record exists.
 6. Empty church selection from mobile: setup: submit without selecting a church; assertion: the form refuses and asks for the church.
 7. Baptism unlocks financial section: setup: member registers with `isBaptised=true`; assertion: financial section is unlocked on dashboard.
-8. Feature flag gate: setup: set `nkst.features.memberSelfService=false`; assertion: registration screen is hidden, endpoint returns `403`.
+8. Feature flag gate: setup: set `church.features.memberSelfService=false`; assertion: registration screen is hidden, endpoint returns `403`.
 9. Username format validation (phone vs card): setup: submit with invalid username format; assertion: form rejects with format error.
 10. Church list defaults to Lagos: setup: no church selected; assertion: first Lagos church from database is pre-selected.
 11. Root workspace initialization: setup: run `expo init` or `npx react-native@latest`; assertion: project structure created with `App.tsx`, `package.json`, navigation config, React Query provider.
@@ -259,10 +259,10 @@ sequenceDiagram
 **Step 1:** Initialize root workspace with `expo init` or `npx react-native@latest`. Verify project structure includes `App.tsx`, `package.json`, navigation setup, and core providers (React Query, feature flag).
 **Step 2:** Create mobile registration screen component (`RegistrationScreen.tsx`) and `useMobileRegister()` hook.
 **Step 3:** Add API client methods (`authApi.register()`, `peopleApi.create()`) to mobile `api.ts`.
-**Step 4:** Add feature flag `nkst.features.memberSelfService` with default `true` to configuration.
+**Step 4:** Add feature flag `church.features.memberSelfService` with default `true` to configuration.
 **Step 5:** Deploy to canary group of mobile users (10%).
 **Step 6:** Monitor `mobile_registration_attempts_total` and `mobile_registration_successes_total` metrics.
 **Step 7:** If no errors over 48 hours, roll out to 100% of mobile users.
-**Rollback Path:** Set feature flag `nkst.features.memberSelfService` to `false`; mobile app hides registration option and shows "Coming soon". No database or schema changes need reversal. Root workspace remains intact.
+**Rollback Path:** Set feature flag `church.features.memberSelfService` to `false`; mobile app hides registration option and shows "Coming soon". No database or schema changes need reversal. Root workspace remains intact.
 
 ---

@@ -17,7 +17,7 @@ const initialChurches: Church[] = [
 ]
 
 export const RegistrationScreen = () => {
-  const { state: flagState, isLoading: flagLoading } = useFeatureFlag('nkst.features.memberSelfService')
+  const { state: flagState, isLoading: flagLoading } = useFeatureFlag('church.features.memberSelfService')
   const navigation = useNavigation()
   const queryClient = useQueryClient()
   const { isBaptised, setIsBaptised, baptismalNumber, setBaptismalNumber } = useBaptism()

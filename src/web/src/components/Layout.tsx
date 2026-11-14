@@ -47,7 +47,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="sidebar-brand-top">
             <div className="sidebar-brand-icon" />
             <div className="sidebar-brand-text">
-              <div className="sidebar-brand-name">NKST</div>
+              <div className="sidebar-brand-name">ChurchMS</div>
               <div className="sidebar-brand-sub">
                 Nongo u Kristu u ken Sudan hen Tiv
               </div>

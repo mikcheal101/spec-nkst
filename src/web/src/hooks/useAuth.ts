@@ -10,7 +10,6 @@ import {
   type ProfileResponse,
   type ChangePasswordRequest,
   type ManagedUser,
-  type Role,
 } from '../services/api'
 import { unwrap } from './useApi'
 

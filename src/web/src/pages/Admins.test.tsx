@@ -19,7 +19,7 @@ const { mockAuthUser } = vi.hoisted(() => ({
   })),
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 
@@ -49,7 +49,6 @@ vi.mock('../hooks/useAuth', () => ({
 import Admins from './Admins'
 import { usePeopleList } from '../hooks/usePeople'
 import { useUsers, useAssignRole, useRevokeRole, useRegister } from '../hooks/useAuth'
-import { useAuth } from '../context/AuthContext'
 
 beforeEach(() => {
   vi.clearAllMocks()

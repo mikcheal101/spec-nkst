@@ -61,7 +61,7 @@ export default function Announcements() {
   const updateAnnMut = useUpdateAnnouncement()
   const deleteAnnMut = useDeleteAnnouncement()
 
-  const announcements = Array.isArray(announcementsData) ? announcementsData as Announcement[] : []
+  const announcements = Array.isArray(announcementsData) ? announcementsData as unknown as Announcement[] : []
   const roles = Array.isArray(rolesData) ? (rolesData as { name: string }[]).map((r) => r.name) : []
   const loading = aLoading
 

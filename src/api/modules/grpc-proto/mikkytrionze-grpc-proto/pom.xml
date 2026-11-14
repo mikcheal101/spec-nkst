@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mikkytrionze-grpc-proto</name>
-    <description>Shared gRPC contracts (proto + generated stubs) for NKST microservices</description>
+    <description>Shared gRPC contracts (proto + generated stubs) for Church microservices</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

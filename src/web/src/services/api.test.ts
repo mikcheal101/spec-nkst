@@ -20,6 +20,7 @@ function mockResponse(overrides: Partial<Response>): Response {
     arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
     blob: () => Promise.resolve(new Blob()),
     formData: () => Promise.resolve(new FormData()),
+    bytes: () => Promise.resolve(new Uint8Array()),
     ...overrides,
   }
 }
@@ -195,7 +196,7 @@ describe('request()', () => {
     const originalLocation = window.location
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation, href: '' }
+    window.location = { ...originalLocation, href: '' } as unknown as Location & string
 
     const api = await getApi()
     const result = await api.rolesApi.list()
@@ -218,7 +219,7 @@ describe('request()', () => {
     const originalLocation = window.location
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation, href: '' }
+    window.location = { ...originalLocation, href: '' } as unknown as Location & string
 
     const api = await getApi()
     const result = await api.rolesApi.list()
@@ -1014,7 +1015,7 @@ describe('401 retry edge cases', () => {
     const originalLocation = window.location
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation, href: '' }
+    window.location = { ...originalLocation, href: '' } as unknown as Location & string
 
     const api = await getApi()
     const result = await api.dashboardApi.getCounters()
@@ -1032,7 +1033,7 @@ describe('401 retry edge cases', () => {
     const originalLocation = window.location
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation, href: '' }
+    window.location = { ...originalLocation, href: '' } as unknown as Location & string
 
     const api = await getApi()
     const result = await api.dashboardApi.getCounters()
@@ -1051,7 +1052,7 @@ describe('401 retry edge cases', () => {
     const originalLocation = window.location
     // @ts-expect-error
     delete window.location
-    window.location = { ...originalLocation, href: '' }
+    window.location = { ...originalLocation, href: '' } as unknown as Location & string
 
     const api = await getApi()
     const result = await api.dashboardApi.getCounters()
@@ -1288,7 +1289,7 @@ describe('deaconsApi', () => {
       json: () => Promise.resolve({ data: deaconBackend }),
     }))
     const api = await getApi()
-    const result = await api.deaconsApi.create({ firstName: 'Paul' })
+    const result = await api.deaconsApi.create({ memberId: 1 })
     expect(mockFetch).toHaveBeenCalledWith('http://localhost:82/api/v1/deacons', expect.objectContaining({ method: 'POST' }))
     expect(result.data?.firstName).toBe('Paul')
   })
@@ -1571,7 +1572,7 @@ describe('toPersonRequest edge cases', () => {
       json: () => Promise.resolve({ data: { id: 3, firstName: 'C', lastName: 'D', gender: 'M' } }),
     }))
     const api = await getApi()
-    const result = await api.deaconsApi.update('3', { firstName: 'C', lastName: 'D', gender: 'Male', church: { id: '7', name: 'X', address: '' } })
+    const result = await api.deaconsApi.update('3', { firstName: 'C', lastName: 'D', gender: 'Male', church: { id: 7, name: 'X', address: '' } })
     expect(result.data?.gender).toBe('Male')
     const body = JSON.parse(mockFetch.mock.calls[0][1].body)
     expect(body.gender).toBe('M')

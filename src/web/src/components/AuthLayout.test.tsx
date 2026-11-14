@@ -9,7 +9,7 @@ import AuthLayout from './AuthLayout'
 describe('AuthLayout', () => {
   it('renders brand name', () => {
     render(<AuthLayout title="Sign In"><div /></AuthLayout>)
-    expect(screen.getByText('NKST')).toBeInTheDocument()
+    expect(screen.getByText('ChurchMS')).toBeInTheDocument()
   })
 
   it('renders brand subtitle', () => {

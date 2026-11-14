@@ -10,8 +10,7 @@ import com.mikkytrionze.auth.user.application.exception.UserAlreadyExistsExcepti
 import com.mikkytrionze.auth.user.domain.service.AuthService;
 import com.mikkytrionze.auth.user.domain.service.RefreshTokenService;
 import jakarta.validation.Valid;
-import org.springframework.core.environment.Environment;
-import org.springframework.core.annotation.Value;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,7 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
 
-    @Value("${nkst.features.memberSelfService:true}")
+    @Value("${church.features.memberSelfService:true}")
     private boolean memberSelfServiceEnabled;
 
     @PostMapping("/sign-in")

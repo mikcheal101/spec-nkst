@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Document Title | Enterprise Business Strategy Document (BSD) |
-| Document Reference | BSD-NKST-2026-001 |
+| Document Reference | BSD-Church Management System-2026-001 |
 | Target Domain | Administrative & Member Operations Platform |
 | Status | Approved for Pre-PRD Analysis |
 
@@ -11,7 +11,7 @@
 
 ## Section 1: Executive Summary & Business Problem
 
-The NKST church runs its member operations on a single hard cover note. Every registration, contribution, award, punishment, and status update is written into that book by hand. The book is treated as a sacred record, and for good reason, because it is the only place the church history lives. The problem is that a hard cover note does not scale and it does not answer questions quickly.
+The Church Management System church runs its member operations on a single hard cover note. Every registration, contribution, award, punishment, and status update is written into that book by hand. The book is treated as a sacred record, and for good reason, because it is the only place the church history lives. The problem is that a hard cover note does not scale and it does not answer questions quickly.
 
 Here is what that looks like in daily practice. A clerk opens the book, flips through pages to find a member by baptismal number, then writes the new contribution or update in the margin. If two people need the book at the same time, one of them waits. If the book is lost, damaged, or taken to a branch, the church has no live copy. If a member wants to know how much they have given this year, someone has to trace every entry by hand.
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, type ReactNode } from 'react'
 import { useLogin, useLogout } from '../hooks/useAuth'
 
 interface User {
@@ -95,5 +95,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
-
-const superAdminRoles = new Set(['CHURCH_SUPER_ADMIN', 'SYSTEM_ADMIN'])

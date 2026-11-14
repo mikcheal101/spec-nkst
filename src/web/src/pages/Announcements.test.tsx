@@ -16,7 +16,7 @@ const mockAuthUser = vi.fn(() => ({
   login: vi.fn(), logout: vi.fn(), loading: false,
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 vi.mock('../shared/utils/swal', () => ({
@@ -49,7 +49,6 @@ vi.mock('../hooks/useRoles', () => ({
 }))
 
 import Announcements from './Announcements'
-import { useAuth } from '../context/AuthContext'
 import { useAnnouncementsList, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../hooks/useAnnouncements'
 import { useRolesList } from '../hooks/useRoles'
 import { showSuccessToast, showErrorToast } from '../shared/utils/swal'

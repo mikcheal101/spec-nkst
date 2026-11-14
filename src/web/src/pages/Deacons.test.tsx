@@ -28,7 +28,7 @@ vi.mock('../hooks/useApi', () => ({
   unwrap: vi.fn().mockImplementation((p: Promise<any>) => p),
 }))
 vi.mock('../shared/components/ConfirmDialog', () => ({
-  default: ({ open, title, message, confirmLabel, onConfirm, onCancel, danger, loading }: any) =>
+  default: ({ open, title, message, confirmLabel, onConfirm, onCancel, loading }: any) =>
     open ? (
       <div data-testid="confirm-dialog">
         <span>{title}</span>
@@ -337,7 +337,6 @@ describe('Deacons', () => {
   })
 
   it('delete target null guard - handleDelete returns early', async () => {
-    const user = userEvent.setup()
     render(<Deacons />)
     expect(mockDeleteAsync).not.toHaveBeenCalled()
   })

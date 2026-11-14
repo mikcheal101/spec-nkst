@@ -1,5 +1,5 @@
 {
-  "app": { "title": "NKST CMS", "subtitle": "Sistema de Gestión de Iglesias" },
+  "app": { "title": "ChurchMS", "subtitle": "Sistema de Gestión de Iglesias" },
   "nav": { "dashboard": "Panel", "pastors": "Pastores", "elders": "Ancianos", "deacons": "Diáconos", "people": "Personas", "churches": "Iglesias", "announcements": "Anuncios", "projects": "Proyectos", "contributions": "Contribuciones", "media": "Medios", "messages": "Mensajes", "payments": "Pagos", "workflow": "Flujo de trabajo", "settings": "Configuración" },
   "auth": {
     "login": "Iniciar sesión", "register": "Registrarse", "logout": "Cerrar sesión",
@@ -8,7 +8,7 @@
     "confirmPassword": "Confirmar contraseña",
     "forgotPassword": "¿Olvidó su contraseña?",
     "resetPassword": "Restablecer contraseña",
-    "signInTitle": "Iniciar sesión en NKST",
+    "signInTitle": "Iniciar sesión en Church Management System",
     "signInSuccess": "Sesión iniciada correctamente",
     "signingIn": "Iniciando sesión...",
     "signIn": "Iniciar sesión",
@@ -36,7 +36,7 @@
   },
   "dashboard": {
     "welcome": "Bienvenido, {{username}}",
-    "description": "Ha iniciado sesión en el Sistema de Gestión de Iglesias NKST.",
+    "description": "Ha iniciado sesión en el Sistema de Gestión de Iglesias Church Management System.",
     "church": "Iglesia",
     "churchDesc": "Gestionar jerarquía de la iglesia",
     "people": "Personas",

@@ -590,7 +590,6 @@ describe('PersonDetail', () => {
     render(<PersonDetail />)
     await user.click(screen.getByText('Edit'))
     expect(screen.getByText('Edit Member')).toBeInTheDocument()
-    const callArg = mockMutateAsync
   })
 
   it('openEdit fills form with fallbacks when baptismRecord fields are all null', async () => {

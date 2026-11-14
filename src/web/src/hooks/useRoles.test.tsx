@@ -26,16 +26,17 @@ beforeEach(() => { vi.clearAllMocks() })
 
 describe('useRolesList', () => {
   it('fetches roles', async () => {
-    vi.mocked(rolesApi.list).mockResolvedValueOnce({ data: [{ id: 'r1', name: 'Admin' }] })
+    const role = { id: 'r1', name: 'Admin', permissions: [] }
+    vi.mocked(rolesApi.list).mockResolvedValueOnce({ data: [role] })
     const { result } = renderHook(() => useRolesList(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.data).toEqual([{ id: 'r1', name: 'Admin' }])
+    expect(result.current.data).toEqual([role])
   })
 })
 
 describe('useCreateRole', () => {
   it('calls rolesApi.create', async () => {
-    vi.mocked(rolesApi.create).mockResolvedValueOnce({ data: { id: 'r1' } })
+    vi.mocked(rolesApi.create).mockResolvedValueOnce({ data: { id: 'r1', name: 'New Role', permissions: [] } })
     const { result } = renderHook(() => useCreateRole(), { wrapper: createWrapper() })
     await waitFor(async () => { await result.current.mutateAsync({ name: 'New Role' } as any) })
     expect(rolesApi.create).toHaveBeenCalledWith({ name: 'New Role' })
@@ -44,7 +45,7 @@ describe('useCreateRole', () => {
 
 describe('useUpdateRole', () => {
   it('calls rolesApi.update', async () => {
-    vi.mocked(rolesApi.update).mockResolvedValueOnce({ data: { id: 'r1' } })
+    vi.mocked(rolesApi.update).mockResolvedValueOnce({ data: { id: 'r1', name: 'Updated', permissions: [] } })
     const { result } = renderHook(() => useUpdateRole(), { wrapper: createWrapper() })
     await waitFor(async () => { await result.current.mutateAsync({ id: 'r1', data: { name: 'Updated' } as any }) })
     expect(rolesApi.update).toHaveBeenCalledWith('r1', { name: 'Updated' })

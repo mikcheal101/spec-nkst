@@ -10,7 +10,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <NavigationContainer>
         <View style={styles.container}>
-          <Text>NKST Church Management System</Text>
+          <Text>Church Management System</Text>
           <StatusBar style="auto" />
         </View>
       </NavigationContainer>

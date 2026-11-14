@@ -1,5 +1,5 @@
 {
-  "app": { "title": "NKST CMS", "subtitle": "Tsarin Gudanar da Coci" },
+  "app": { "title": "ChurchMS", "subtitle": "Tsarin Gudanar da Coci" },
   "nav": { "dashboard": "Dashboard", "pastors": "Fastoci", "elders": "Dattawa", "deacons": "Dikonai", "members": "Membobi", "admins": "Admins", "people": "Mutane", "churches": "Coci-coci", "announcements": "Sanarwa", "projects": "Ayyuka", "contributions": "Gudunmawa", "media": "Kafofin Watsa Labarai", "messages": "Saƙonni", "payments": "Biya", "workflow": "Ayyuka", "notifications": "Sanarwa", "settings": "Saituna" },
   "auth": {
     "login": "Shiga", "register": "Rajista", "logout": "Fita",
@@ -8,7 +8,7 @@
     "confirmPassword": "Tabbatar da Kalmar Sirri",
     "forgotPassword": "Ka Manta Kalmar Sirri?",
     "resetPassword": "Sake Saita Kalmar Sirri",
-    "signInTitle": "Shiga NKST",
+    "signInTitle": "Shiga Church Management System",
     "signInSuccess": "An shiga cikin nasara",
     "signingIn": "Ana shiga...",
     "signIn": "Shiga",
@@ -36,7 +36,7 @@
   },
   "dashboard": {
     "welcome": "Barka da zuwa, {{username}}",
-    "description": "Kana shiga tsarin gudanar da coci na NKST.",
+    "description": "Kana shiga tsarin gudanar da coci na Church Management System.",
     "members": "Membobi",
     "membersDesc": "Gudanar da membobin coci",
     "contributions": "Gudunmawa",

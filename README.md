@@ -1,6 +1,6 @@
-# NKST Church Management System
+# Church Management System
 
-Church management system branded for **NKST Church**.
+Church management system branded for **Church Management System Church**.
 
 ## Structure
 

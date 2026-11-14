@@ -45,7 +45,7 @@ describe('Layout', () => {
 
   it('renders brand name', () => {
     renderLayout()
-    expect(screen.getByText('NKST')).toBeInTheDocument()
+    expect(screen.getByText('ChurchMS')).toBeInTheDocument()
     expect(screen.getByText('Nongo u Kristu u ken Sudan hen Tiv')).toBeInTheDocument()
   })
 

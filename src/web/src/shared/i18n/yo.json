@@ -1,5 +1,5 @@
 {
-  "app": { "title": "NKST CMS", "subtitle": "Eto Isakoso Ile ijọsin" },
+  "app": { "title": "ChurchMS", "subtitle": "Eto Isakoso Ile ijọsin" },
   "nav": { "dashboard": "Dasibodu", "pastors": "Awọn Pastor", "elders": "Awọn Alàgbà", "deacons": "Awọn Dikoni", "people": "Awọn eniyan", "churches": "Awọn ile ijọsin", "announcements": "Awọn ikede", "projects": "Awọn iṣẹ akanṣe", "contributions": "Awọn ẹbun", "media": "Awọn media", "messages": "Awọn ifiranṣẹ", "payments": "Awọn isanwo", "workflow": "Awọn iṣẹ", "settings": "Awọn eto" },
   "auth": {
     "login": "Wọlé", "register": "Forukọsilẹ", "logout": "Jade",
@@ -8,7 +8,7 @@
     "confirmPassword": "Jẹrisi Ọrọ aṣínà",
     "forgotPassword": "Ṣe gbagbe ọrọ aṣínà?",
     "resetPassword": "Tun ọrọ aṣínà ṣeto",
-    "signInTitle": "Wọlé si NKST",
+    "signInTitle": "Wọlé si Church Management System",
     "signInSuccess": "Wọlé ni aṣeyọri",
     "signingIn": "N wọlé...",
     "signIn": "Wọlé",
@@ -36,7 +36,7 @@
   },
   "dashboard": {
     "welcome": "Kaabo, {{username}}",
-    "description": "O ti wọlé si Eto Isakoso Ile ijọsin NKST.",
+    "description": "O ti wọlé si Eto Isakoso Ile ijọsin Church Management System.",
     "church": "Ile ijọsin",
     "churchDesc": "Ṣakoso ilana ile ijọsin",
     "people": "Awọn eniyan",

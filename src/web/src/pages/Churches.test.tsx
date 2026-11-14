@@ -57,7 +57,7 @@ vi.mock('../shared/components', () => ({
 }))
 
 import Churches from './Churches'
-import { useChurches, useCreateChurch, useUpdateChurch, useDeleteChurch, useAllChurches, useChurchesAdminStatus } from '../hooks/useChurches'
+import { useChurches, useCreateChurch, useUpdateChurch, useAllChurches, useChurchesAdminStatus } from '../hooks/useChurches'
 import { useAuth } from '../context/AuthContext'
 
 beforeEach(() => {
@@ -349,7 +349,6 @@ describe('Churches', () => {
   })
 
   it('mouse events on church card', async () => {
-    const user = userEvent.setup()
     render(<Churches />)
     const card = document.querySelector('[style*="cursor: pointer"]') as HTMLElement
     if (card) {
@@ -372,7 +371,6 @@ describe('Churches', () => {
     } as any)
     render(<Churches />)
 
-    const firstBtn = document.querySelector('.pagination .btn-outline') as HTMLButtonElement
     const page2Btns = Array.from(document.querySelectorAll('.pagination .btn-primary'))
     if (page2Btns.length > 0) {
       await userEvent.setup().click(page2Btns[0])

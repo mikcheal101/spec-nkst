@@ -4,7 +4,6 @@ dist/
 .env
 test-results/
 .github/
-.specify/
 jira/
 tickets/
 completed_tickets.json

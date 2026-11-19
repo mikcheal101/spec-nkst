@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/18</span>
+                <span class='fraction'>20/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>9/9</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>15/15</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -196,7 +196,8 @@
 <a name='L131'></a><a href='#L131'>131</a>
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
-<a name='L134'></a><a href='#L134'>134</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -231,13 +232,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -257,16 +258,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">240x</span>
-<span class="cline-any cline-yes">220x</span>
-<span class="cline-any cline-yes">240x</span>
+<span class="cline-any cline-yes">264x</span>
+<span class="cline-any cline-yes">242x</span>
+<span class="cline-any cline-yes">913x</span>
+<span class="cline-any cline-yes">264x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">80x</span>
+<span class="cline-any cline-yes">105x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">80x</span>
+<span class="cline-any cline-yes">105x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -308,7 +310,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">80x</span>
+<span class="cline-any cline-yes">88x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -358,7 +360,7 @@ const navItems: NavItem[] = [
   { to: '/admins', icon: '🛡️', labelKey: 'nav.admins', permission: ['can_update_church', 'can_update_member'] },
   { to: '/projects', icon: '📋', labelKey: 'nav.projects', permission: 'can_read_projects' },
   { to: '/contributions', icon: '💰', labelKey: 'nav.contributions', permission: 'can_read_contribution' },
-  { to: '/announcements', icon: '📢', labelKey: 'nav.announcements', permission: 'can_read_announcement' },
+  { to: '/announcements', icon: '📢', labelKey: 'nav.announcements', permission: 'can_read_announcements' },
   { to: '/notifications', icon: '🔔', labelKey: 'nav.notifications', permission: 'can_read_notification' },
   { to: '/settings', icon: '⚙', labelKey: 'nav.settings', permission: 'can_read_settings' },
 ]
@@ -378,7 +380,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           &lt;div className="sidebar-brand-top"&gt;
             &lt;div className="sidebar-brand-icon" /&gt;
             &lt;div className="sidebar-brand-text"&gt;
-              &lt;div className="sidebar-brand-name"&gt;NKST&lt;/div&gt;
+              &lt;div className="sidebar-brand-name"&gt;ChurchMS&lt;/div&gt;
               &lt;div className="sidebar-brand-sub"&gt;
                 Nongo u Kristu u ken Sudan hen Tiv
               &lt;/div&gt;
@@ -392,7 +394,8 @@ export default function Layout({ children }: { children: ReactNode }) {
             .filter((item) =&gt; {
               if (!item.permission) return true
               const perms = Array.isArray(item.permission) ? item.permission : [item.permission]
-              return perms.every((p) =&gt; user?.permissions?.includes(p))
+              const userPerms = (user?.permissions ?? []).map((p) =&gt; p.toLowerCase())
+              return perms.every((p) =&gt; userPerms.includes(p.toLowerCase()))
             })
             .map((item) =&gt; (
             &lt;NavLink
@@ -469,7 +472,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-01T05:32:15.089Z
+                at 2026-11-15T01:04:26.769Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

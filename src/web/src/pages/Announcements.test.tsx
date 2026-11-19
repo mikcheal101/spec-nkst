@@ -369,4 +369,76 @@ describe('Announcements', () => {
     await waitFor(() => { expect(showConfirm).toHaveBeenCalled() })
     expect(mockDeleteAnnMutate).not.toHaveBeenCalled()
   })
+
+  it('view modal handles missing expiry and empty roles', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('View')[1])
+    const dialog = document.querySelector('.announcement-dialog') as HTMLElement
+    expect(within(dialog).getByText('Bible Study')).toBeInTheDocument()
+    expect(within(dialog).getByText('All roles')).toBeInTheDocument()
+    expect(within(dialog).getByText('—')).toBeInTheDocument()
+  })
+
+  it('view modal renders raw value for invalid expiry date', async () => {
+    vi.mocked(useAnnouncementsList).mockReturnValue({
+      data: [{ ...announcements[0], expiresAt: 'not-a-real-date' }],
+      isLoading: false,
+    } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('View')[0])
+    const dialog = document.querySelector('.announcement-dialog') as HTMLElement
+    expect(within(dialog).getByText('not-a-real-date')).toBeInTheDocument()
+  })
+
+  it('shows no roles hint when roles list is empty', async () => {
+    vi.mocked(useRolesList).mockReturnValue({ data: [], isLoading: false } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getByText('New Announcement'))
+    expect(screen.getByText('No roles available.')).toBeInTheDocument()
+  })
+
+  it('shows no roles hint when roles response is not an array', async () => {
+    vi.mocked(useRolesList).mockReturnValue({ data: null, isLoading: false } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getByText('New Announcement'))
+    expect(screen.getByText('No roles available.')).toBeInTheDocument()
+  })
+
+  it('treats a non-array announcements response as empty', () => {
+    vi.mocked(useAnnouncementsList).mockReturnValue({ data: { content: [] }, isLoading: false } as any)
+    render(<Announcements />)
+    expect(screen.getByText('No announcements found')).toBeInTheDocument()
+  })
+
+  it('clears the search query via the clear button', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    const search = screen.getByPlaceholderText(/search announcements/i) as HTMLInputElement
+    await user.type(search, 'Sunday')
+    expect(screen.queryByText('Bible Study')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Clear search'))
+    expect(search).toHaveValue('')
+    expect(screen.getByText('Bible Study')).toBeInTheDocument()
+  })
+
+  it('shows a search-specific empty state when nothing matches', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.type(screen.getByPlaceholderText(/search announcements/i), 'zzzz-no-match')
+    expect(screen.getByText('No announcements match your search')).toBeInTheDocument()
+  })
+
+  it('shows a generic delete error for non-Error rejections', async () => {
+    mockDeleteAnnMutate.mockRejectedValueOnce('string failure')
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('Delete')[0])
+    await waitFor(() => {
+      expect(showErrorToast).toHaveBeenCalledWith('Delete failed')
+    })
+  })
 })

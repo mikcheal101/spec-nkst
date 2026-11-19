@@ -23,6 +23,7 @@ vi.mock('../context/AuthContext', () => ({
 const mockSearch = vi.fn().mockResolvedValue({ content: [] })
 vi.mock('../services/api', () => ({
   deaconsApi: { search: (...args: any[]) => mockSearch(...args) },
+  mapDeaconToPerson: (p: any) => ({ ...p, phoneNumber: p.tel, email: p.emailAddress, church: p.church, isBaptised: false }),
 }))
 vi.mock('../hooks/useApi', () => ({
   unwrap: vi.fn().mockImplementation((p: Promise<any>) => p),

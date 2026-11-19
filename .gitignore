@@ -8,3 +8,6 @@ test-results/
 jira/
 tickets/
 completed_tickets.json
+.playwright-mcp/
+coverage-json/
+.opencode/

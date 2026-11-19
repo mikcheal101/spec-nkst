@@ -1,0 +1,43 @@
+import { chromium } from 'playwright'
+
+const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
+page.on('response', async (res) => {
+  if (res.url().includes('/api/v1/members') && res.request().method() !== 'GET') {
+    console.log('RESP', res.request().method(), res.url(), res.status(), (await res.text().catch(() => '')).slice(0, 500))
+  }
+})
+page.on('console', m => { if (m.type() === 'error') console.log('CONSOLE', m.text()) })
+
+await page.goto('http://localhost:3000/login')
+await page.getByLabel('Username').fill('super-admin')
+await page.getByLabel('Password').fill('super-admin')
+await page.getByRole('button', { name: 'Sign In' }).click()
+await page.waitForURL(/\/dashboard/)
+await page.waitForTimeout(1500)
+await page.goto('http://localhost:3000/members')
+await page.waitForTimeout(2000)
+await page.getByRole('button', { name: 'Add Member' }).click()
+await page.waitForTimeout(500)
+const md = page.locator('.mf-dialog')
+const inputs = md.locator('input.mf-input')
+const vals = []
+for (let i = 0; i < await inputs.count(); i++) vals.push(await inputs.nth(i).getAttribute('type'))
+console.log('types', vals)
+await inputs.nth(0).fill('QaFirst')
+await inputs.nth(1).fill('QaLastProbe')
+await inputs.nth(2).fill('Middle')
+await inputs.nth(3).fill('1 QA Avenue')
+await inputs.nth(4).fill('qa@example.com')
+await inputs.nth(5).fill('08012345678')
+await md.locator('select.mf-input').first().selectOption('Male')
+for (let i = 0; i < await inputs.count(); i++) console.log('val', i, await inputs.nth(i).inputValue())
+console.log('select vals', await md.locator('select.mf-input').evaluateAll(els => els.map(e => e.value)))
+console.log('toasts before', await page.locator('[role="status"], .swal2-toast, .swal2-popup').allTextContents().catch(() => []))
+await md.getByRole('button', { name: /Save/i }).click()
+await page.waitForTimeout(3000)
+console.log('toasts after', await page.locator('[role="status"], .swal2-toast, .swal2-popup').allTextContents().catch(() => []))
+console.log('dialog open', await md.isVisible().catch(() => false))
+console.log('body tail', (await page.locator('body').innerText()).slice(0, 1200))
+await page.screenshot({ path: 'scripts/shot-member-save.png', fullPage: true })
+await browser.close()

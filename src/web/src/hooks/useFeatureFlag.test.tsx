@@ -41,4 +41,17 @@ describe('useFeatureFlag hook', () => {
 
     expect(fetchMock).toHaveBeenCalledWith('/api/feature-flags?key=church.features.memberSelfService')
   })
+
+  it('leaves state null and stops loading when the flag request fails', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ isEnabled: false }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result } = renderHook(() => useFeatureFlag('church.features.offline'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.state).toBeNull()
+  })
 })

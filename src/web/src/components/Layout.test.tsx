@@ -163,4 +163,14 @@ describe('Layout', () => {
     expect(screen.getByText('U')).toBeInTheDocument()
     mockAuthData.user = saved
   })
+
+  it('renders safely when the user object is null', () => {
+    const saved = mockAuthData.user
+    mockAuthData.user = null
+    renderLayout()
+    expect(screen.getByText('Child content')).toBeInTheDocument()
+    expect(screen.getByText('U')).toBeInTheDocument()
+    expect(screen.queryByText('nav.churches')).not.toBeInTheDocument()
+    mockAuthData.user = saved
+  })
 })

@@ -12,9 +12,9 @@ describe('AuthLayout', () => {
     expect(screen.getByText('ChurchMS')).toBeInTheDocument()
   })
 
-  it('renders brand subtitle', () => {
+  it('does not render the old Tiv slogan', () => {
     render(<AuthLayout title="Sign In"><div /></AuthLayout>)
-    expect(screen.getByText('Nongo u Kristu u ken Sudan hen Tiv')).toBeInTheDocument()
+    expect(screen.queryByText(/Nongo u Kristu u ken Sudan hen Tiv/i)).not.toBeInTheDocument()
   })
 
   it('renders the title prop', () => {

@@ -126,4 +126,10 @@ describe('Login', () => {
     const link = screen.getByText('auth.forgotPassword')
     expect(link).toHaveAttribute('href', '/forgot-password')
   })
+
+  it('does not offer self-service registration on the login page', () => {
+    render(<Login />)
+    expect(screen.queryByText(/register|sign.?up|create account/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /register|sign.?up|create account/i })).not.toBeInTheDocument()
+  })
 })

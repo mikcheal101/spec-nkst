@@ -43,10 +43,10 @@ describe('Layout', () => {
     expect(screen.getByText('Child content')).toBeInTheDocument()
   })
 
-  it('renders brand name', () => {
+  it('renders brand name without the old Tiv slogan', () => {
     renderLayout()
     expect(screen.getByText('ChurchMS')).toBeInTheDocument()
-    expect(screen.getByText('Nongo u Kristu u ken Sudan hen Tiv')).toBeInTheDocument()
+    expect(screen.queryByText(/Nongo u Kristu u ken Sudan hen Tiv/i)).not.toBeInTheDocument()
   })
 
   it('renders sidebar navigation items based on permissions', () => {

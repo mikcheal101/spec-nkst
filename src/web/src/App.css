@@ -41,14 +41,6 @@
   line-height: 1.2;
 }
 
-.auth-logo-sub {
-  font-size: 0.7rem; font-weight: 400;
-  color: var(--color-text-muted);
-  display: block;
-  letter-spacing: 0.05em;
-  margin-top: 0.1rem;
-}
-
 .auth-subtitle {
   font-size: 0.875rem; color: var(--color-text-secondary);
   margin-top: 0.25rem;
@@ -311,11 +303,6 @@
 .sidebar-brand-name {
   font-size: 1rem; font-weight: 700; color: #fff;
 }
-.sidebar-brand-sub {
-  font-size: 0.6rem; color: var(--color-accent);
-  text-transform: uppercase; letter-spacing: 0.08em;
-}
-
 .sidebar-tiv-pattern {
   height: 4px; width: 100%; margin-top: 0.5rem;
   background: repeating-linear-gradient(90deg,

@@ -17,7 +17,7 @@ npm run test:e2e:ui       # Playwright UI mode
 ```
 
 ## Coverage (as super admin)
-- **Auth** (`auth.spec.ts`): happy-path login/logout, wrong password, unknown user, empty submit, protected-route redirect, forgot-password page.
+- **Auth** (`auth.spec.ts`): happy-path login/logout, wrong password, unknown user, empty submit, protected-route redirect, forgot-password page, no registration entry point on public auth pages, no legacy Tiv slogan on auth pages. Web has no self-service registration — accounts are created only by church admins from the protected `/admins` / `/settings` screens.
 - **Dashboard & navigation** (`dashboard.spec.ts`): welcome/sections, sidebar navigation to all modules, profile link.
 - **Churches** (`churches.spec.ts`): list/search, create-church flow, required-field validation, view/edit actions.
 - **Members** (`members.spec.ts`): list/filters, add member form, create **non-baptised** member, create **baptised** member with baptism details, required-field validation.

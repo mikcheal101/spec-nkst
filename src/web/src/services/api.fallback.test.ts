@@ -66,7 +66,7 @@ describe('API base URL fallbacks', () => {
     await api.contributionApi.listRequests()
     await api.announcementApi.list()
     await api.mediaApi.listSermons()
-    await api.messagingApi.listConversations()
+    await api.messagingApi.listConversations('user-1')
     await api.notificationApi.listTemplates()
     await api.auditApi.listEvents()
     await api.dashboardApi.getCounters()

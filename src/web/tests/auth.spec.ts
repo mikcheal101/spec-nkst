@@ -50,4 +50,19 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL(/\/forgot-password/)
     await expect(page.locator('body')).not.toBeEmpty()
   })
+
+  test('login page has no self-service registration link (accounts are admin-created)', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /register|sign.?up|create account/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /register|sign.?up|create account/i })).toHaveCount(0)
+    await expect(page.locator('a[href*="register"], a[href*="signup"], a[href*="sign-up"]')).toHaveCount(0)
+  })
+
+  test('login and auth pages do not display the old Tiv slogan', async ({ page }) => {
+    for (const path of ['/login', '/forgot-password', '/reset-password']) {
+      await page.goto(path)
+      await expect(page.getByText(/Nongo u Kristu u ken Sudan hen Tiv/i)).toHaveCount(0)
+    }
+  })
 })

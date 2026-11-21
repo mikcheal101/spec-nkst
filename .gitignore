@@ -10,3 +10,4 @@ completed_tickets.json
 .playwright-mcp/
 coverage-json/
 .opencode/
+playwright-report/

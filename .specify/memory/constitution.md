@@ -166,6 +166,52 @@ All first-party code and all third-party dependencies introduced or updated in c
 
 ---
 
+### VII. Automated UX & QA Tests for All Web User-Facing Features (NON-NEGOTIABLE)
+
+Every user-facing feature, UI workflow, and public-facing interaction in the web application (`src/web/`) MUST have automated end-to-end UX and QA verification written in Playwright. This requirement applies to all features regardless of complexity, scope, or deployment tier.
+
+**Scope and coverage:**
+
+- **All public-facing workflows** (login, registration, password reset, profile management, navigation, form submissions) MUST have dedicated UX test coverage.
+- **All interactive components** (buttons, links, forms, modals, dropdowns, tabs, accordions, toast notifications) MUST be verified for:
+  - Correct rendering across supported browsers (Chrome, Firefox, Safari, Edge latest versions)
+  - Responsive behavior on common viewport sizes (1920px desktop, 768px tablet, 375px mobile)
+  - Keyboard navigation (Tab, Shift+Tab, Enter, Space, Escape)
+  - Accessibility (ARIA labels, semantic HTML, color contrast ≥ WCAG AA)
+  - Focus management and visible focus indicators
+  - Hover/active states and transitions
+- **All error and edge states** MUST be verified:
+  - Form validation errors display inline with field
+  - Loading states appear during async operations
+  - Empty states display appropriate messaging
+  - Timeout and failure states show user-friendly messages
+  - Network errors are handled gracefully
+- **All navigation flows** MUST be verified:
+  - Route protection and redirects function correctly
+  - Back/forward browser navigation preserves state
+  - Deep-linking to protected routes redirects to login
+  - URL query parameters and fragments are handled correctly
+
+**Tooling and execution:**
+
+- Playwright MUST be used for all web UX/QA E2E tests. No alternative E2E tool may be introduced without a constitution amendment.
+- Tests MUST be written in TypeScript and stored in `src/web/e2e/` alongside existing test files.
+- Tests MUST run in CI on every PR and block merge on any failure.
+- Tests MUST produce HTML and JUnit reports retained as CI artifacts.
+- Tests MUST include visual regression checks for critical workflows using Playwright's `expect(page).toMatchSnapshot()` or equivalent.
+
+**Compliance and verification:**
+
+- PRs MUST include:
+  - Links to Playwright test files covering all user-facing workflows introduced or modified
+  - Evidence of test execution in CI (test output logs or screenshots)
+  - A brief UX/QA coverage summary listing verified scenarios
+- Exceptions to this requirement MUST be documented with owner, rationale, risk assessment, and remediation date. Exceptions are temporary and MUST be time-bound.
+
+**Rationale**: Automated UX/QA tests provide continuous confidence that user-facing features work correctly across browsers, devices, and interaction modes. They catch visual regressions, accessibility issues, and workflow breakage before users encounter them in production — protecting user experience and reducing support burden.
+
+---
+
 ## Technology & Platform Constraints
 
 | Component | Stack |

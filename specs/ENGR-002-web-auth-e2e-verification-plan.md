@@ -20,11 +20,17 @@ These are confirmed facts from the codebase, not assumptions.
 | Auth DB container | `identity-auth-db`, MySQL 8.0, host port `3307`, db `church_auth_db`, user `sa`, password `password` |
 | Redis container | `identity-redis`, host port `6379` |
 | Playwright config | `testDir: './tests'`, `workers: 1`, `baseURL: 'http://localhost:3000'`, `timeout: 60000`, `expect.timeout: 15000` |
-| E2E run command | `npm run test:e2e` from `src/web/` |
+| E2E run commands | `npm run test:e2e` → `./tests`; `npm run test:e2e:e2e` → `./e2e` (add to package.json) |
+| Unit test (web) | Vitest, `npm run test`, `testDir: './src'` (TS/JS files in `src/`) |
+| Unit test (backend) | JUnit + Spring Boot Test, `mvn test`, Spring Boot 4.0.6 |
+| Integration test (backend) | `@SpringBootTest` + `TestRestTemplate`, embedded MySQL/H2 |
+| Integration test (web) | Playwright API fixture (`page.request`) for service-layer calls |
 | Existing auth helpers | `tests/helpers/auth.ts` → `loginAsSuperAdmin`, `logout`, `uniqueMixed`, `SUPER_ADMIN` |
 | Existing API helpers | `tests/helpers/api.ts` → `apiToken`, `cleanupChurches`, `cleanupMembers` |
 | Existing DB helpers | `tests/helpers/db.ts` → `runSql` (uses `docker exec`; adapt for `identity-auth-db`) |
 | Auth API base (Playwright requests) | `http://localhost:81` (direct to service, not proxied through Nginx) |
+| E2E output directory | `src/web/test-results/e2e/` (update `outputDir` in playwright config for e2e suite) |
+| Backend test output | `src/api/auth/target/surefire-reports/` |
 
 ---
 
@@ -32,8 +38,14 @@ These are confirmed facts from the codebase, not assumptions.
 
 | File | Action | Purpose |
 |---|---|---|
-| `src/web/tests/auth-lifecycle.spec.ts` | **Create** | ~30 test cases across 8 describe blocks |
-| `src/web/tests/README.md` | **Update** | Add auth-lifecycle coverage entry |
+| `src/web/e2e/auth-lifecycle.spec.ts` | **Create** | ~30 test cases across 8 describe blocks for automated E2E verification |
+| `src/web/e2e/auth-ux.spec.ts` | **Create** | Automated UX tests for authentication flows (form validation, visual consistency, keyboard navigation, error states) |
+| `src/web/src/__tests__/unit/auth/*.test.ts` | **Create** | Unit tests for auth hooks, context, and helpers (login, logout, password reset mutations) |
+| `src/web/src/__tests__/integration/auth/*.test.ts` | **Create** | Integration tests for auth API client and request interceptor (401→refresh→retry flow) |
+| `src/api/auth/src/test/java/com/mikkytrionze/auth/user/service/AuthServiceTest.java` | **Create** | JUnit tests for `AuthServiceImpl`, `UserDetailsServiceImpl`, `RedisTokenBlacklistService`, `RefreshTokenServiceImpl` |
+| `src/api/auth/src/test/java/com/mikkytrionze/auth/user/api/AuthControllerTest.java` | **Create** | `@SpringBootTest` + `TestRestTemplate` for auth controller endpoints |
+| `src/web/package.json` | **Update** | Add `test:e2e:e2e` script pointing to `./e2e` testDir |
+| `src/web/tests/README.md` | **Update** | Add coverage entries for unit, integration, and E2E layers |
 
 No files under `src/web/src/` or `src/api/` are touched.
 No `tests/helpers/registration.ts` is created — there is no public registration to drive.
@@ -42,10 +54,16 @@ No `tests/helpers/registration.ts` is created — there is no public registratio
 
 ## Task Breakdown
 
-### Task 1 — `No Public Registration` describe block
+### Task 1 — `src/web/e2e/auth-lifecycle.spec.ts`
 
-**File:** `auth-lifecycle.spec.ts`
-**Covers:** REQ-NOREG-001 → 003
+**File:** `src/web/e2e/auth-lifecycle.spec.ts`
+**Covers:** REQ-NOREG-001 → 003, REQ-ADMIN-001, 002, REQ-LOGIN-001 → 005, REQ-PWD-001 → 006, REQ-SESSION-001, 002, REQ-REFRESH-001 → 004, REQ-ROUTE-001 → 003, REQ-LOGOUT-001 → 004
+
+**Playwright config update:** Adjust `testDir` in `src/web/playwright.config.ts` to include both `./tests` and `./e2e` or run tests separately:
+- `npm run test:e2e` → `./tests` (existing suite)
+- `npm run test:e2e:e2e` → `./e2e` (new auth E2E suite)
+
+**Test environment:** Same Docker Compose stack, `baseURL: 'http://localhost:3000'`.
 
 ```ts
 test.describe('No Public Registration', () => {
@@ -75,25 +93,30 @@ test.describe('No Public Registration', () => {
 
 ---
 
-### Task 2 — `Admin-Created Account Sign-In` describe block
+### Task 2 — `src/web/e2e/auth-ux.spec.ts`
 
-**Covers:** REQ-ADMIN-001, REQ-ADMIN-002
+**File:** `src/web/e2e/auth-ux.spec.ts`
+**Purpose:** Automated UX verification for authentication flows beyond functional correctness.
 
-Seed a user with a unique username through the protected admin UI (preferred, proves the admin path) or directly via `tests/helpers/db.ts` against `church_auth_db` if the UI is unavailable. Clean up after each test.
+**Covered scenarios:**
+- REQ-UX-001: All input fields have visible focus indicators
+- REQ-UX-002: All interactive elements (buttons, links) have hover/click states
+- REQ-UX-003: Error messages are visually distinct and accessible (ARIA labels)
+- REQ-UX-004: Form validation errors appear inline next to the relevant field
+- REQ-UX-005: Loading states appear during async operations (login, password reset request)
+- REQ-UX-006: Keyboard navigation works (Tab, Shift+Tab, Enter to submit, Escape to close modals)
+- REQ-UX-007: Color contrast meets WCAG AA for text and error states
+- REQ-UX-008: All interactive elements have descriptive aria-labels or visible text
+- REQ-UX-009: Password visibility toggle (show/hide) functions correctly
+- REQ-UX-010: Mobile viewport (375px width) renders auth forms legibly
 
-```
-test: seed admin-created user with unique credentials
-      goto /login → fill username/password → click Sign In
-      expect /dashboard, accessToken & refreshToken present
-
-test: submit duplicate username in admin create-user form
-      expect conflict error visible, no session tokens written
-```
+**Approach:** Use Playwright's built-in assertions, `toHaveCSS`, `toHaveAttribute`, accessibility testing via `page.evaluate()` for ARIA checks, and viewport testing.
 
 ---
 
-### Task 3 — Login describe block
+### Task 3 — Login describe block (auth-lifecycle.spec.ts)
 
+**File:** `src/web/e2e/auth-lifecycle.spec.ts`
 **Covers:** REQ-LOGIN-001 → 005
 
 | Case | Pattern |
@@ -106,8 +129,9 @@ test: submit duplicate username in admin create-user form
 
 ---
 
-### Task 4 — Password Recovery describe block
+### Task 4 — Password Recovery describe block (auth-lifecycle.spec.ts)
 
+**File:** `src/web/e2e/auth-lifecycle.spec.ts`
 **Covers:** REQ-PWD-001 → 006
 
 Stub OTP endpoints with `page.route()` — real SMS delivery cannot be exercised locally.

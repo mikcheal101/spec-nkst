@@ -9,17 +9,14 @@ test('debug login redirect', async ({ page }) => {
     if (frame === page.mainFrame()) logs.push(`[NAV] ${page.url()}`)
   })
 
-  await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' })
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(500)
-  await page.screenshot({ path: 'e2e/screenshots/01-before-login.png' })
 
-  await page.fill('input[type="text"]', 'admin')
-  await page.fill('input[type="password"]', 'Admin@12345')
-  await page.screenshot({ path: 'e2e/screenshots/02-filled.png' })
+  await page.getByLabel('Username').fill('super-admin')
+  await page.getByLabel('Password').fill('super-admin')
+  await page.getByRole('button', { name: 'Sign In' }).click()
 
-  await page.click('button[type="submit"]')
-  await page.waitForTimeout(3000)
-  await page.screenshot({ path: 'e2e/screenshots/03-after-login.png' })
+  await page.waitForURL('**/dashboard', { timeout: 15000 })
 
   const finalUrl = page.url()
   console.log('=== DEBUG LOGS ===')
@@ -31,7 +28,7 @@ test('debug login redirect', async ({ page }) => {
   const refresh = await page.evaluate(() => localStorage.getItem('refreshToken'))
   console.log('refreshToken:', refresh ? refresh.substring(0, 50) + '...' : 'null')
 
-  expect(finalUrl).toBe('http://localhost:5173/dashboard')
+  expect(finalUrl).toContain('/dashboard')
   expect(token).not.toBeNull()
   expect(token).not.toBe('undefined')
 })

@@ -1,0 +1,125 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.mikkytrionze:church >-----------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ church ---
+[INFO] argLine set to -javaagent:/Users/apple/.m2/repository/org/jacoco/org.jacoco.agent/0.8.13/org.jacoco.agent-0.8.13-runtime.jar=destfile=/Users/apple/code/nkst-sys/src/api/auth/target/jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ church ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 16 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ church ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ church ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ church ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ church ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.mikkytrionze.auth.integration.AuthContractIntegrationTest
+21:50:33.634 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.mikkytrionze.auth.integration.AuthContractIntegrationTest]: AuthContractIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+21:50:34.165 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mikkytrionze.auth.ChurchManagementApplication for test class com.mikkytrionze.auth.integration.AuthContractIntegrationTest
+21:50:34.474 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.mikkytrionze.auth.integration.AuthContractIntegrationTest]: AuthContractIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+21:50:34.485 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mikkytrionze.auth.ChurchManagementApplication for test class com.mikkytrionze.auth.integration.AuthContractIntegrationTest
+21:50:34.730 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T21:50:35.490+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.i.AuthContractIntegrationTest      : Starting AuthContractIntegrationTest using Java 23 with PID 16595 (started by apple in /Users/apple/code/nkst-sys/src/api/auth)
+2026-11-22T21:50:35.493+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.i.AuthContractIntegrationTest      : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T21:50:37.012+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.b.f.s.DefaultListableBeanFactory     : Overriding bean definition for bean 'kafkaTemplate' with a different definition: replacing [Root bean: class=null; scope=; abstract=false; lazyInit=null; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=true; fallback=false; factoryBeanName=com.mikkytrionze.auth.TestInfraConfig; factoryMethodName=kafkaTemplate; initMethodNames=null; destroyMethodNames=[(inferred)]; defined in class path resource [com/mikkytrionze/auth/TestInfraConfig.class]] with [Root bean: class=null; scope=; abstract=false; lazyInit=null; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; fallback=false; factoryBeanName=kafkaConfig; factoryMethodName=kafkaTemplate; initMethodNames=null; destroyMethodNames=[(inferred)]; defined in class path resource [com/mikkytrionze/auth/common/config/KafkaConfig.class]]
+2026-11-22T21:50:37.813+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-22T21:50:37.817+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T21:50:38.223+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 384 ms. Found 6 JPA repository interfaces.
+2026-11-22T21:50:38.332+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-22T21:50:38.335+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-11-22T21:50:38.388+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.common.domain.repository.AuditLogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.389+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.common.domain.repository.SystemConfigurationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.394+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.roles.domain.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.395+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.roles.domain.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.396+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.user.domain.repository.RefreshTokenRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.396+01:00  INFO 16595 --- [church-auth-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.auth.user.domain.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:38.397+01:00  INFO 16595 --- [church-auth-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2026-11-22T21:50:40.355+01:00  INFO 16595 --- [church-auth-service-test] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T21:50:40.514+01:00  INFO 16595 --- [church-auth-service-test] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-11-22T21:50:41.425+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T21:50:41.495+01:00  INFO 16595 --- [church-auth-service-test] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-22T21:50:42.022+01:00  INFO 16595 --- [church-auth-service-test] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:authtestdb user=SA
+2026-11-22T21:50:42.025+01:00  INFO 16595 --- [church-auth-service-test] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-22T21:50:42.081+01:00  WARN 16595 --- [church-auth-service-test] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T21:50:42.144+01:00  INFO 16595 --- [church-auth-service-test] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:authtestdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: AUTHTESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T21:50:45.479+01:00  INFO 16595 --- [church-auth-service-test] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T21:50:45.632+01:00  INFO 16595 --- [church-auth-service-test] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T21:50:45.799+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/Users/apple/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-22T21:50:49.724+01:00  INFO 16595 --- [church-auth-service-test] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-11-22T21:50:50.160+01:00  WARN 16595 --- [church-auth-service-test] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T21:50:51.780+01:00  WARN 16595 --- [church-auth-service-test] [           main] i.n.r.d.DnsServerAddressStreamProviders  : Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+2026-11-22T21:50:52.954+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T21:50:52.955+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T21:50:52.983+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-22T21:50:53.005+01:00  INFO 16595 --- [church-auth-service-test] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 50 ms
+2026-11-22T21:50:53.515+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.i.AuthContractIntegrationTest      : Started AuthContractIntegrationTest in 18.812 seconds (process running for 22.683)
+2026-11-22T21:50:56.381+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.infrastructure.database.Seeder   : Seed reconciliation complete. created=64, updated=0, unchanged=0, warnings=0
+2026-11-22T21:50:57.060+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:57.968+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:58.214+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:58.495+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:58.840+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:59.028+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: itest-admin
+2026-11-22T21:50:59.329+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: ratelimit-user
+2026-11-22T21:50:59.456+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: ratelimit-user
+2026-11-22T21:50:59.570+01:00  INFO 16595 --- [church-auth-service-test] [           main] c.m.a.u.a.service.UserLookupServiceImpl  : Loading user with username: ratelimit-user
+2026-11-22T21:50:59.725+01:00 ERROR 16595 --- [church-auth-service-test] [           main] c.m.infrastructure.jwt.JwtUtil           : Expired JWT: JWT expired 60722 milliseconds ago at 2026-11-22T20:49:59.000Z. Current time: 2026-11-22T20:50:59.722Z. Allowed clock skew: 0 milliseconds.
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.89 s -- in com.mikkytrionze.auth.integration.AuthContractIntegrationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco:0.8.13:report (report) @ church ---
+[INFO] Loading execution data file /Users/apple/code/nkst-sys/src/api/auth/target/jacoco.exec
+[INFO] Analyzed bundle '' with 60 classes
+[WARNING] Classes in bundle '' do not match with execution data. For report generation the same class files must be used as at runtime.
+[WARNING] Execution data for class com/mikkytrionze/auth/user/infrastructure/config/LiquibaseConfig does not match.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  34.502 s
+[INFO] Finished at: 2026-11-22T21:51:01+01:00
+[INFO] ------------------------------------------------------------------------
+EXIT=0

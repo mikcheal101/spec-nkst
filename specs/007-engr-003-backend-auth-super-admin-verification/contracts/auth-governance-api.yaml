@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+  title: ENGR-003 Auth & Governance API Contracts
+  version: 0.1.0-draft
+  description: |
+    Contract reference for backend auth verification and Super Admin governance.
+    This is a design artifact for planning; implementation must preserve backward
+    compatibility where required and add contract tests.
+servers:
+  - url: https://api.example.local
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Permissions
+  - name: Roles
+  - name: Audit
+  - name: Governance
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  headers:
+    X-Correlation-Id:
+      description: Correlation/request identifier for tracing.
+      schema: { type: string }
+    Retry-After:
+      description: Seconds until next allowed attempt.
+      schema: { type: integer, minimum: 1 }
+  schemas:
+    ApiErrorResponse:
+      type: object
+      required: [timestamp, status, error, code, message, path, correlationId]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer }
+        error: { type: string }
+        code: { type: string, description: Stable machine-readable error code }
+        message: { type: string, description: Human-readable non-enumerating message }
+        path: { type: string }
+        correlationId: { type: string }
+        details:
+          type: object
+          additionalProperties: true
+          description: Optional validation/retry metadata; no secrets.
+    SignInRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+        isMobileAuthentication: { type: boolean }
+    SignInResponse:
+      type: object
+      required: [accessToken, refreshToken, tokenType, expiresIn]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresIn: { type: integer, description: Access token lifetime seconds }
+        permissionsVersion: { type: integer, description: User permission epoch/version }
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    RefreshTokenResponse:
+      type: object
+      required: [accessToken, refreshToken, tokenType, expiresIn]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresIn: { type: integer }
+        permissionsVersion: { type: integer }
+    SignOutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+    EffectivePermissionsResponse:
+      type: object
+      required: [userId, permissionEpoch, permissions]
+      properties:
+        userId: { type: string }
+        permissionEpoch: { type: integer }
+        roles:
+          type: array
+          items: { type: string }
+        permissions:
+          type: array
+          items: { type: string }
+          description: Canonical RESOURCE:ACTION keys and/or legacy aliases during migration.
+    StepUpRequest:
+      type: object
+      required: [password]
+      properties:
+        password: { type: string, format: password }
+    StepUpResponse:
+      type: object
+      required: [stepUpToken, expiresIn]
+      properties:
+        stepUpToken: { type: string }
+        expiresIn: { type: integer }
+    RoleMatrixUpdateRequest:
+      type: object
+      required: [permissions, stepUpToken]
+      properties:
+        permissions:
+          type: array
+          items: { type: string }
+        stepUpToken:
+          type: string
+          description: Required for protected/governance-critical role changes.
+    AuditLogEntry:
+      type: object
+      required: [id, occurredAt, action, resourceType, outcome, correlationId]
+      properties:
+        id: { type: string }
+        occurredAt: { type: string, format: date-time }
+        actorUserId: { type: string, nullable: true }
+        actorUsername: { type: string, nullable: true }
+        action: { type: string }
+        resourceType: { type: string }
+        resourceId: { type: string, nullable: true }
+        outcome: { type: string, enum: [SUCCESS, DENIED, FAILURE] }
+        reasonCode: { type: string, nullable: true }
+        correlationId: { type: string }
+paths:
+  /api/v1/auth/sign-in:
+    post:
+      tags: [Auth]
+      summary: Sign in with credentials
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignInRequest' }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignInResponse' }
+        '400': { description: Validation/malformed input, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '401': { description: Invalid credentials/account not eligible, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '429':
+          description: Rate limited
+          headers:
+            Retry-After: { $ref: '#/components/headers/Retry-After' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiErrorResponse' }
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token and issue new access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshTokenRequest' }
+      responses:
+        '200': { description: Rotated tokens, content: { application/json: { schema: { $ref: '#/components/schemas/RefreshTokenResponse' } } } }
+        '400': { description: Invalid request, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '401': { description: Expired/revoked/reused/invalid refresh token, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '429': { description: Rate limited, headers: { Retry-After: { $ref: '#/components/headers/Retry-After' } }, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+  /api/v1/auth/sign-out:
+    post:
+      tags: [Auth]
+      summary: Sign out and invalidate session/tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignOutRequest' }
+      responses:
+        '200': { description: Signed out }
+        '400': { description: Invalid request, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '401': { description: Invalid/missing auth, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+  /api/v1/auth/step-up:
+    post:
+      tags: [Auth]
+      summary: Obtain short-lived step-up token for sensitive governance action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StepUpRequest' }
+      responses:
+        '200': { description: Step-up granted, content: { application/json: { schema: { $ref: '#/components/schemas/StepUpResponse' } } } }
+        '401': { description: Invalid credentials/session, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '429': { description: Rate limited, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+  /api/v1/me/permissions:
+    get:
+      tags: [Permissions]
+      summary: Get effective permissions for current session
+      responses:
+        '200': { description: Effective permissions, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionsResponse' } } } }
+        '401': { description: Missing/expired/revoked auth, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+  /api/v1/roles/{id}:
+    put:
+      tags: [Roles]
+      summary: Update role matrix (governance-critical)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleMatrixUpdateRequest' }
+      responses:
+        '200': { description: Role updated }
+        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '401': { description: Unauthenticated, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '403': { description: Missing permission / Root Super Admin or last-admin safeguard violation, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+  /api/v1/audit-logs:
+    get:
+      tags: [Audit]
+      summary: Query governance/security audit logs
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: action
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditLogEntry' }
+        '401': { description: Unauthenticated, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } } }
+
+  # ENGR-003 Phase 1 note:
+  # - Error contract fields are standardized across auth/api-service/announcement.
+  # - SignInResponse/RefreshTokenResponse currently preserve legacy field names
+  #   in existing clients where needed; implementation must provide compatibility
+  #   mapping until frontend migration (Phase 3) is complete.
+  # - Rate-limited endpoints return 429 + Retry-After + ApiErrorResponse.details.retryAfterSeconds.

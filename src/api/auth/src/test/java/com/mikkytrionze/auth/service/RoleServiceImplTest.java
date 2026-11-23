@@ -35,6 +35,21 @@ class RoleServiceImplTest {
     @Mock
     private PermissionService permissionService;
 
+    @Mock
+    private com.mikkytrionze.auth.user.domain.repository.UserRepository userRepository;
+
+    @Mock
+    private com.mikkytrionze.auth.user.application.service.SessionCutoffService sessionCutoffService;
+
+    @Mock
+    private com.mikkytrionze.auth.common.application.service.AuditLogService auditLogService;
+
+    @Mock
+    private com.mikkytrionze.auth.common.application.service.StepUpGuardService stepUpGuardService;
+
+    @Mock
+    private com.mikkytrionze.auth.common.application.service.SuperAdminGovernanceService governanceService;
+
     @InjectMocks
     private RoleServiceImpl roleService;
 
@@ -147,7 +162,6 @@ class RoleServiceImplTest {
     @Test
     void updateRole_withValidId_updatesPermissions() {
         RoleRequest request = RoleRequest.builder()
-                .name("MEMBER_UNBAPTISED")
                 .permissions(List.of("CAN_READ"))
                 .build();
         Permission perm = Permission.builder().id(10L).name("CAN_READ").build();
@@ -157,6 +171,7 @@ class RoleServiceImplTest {
         when(permissionService.findByName("CAN_READ")).thenReturn(Optional.of(perm));
         when(roleRepository.save(any(Role.class))).thenReturn(role);
         when(roleMapper.toResponse(role)).thenReturn(response);
+        when(userRepository.findAll()).thenReturn(java.util.Collections.emptyList());
 
         RolesResponse result = roleService.updateRole(1L, request);
 
@@ -167,7 +182,6 @@ class RoleServiceImplTest {
     @Test
     void updateRole_withInvalidId_throwsException() {
         RoleRequest request = RoleRequest.builder()
-                .name("MEMBER_UNBAPTISED")
                 .permissions(List.of())
                 .build();
 
@@ -177,22 +191,15 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void updateRole_withNonExistentPermission_filtersIt() {
+    void updateRole_withNonExistentPermission_throwsBadRequest() {
         RoleRequest request = RoleRequest.builder()
-                .name("MEMBER_UNBAPTISED")
                 .permissions(List.of("NON_EXISTENT_PERM"))
                 .build();
-        RolesResponse response = RolesResponse.builder().id(1L).name("MEMBER_UNBAPTISED").build();
-
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(permissionService.findByName("NON_EXISTENT_PERM")).thenReturn(Optional.empty());
-        when(roleRepository.save(any(Role.class))).thenReturn(role);
-        when(roleMapper.toResponse(role)).thenReturn(response);
 
-        RolesResponse result = roleService.updateRole(1L, request);
-
-        assertNotNull(result);
-        assertTrue(role.getPermissions().isEmpty());
+        assertThrows(com.mikkytrionze.auth.common.application.exception.ApiException.class, () -> roleService.updateRole(1L, request));
+        verify(roleRepository, never()).save(any(Role.class));
     }
 
     @Test

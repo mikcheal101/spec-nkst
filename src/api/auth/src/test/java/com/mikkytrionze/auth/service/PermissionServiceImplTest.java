@@ -33,6 +33,7 @@ class PermissionServiceImplTest {
     void saveObject_withNewPermission_savesAndFlushes() {
         Permission permission = Permission.builder().name("CAN_READ_CHURCH").build();
         when(permissionRepository.findByName("CAN_READ_CHURCH")).thenReturn(Optional.empty());
+        org.mockito.Mockito.lenient().when(permissionRepository.findByLegacyAlias("CAN_READ_CHURCH")).thenReturn(Optional.empty());
         when(permissionRepository.saveAndFlush(any(Permission.class))).thenReturn(permission);
 
         Permission result = permissionService.saveObject(permission);
@@ -43,15 +44,17 @@ class PermissionServiceImplTest {
 
     @Test
     void saveObject_withExistingPermission_returnsExisting() {
-        Permission existing = Permission.builder().id(1L).name("CAN_READ_CHURCH").build();
-        Permission newPerm = Permission.builder().name("CAN_READ_CHURCH").build();
+        Permission existing = Permission.builder().id(1L).name("CAN_READ_CHURCH").key("CHURCH:VIEW").active(true).build();
+        Permission newPerm = Permission.builder().name("CAN_READ_CHURCH").key("CHURCH:VIEW").legacyAlias("CAN_READ_CHURCH").active(true).build();
 
-        when(permissionRepository.findByName("CAN_READ_CHURCH")).thenReturn(Optional.of(existing));
+        when(permissionRepository.findByKey("CHURCH:VIEW")).thenReturn(Optional.of(existing));
+        when(permissionRepository.save(any(Permission.class))).thenAnswer(i -> i.getArgument(0));
 
         Permission result = permissionService.saveObject(newPerm);
 
-        assertEquals(existing, result);
+        assertEquals(existing.getId(), result.getId());
         verify(permissionRepository, never()).saveAndFlush(any());
+        verify(permissionRepository).save(existing);
     }
 
     @Test

@@ -1,0 +1,4 @@
+sha256=b4e54954b685a5ed1b4755c53ab5e66e9aa45c869f4df4ce32282b431c8d6dd9
+manifest=src/api/auth/src/main/resources/seed/canonical-baseline.json
+capturedAt=2026-11-22T00:00:00Z
+source=identity-auth-db/church_auth_db

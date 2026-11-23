@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { usePerson, useUpdatePerson, useDeletePerson, useMakeChurchAdmin, useDeacon, useElder, useUpdateDeacon, useDeleteDeacon, useUpdateElder, useDeleteElder } from '../hooks/usePeople'
 import { useAllChurches } from '../hooks/useChurches'
@@ -47,13 +46,6 @@ const IconCheck = () => (
 const IconChevronRight = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
 )
-const IconVenue = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-)
-const IconBook = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-)
-
 function formatDate(dateStr?: string) {
   if (!dateStr) return null
   try {
@@ -142,7 +134,6 @@ function StatusBadge({ active, label }: { active: boolean; label: string }) {
 }
 
 export default function PersonDetail() {
-  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -159,7 +150,6 @@ export default function PersonDetail() {
   const { data: person, isLoading } = personResult
 
   const entityLabel = isDeacon ? 'Deacon' : isElder ? 'Elder' : 'Member'
-  const entityLabelPlural = isDeacon ? 'Deacons' : isElder ? 'Elders' : 'Members'
 
   const updateMut = isDeacon ? useUpdateDeacon() : isElder ? useUpdateElder() : useUpdatePerson()
   const deleteMut = isDeacon ? useDeleteDeacon() : isElder ? useDeleteElder() : useDeletePerson()
@@ -286,7 +276,7 @@ export default function PersonDetail() {
         payload.baptisedBy = editForm.baptisedBy || null
         payload.remark = editForm.remark || null
       }
-      await updateMut.mutateAsync({ id: person.id, data: payload as Partial<Person> })
+      await updateMut.mutateAsync({ id: String(person.id), data: payload as Partial<Person> })
       toast.success(entityLabel + ' updated')
       setShowEdit(false)
     } catch (err) {

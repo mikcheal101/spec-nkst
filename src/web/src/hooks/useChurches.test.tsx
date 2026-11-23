@@ -31,7 +31,7 @@ beforeEach(() => { vi.clearAllMocks() })
 
 describe('useChurches', () => {
   it('fetches paginated churches', async () => {
-    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
+    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main', address: '' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
     const { result } = renderHook(() => useChurches(0, 10), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data?.content).toHaveLength(1)
@@ -39,14 +39,14 @@ describe('useChurches', () => {
   })
 
   it('passes search and sort params', async () => {
-    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
+    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main', address: '' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
     const { result } = renderHook(() => useChurches(0, 10, 'test', 'name,asc'), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(churchApi.list).toHaveBeenCalledWith(0, 10, 'test', 'name,asc')
   })
 
   it('uses placeholderData to keep previous data', async () => {
-    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
+    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'Main', address: '' }], totalPages: 1, totalElements: 1, number: 0, size: 10, last: true, first: true, empty: false } })
     const { result } = renderHook(() => useChurches(0, 10), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data?.content).toHaveLength(1)
@@ -55,7 +55,7 @@ describe('useChurches', () => {
 
 describe('useAllChurches', () => {
   it('fetches all churches via list with size=200', async () => {
-    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'A' }], totalPages: 1, totalElements: 1, number: 0, size: 200, last: true, first: true, empty: false } })
+    vi.mocked(churchApi.list).mockResolvedValueOnce({ data: { content: [{ id: 1, name: 'A', address: '' }], totalPages: 1, totalElements: 1, number: 0, size: 200, last: true, first: true, empty: false } })
     const { result } = renderHook(() => useAllChurches(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(churchApi.list).toHaveBeenCalledWith(0, 200)
@@ -65,19 +65,19 @@ describe('useAllChurches', () => {
 
 describe('useCreateChurch', () => {
   it('calls churchApi.create', async () => {
-    vi.mocked(churchApi.create).mockResolvedValueOnce({ data: { id: 1 } })
+    vi.mocked(churchApi.create).mockResolvedValueOnce({ data: { id: 1, name: 'New', address: 'Addr' } })
     const { result } = renderHook(() => useCreateChurch(), { wrapper: createWrapper() })
-    await waitFor(async () => { await result.current.mutateAsync({ name: 'New' }) })
-    expect(churchApi.create).toHaveBeenCalledWith({ name: 'New' })
+    await waitFor(async () => { await result.current.mutateAsync({ name: 'New', address: 'Addr' }) })
+    expect(churchApi.create).toHaveBeenCalledWith({ name: 'New', address: 'Addr' })
   })
 })
 
 describe('useUpdateChurch', () => {
   it('calls churchApi.update', async () => {
-    vi.mocked(churchApi.update).mockResolvedValueOnce({ data: { id: 1 } })
+    vi.mocked(churchApi.update).mockResolvedValueOnce({ data: { id: 1, name: 'Updated', address: 'Addr' } })
     const { result } = renderHook(() => useUpdateChurch(), { wrapper: createWrapper() })
-    await waitFor(async () => { await result.current.mutateAsync({ id: 1, data: { name: 'Updated' } }) })
-    expect(churchApi.update).toHaveBeenCalledWith(1, { name: 'Updated' })
+    await waitFor(async () => { await result.current.mutateAsync({ id: 1, data: { name: 'Updated', address: 'Addr' } }) })
+    expect(churchApi.update).toHaveBeenCalledWith(1, { name: 'Updated', address: 'Addr' })
   })
 })
 
@@ -92,7 +92,7 @@ describe('useDeleteChurch', () => {
 
 describe('useChurch', () => {
   it('fetches a single church by id', async () => {
-    vi.mocked(churchApi.get).mockResolvedValueOnce({ data: { id: 1, name: 'Grace' } })
+    vi.mocked(churchApi.get).mockResolvedValueOnce({ data: { id: 1, name: 'Grace', address: 'Addr' } })
     const { result } = renderHook(() => useChurch(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(churchApi.get).toHaveBeenCalledWith(1)
@@ -108,14 +108,14 @@ describe('useChurch', () => {
 
 describe('useSubChurches', () => {
   it('returns array directly when result is an array', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: [{ id: 2, name: 'Sub' }] })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: [{ id: 2, name: 'Sub', address: 'Addr' }] })
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toHaveLength(1)
   })
 
   it('extracts .content from paginated result', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { content: [{ id: 3, name: 'Sub2' }] } })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { content: [{ id: 3, name: 'Sub2' }] } } as any)
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toHaveLength(1)
@@ -123,28 +123,28 @@ describe('useSubChurches', () => {
   })
 
   it('extracts .data array from nested result', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: [{ id: 4, name: 'Nested' }] } })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: [{ id: 4, name: 'Nested' }] } } as any)
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toHaveLength(1)
   })
 
   it('extracts .data.content from deeply nested result', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: { content: [{ id: 5, name: 'Deep' }] } } })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: { content: [{ id: 5, name: 'Deep' }] } } } as any)
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toHaveLength(1)
   })
 
   it('returns empty array for unrecognized shape', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: null })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: null } as any)
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toEqual([])
   })
 
   it('returns empty array when nested data has no content', async () => {
-    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: { foo: 'bar' } } })
+    vi.mocked(churchApi.getSubChurches).mockResolvedValueOnce({ data: { data: { foo: 'bar' } } } as any)
     const { result } = renderHook(() => useSubChurches(1), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.data).toEqual([])

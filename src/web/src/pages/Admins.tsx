@@ -1,6 +1,5 @@
 import { useState, useMemo, type FormEvent } from 'react'
 import toast from 'react-hot-toast'
-import { useTranslation } from 'react-i18next'
 import { usePeopleList } from '../hooks/usePeople'
 import { useUsers, useAssignRole, useRevokeRole, useRegister } from '../hooks/useAuth'
 import { useAuth } from '../context/AuthContext'
@@ -25,7 +24,6 @@ const IconClose = () => (
 )
 
 export default function Admins() {
-  const { t } = useTranslation()
   const { user: currentUser } = useAuth()
   const churchId = currentUser?.churchId
 
@@ -60,7 +58,7 @@ export default function Admins() {
     return { hasAccount: true, isAdmin: roles.includes(ADMIN_ROLE) }
   }
 
-  async function handleAssign(memberId: number, userId: string) {
+  async function handleAssign(_memberId: number, userId: string) {
     try {
       await assignMut.mutateAsync({ userId, roleId: ADMIN_ROLE })
       toast.success('Admin role assigned')
@@ -69,7 +67,7 @@ export default function Admins() {
     }
   }
 
-  async function handleRevoke(memberId: number, userId: string) {
+  async function handleRevoke(_memberId: number, userId: string) {
     try {
       await revokeMut.mutateAsync({ userId, roleId: ADMIN_ROLE })
       toast.success('Admin role removed')

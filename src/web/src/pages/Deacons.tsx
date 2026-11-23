@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useDeaconsList, useCreateDeacon, useDeleteDeacon } from '../hooks/usePeople'
 import { useAuth } from '../context/AuthContext'
-import { deaconsApi, type Person } from '../services/api'
+import { deaconsApi, mapDeaconToPerson, type DeaconResponse, type Person } from '../services/api'
 import { unwrap } from '../hooks/useApi'
 import ConfirmDialog from '../shared/components/ConfirmDialog'
 import Skeleton from '../shared/components/Skeleton'
@@ -243,8 +243,8 @@ function AddDeaconModal({ onClose, onAdded }: { onClose: () => void; onAdded: ()
     setSearching(true)
     try {
       const data = await unwrap(deaconsApi.search(query.trim()))
-      const list = 'content' in data ? data.content : data
-      setResults(list)
+      const list = 'content' in data ? data.content : (data as unknown as DeaconResponse[])
+      setResults(list.map(mapDeaconToPerson))
       setSearched(true)
     } catch {
       toast.error('Search failed')

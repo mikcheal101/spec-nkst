@@ -70,7 +70,7 @@ class RoleControllerTest {
 
     @Test
     void updateRole_withValidRequest_returnsUpdatedRole() {
-        RoleRequest request = RoleRequest.builder().name("MEMBER").permissions(List.of("CAN_READ")).build();
+        RoleRequest request = RoleRequest.builder().permissions(List.of("CAN_READ")).build();
         RolesResponse updated = RolesResponse.builder().id(1L).name("MEMBER").build();
         when(roleService.updateRole(1L, request)).thenReturn(updated);
 
@@ -82,7 +82,7 @@ class RoleControllerTest {
 
     @Test
     void updateRole_withInvalidId_throwsException() {
-        RoleRequest request = RoleRequest.builder().name("MEMBER").permissions(List.of()).build();
+        RoleRequest request = RoleRequest.builder().permissions(List.of("CAN_READ")).build();
         when(roleService.updateRole(99L, request)).thenThrow(new RoleNotFoundException(null));
 
         assertThrows(RoleNotFoundException.class, () -> roleController.updateRole(request, 99L));

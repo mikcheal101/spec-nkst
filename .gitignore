@@ -1,4 +1,14 @@
 node_modules/
+
 dist/
 .env
 test-results/
+.github/
+jira/
+tickets/
+completed_tickets.json
+.playwright-mcp/
+coverage-json/
+.opencode/
+playwright-report/
+coverage/

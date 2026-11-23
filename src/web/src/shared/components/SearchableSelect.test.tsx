@@ -31,6 +31,11 @@ describe('SearchableSelect', () => {
     expect(screen.getByPlaceholderText('Select fruit...')).toHaveValue('')
   })
 
+  it('falls back to the default placeholder when none is provided', () => {
+    render(<SearchableSelect options={options} value={null} onChange={vi.fn()} />)
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
+  })
+
   it('shows selected label when value set', () => {
     render(<SearchableSelect {...defaultProps} value={2} />)
     expect(screen.getByDisplayValue('Banana')).toBeInTheDocument()

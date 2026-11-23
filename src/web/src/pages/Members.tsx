@@ -45,9 +45,6 @@ const IconMapPin = () => (
 const IconChevronDown = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 )
-const IconArrowUpDown = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-)
 const IconCheck = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
 )
@@ -95,8 +92,8 @@ function SelectFilter({ value, onChange, options, placeholder }: {
   options: readonly string[] | { value: string; label: string }[]
   placeholder?: string
 }) {
-  const items = Array.isArray(options) && typeof options[0] === 'string'
-    ? (options as readonly string[]).map((o) => ({ value: o, label: o || placeholder || 'All' }))
+  const items = typeof options[0] === 'string'
+    ? (options as unknown as readonly string[]).map((o) => ({ value: o, label: o || placeholder || 'All' }))
     : (options as { value: string; label: string }[])
   return (
     <div style={{ position: 'relative' }}>
@@ -138,12 +135,11 @@ function SelectFilter({ value, onChange, options, placeholder }: {
 export default function Members() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const allPerms = (user?.permissions ?? []).map((p) => p.toLowerCase())
-  const canCreate = allPerms.includes('can_create_members')
-  const canUpdate = allPerms.includes('can_update_members')
-  const canDelete = allPerms.includes('can_delete_members')
-  const canMakeAdmin = allPerms.includes('can_update_church') && allPerms.includes('can_update_members')
+  const { hasPermission } = useAuth()
+  const canCreate = hasPermission(['MEMBERS:CREATE'])
+  const canUpdate = hasPermission(['MEMBERS:UPDATE'])
+  const canDelete = hasPermission(['MEMBERS:DELETE'])
+  const canMakeAdmin = hasPermission(['CHURCHES:UPDATE','CHURCH:UPDATE']) && hasPermission(['MEMBERS:UPDATE'])
 
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)

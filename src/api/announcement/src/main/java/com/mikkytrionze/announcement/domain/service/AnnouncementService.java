@@ -6,6 +6,7 @@ import com.mikkytrionze.announcement.api.response.AnnouncementResponse;
 import org.springframework.data.domain.Page;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 
 
 /**
@@ -19,7 +20,7 @@ public interface AnnouncementService {
      * @param pageable pagination information
      * @return a page of {@link AnnouncementResponse}
      */
-    Page<AnnouncementResponse> fetchAnnouncements(Pageable pageable);
+    Page<AnnouncementResponse> fetchAnnouncements(Pageable pageable, Authentication authentication);
 
     /**
      * Finds a specific announcement by its unique identifier.
@@ -28,7 +29,7 @@ public interface AnnouncementService {
      * @return the {@link AnnouncementResponse}
      * @throws ResourceNotFoundException if the announcement does not exist
      */
-    AnnouncementResponse findById(Long id) throws ResourceNotFoundException;
+    AnnouncementResponse findById(Long id, Authentication authentication) throws ResourceNotFoundException;
 
     /**
      * Creates a new announcement for the authenticated user's church.
@@ -36,7 +37,7 @@ public interface AnnouncementService {
      * @param request the {@link CreateAnnouncementRequest} containing announcement details
      * @return the created {@link AnnouncementResponse}
      */
-    AnnouncementResponse createAnnouncement(CreateAnnouncementRequest request);
+    AnnouncementResponse createAnnouncement(CreateAnnouncementRequest request, Authentication authentication);
 
     /**
      * Updates an existing announcement.
@@ -46,7 +47,7 @@ public interface AnnouncementService {
      * @return the updated {@link AnnouncementResponse}
      * @throws ResourceNotFoundException if the announcement does not exist
      */
-    AnnouncementResponse updateAnnouncement(Long id, UpdateAnnouncementRequest request) throws ResourceNotFoundException;
+    AnnouncementResponse updateAnnouncement(Long id, UpdateAnnouncementRequest request, Authentication authentication) throws ResourceNotFoundException;
 
     /**
      * Deletes (or marks as deleted) an announcement by its ID.
@@ -54,5 +55,5 @@ public interface AnnouncementService {
      * @param id the announcement ID
      * @throws ResourceNotFoundException if the announcement does not exist
      */
-    void deleteAnnouncement(Long id) throws ResourceNotFoundException;
+    void deleteAnnouncement(Long id, Authentication authentication) throws ResourceNotFoundException;
 }

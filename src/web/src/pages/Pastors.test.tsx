@@ -86,7 +86,6 @@ describe('Pastors', () => {
       data: [{ id: 1, firstName: 'A', lastName: 'B', middleName: '', email: '', phoneNumber: '', gender: '', position: 'Senior Pastor', church: null, pastorRoleId: 1 }],
       isLoading: false,
     } as any)
-    const user = userEvent.setup()
     render(<Pastors />)
     const searchInput = screen.getByPlaceholderText('Search pastors…')
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } })

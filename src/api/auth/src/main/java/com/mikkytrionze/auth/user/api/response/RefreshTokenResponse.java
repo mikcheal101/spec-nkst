@@ -10,5 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class RefreshTokenResponse {
+    private String accessToken;
     private String refreshToken;
+    private String tokenType;
+    private long expiresIn;
+    private long permissionsVersion;
 }

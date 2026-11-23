@@ -49,7 +49,9 @@ describe('Login', () => {
       login: mockLogin,
       logout: vi.fn(),
       loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => true),
+    } as any)
     render(<Login />)
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
   })
@@ -125,5 +127,11 @@ describe('Login', () => {
     render(<Login />)
     const link = screen.getByText('auth.forgotPassword')
     expect(link).toHaveAttribute('href', '/forgot-password')
+  })
+
+  it('does not offer self-service registration on the login page', () => {
+    render(<Login />)
+    expect(screen.queryByText(/register|sign.?up|create account/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /register|sign.?up|create account/i })).not.toBeInTheDocument()
   })
 })

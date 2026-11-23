@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+    <changeSet id="010-alter-churches-lifecycle-fields" author="opencode-eng">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="churches"/>
+        </preConditions>
+        <addColumn tableName="churches">
+            <column name="status" type="VARCHAR(32)" defaultValue="ACTIVE"><constraints nullable="false"/></column>
+            <column name="church_type" type="VARCHAR(32)" defaultValue="PARENT"><constraints nullable="false"/></column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

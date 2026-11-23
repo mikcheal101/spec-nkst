@@ -1,0 +1,17 @@
+**/target
+**/coverage
+**/.git
+**/.gitignore
+**/.idea
+**/*.iml
+**/.classpath
+**/.project
+**/.settings
+**/.factorypath
+**/.vscode
+**/.DS_Store
+**/.mvn
+**/mvnw
+**/mvnw.cmd
+**/node_modules
+**/*.log

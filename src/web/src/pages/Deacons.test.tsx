@@ -23,12 +23,13 @@ vi.mock('../context/AuthContext', () => ({
 const mockSearch = vi.fn().mockResolvedValue({ content: [] })
 vi.mock('../services/api', () => ({
   deaconsApi: { search: (...args: any[]) => mockSearch(...args) },
+  mapDeaconToPerson: (p: any) => ({ ...p, phoneNumber: p.tel, email: p.emailAddress, church: p.church, isBaptised: false }),
 }))
 vi.mock('../hooks/useApi', () => ({
   unwrap: vi.fn().mockImplementation((p: Promise<any>) => p),
 }))
 vi.mock('../shared/components/ConfirmDialog', () => ({
-  default: ({ open, title, message, confirmLabel, onConfirm, onCancel, danger, loading }: any) =>
+  default: ({ open, title, message, confirmLabel, onConfirm, onCancel, loading }: any) =>
     open ? (
       <div data-testid="confirm-dialog">
         <span>{title}</span>
@@ -337,7 +338,6 @@ describe('Deacons', () => {
   })
 
   it('delete target null guard - handleDelete returns early', async () => {
-    const user = userEvent.setup()
     render(<Deacons />)
     expect(mockDeleteAsync).not.toHaveBeenCalled()
   })
@@ -542,6 +542,8 @@ describe('Deacons', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: null,
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => false),
     } as any)
     render(<Deacons />)
     expect(screen.getByText('Deacons')).toBeInTheDocument()
@@ -553,7 +555,9 @@ describe('Deacons', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_create_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
       login: vi.fn(), logout: vi.fn(), loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => true),
+    } as any)
     mockSearch.mockResolvedValue({
       content: [
         { id: 20, firstName: 'Search', lastName: 'Result', emailAddress: null, tel: null, gender: 'Male' },

@@ -1,0 +1,146 @@
+[
+  {
+    "i": 0,
+    "text": "",
+    "title": null,
+    "tooltip": null,
+    "aria": "Menu",
+    "cls": "hamburger"
+  },
+  {
+    "i": 1,
+    "text": "Roles & Permissions",
+    "title": null,
+    "tooltip": null,
+    "aria": null,
+    "cls": "settings-tab is-active"
+  },
+  {
+    "i": 2,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 3,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 4,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 5,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 6,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 7,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 8,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 9,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 10,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 11,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 12,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 13,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 14,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 15,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  },
+  {
+    "i": 16,
+    "text": "",
+    "title": "Edit",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon"
+  },
+  {
+    "i": 17,
+    "text": "",
+    "title": "Delete",
+    "tooltip": null,
+    "aria": null,
+    "cls": "btn-icon btn-icon-danger"
+  }
+]

@@ -1,0 +1,163 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.mikkytrionze:church >-----------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (default) @ church ---
+[INFO] argLine set to -javaagent:/Users/apple/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=/Users/apple/code/nkst-sys/src/api/api-service/target/jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ church ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 6 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ church ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ church ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ church ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ church ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.mikkytrionze.churchmanagement.shared.security.TokenRevocationIntegrationTest
+21:50:35.369 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mikkytrionze.churchmanagement.ChurchManagementApplication for test class com.mikkytrionze.churchmanagement.shared.security.TokenRevocationIntegrationTest
+21:50:35.629 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mikkytrionze.churchmanagement.ChurchManagementApplication for test class com.mikkytrionze.churchmanagement.shared.security.TokenRevocationIntegrationTest
+21:50:35.851 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T21:50:36.672+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.s.s.TokenRevocationIntegrationTest : Starting TokenRevocationIntegrationTest using Java 23 with PID 16598 (started by apple in /Users/apple/code/nkst-sys/src/api/api-service)
+2026-11-22T21:50:36.676+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.s.s.TokenRevocationIntegrationTest : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T21:50:39.035+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-22T21:50:39.041+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T21:50:39.535+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 451 ms. Found 9 JPA repository interfaces.
+2026-11-22T21:50:39.644+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-22T21:50:39.648+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-11-22T21:50:39.722+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.church.domain.repository.ChurchRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.724+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.church.domain.repository.UserChurchScopeRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.726+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.deacon.domain.repository.DeaconRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.727+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.elder.domain.repository.ElderRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.728+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.member.domain.repository.BaptismRecordRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.729+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.member.domain.repository.MemberRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.731+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.pastor.domain.repository.PastorRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.732+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.pastor.domain.repository.PastorRoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.732+01:00  INFO 16598 --- [church-api-service-test] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mikkytrionze.churchmanagement.shared.audit.AuditLogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-22T21:50:39.733+01:00  INFO 16598 --- [church-api-service-test] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 51 ms. Found 0 Redis repository interfaces.
+2026-11-22T21:50:41.664+01:00  INFO 16598 --- [church-api-service-test] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T21:50:41.769+01:00  INFO 16598 --- [church-api-service-test] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-11-22T21:50:42.736+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T21:50:42.806+01:00  INFO 16598 --- [church-api-service-test] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-22T21:50:43.397+01:00  INFO 16598 --- [church-api-service-test] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-11-22T21:50:43.400+01:00  INFO 16598 --- [church-api-service-test] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-22T21:50:43.479+01:00  WARN 16598 --- [church-api-service-test] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T21:50:43.564+01:00  INFO 16598 --- [church-api-service-test] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T21:50:47.246+01:00  INFO 16598 --- [church-api-service-test] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists audit_log cascade 
+Hibernate: drop table if exists baptism_record cascade 
+Hibernate: drop table if exists churches cascade 
+Hibernate: drop table if exists deacons cascade 
+Hibernate: drop table if exists elders cascade 
+Hibernate: drop table if exists members cascade 
+Hibernate: drop table if exists pastor_roles cascade 
+Hibernate: drop table if exists pastors cascade 
+Hibernate: drop table if exists user_church_scopes cascade 
+Hibernate: drop sequence if exists identity_seq
+Hibernate: create sequence identity_seq start with 1 increment by 1
+Hibernate: create table audit_log (actor_user_id bigint, occurred_at timestamp(6) with time zone not null, outcome varchar(32) not null, id varchar(36) not null, ip_address varchar(64), action varchar(128) not null, correlation_id varchar(128) not null, reason_code varchar(128), resource_id varchar(128), resource_type varchar(128) not null, user_agent varchar(512), actor_username varchar(255), after_json TEXT, before_json TEXT, primary key (id))
+Hibernate: create table baptism_record (date_of_baptism date not null, deleted boolean not null, serial_number integer not null, created_at timestamp(6), id bigint not null, updated_at timestamp(6), baptized_by varchar(255) not null, bible_verse varchar(255) not null, created_by varchar(255), image_uri varchar(255), remark varchar(255), updated_by varchar(255), worship_center varchar(255) not null, primary key (id))
+Hibernate: create table churches (deleted boolean not null, church_id bigint, created_at timestamp(6), id bigint not null, updated_at timestamp(6), address varchar(255) not null, church_type varchar(255) not null, created_by varchar(255), email_address varchar(255), name varchar(255) not null unique, status varchar(255) not null, tel_number varchar(255), updated_by varchar(255), primary key (id))
+Hibernate: create table deacons (deleted boolean not null, church_id bigint not null, created_at timestamp(6), id bigint not null, member_id bigint not null unique, updated_at timestamp(6), created_by varchar(255), updated_by varchar(255), primary key (id))
+Hibernate: create table elders (deleted boolean not null, church_id bigint not null, created_at timestamp(6), id bigint not null, member_id bigint not null unique, updated_at timestamp(6), created_by varchar(255), updated_by varchar(255), primary key (id))
+Hibernate: create table members (deleted boolean not null, is_admin boolean, is_baptised boolean not null, baptism_record_id bigint unique, church_id bigint not null, created_at timestamp(6), id bigint not null, updated_at timestamp(6), user_id bigint unique, address varchar(255), created_by varchar(255), email_address varchar(255) unique, first_name varchar(255) not null, last_name varchar(255) not null, middle_name varchar(255), tel varchar(255) not null unique, updated_by varchar(255), user_type varchar(255), gender enum ('FEMALE','MALE') not null, primary key (id))
+Hibernate: create table pastor_roles (deleted boolean not null, created_at timestamp(6), id bigint not null, updated_at timestamp(6), created_by varchar(255), name varchar(255) not null unique, updated_by varchar(255), primary key (id))
+Hibernate: create table pastors (deleted boolean not null, church_id bigint, created_at timestamp(6), id bigint not null, member_id bigint unique, pastor_role_id bigint not null, updated_at timestamp(6), created_by varchar(255), updated_by varchar(255), primary key (id))
+Hibernate: create table user_church_scopes (church_id bigint not null, id bigint not null, user_id bigint not null, primary key (id), constraint uk_user_church_scope unique (user_id, church_id))
+Hibernate: alter table if exists churches add constraint FKohc5j2rdxtl8rlb6tc8gh18s6 foreign key (church_id) references churches
+Hibernate: alter table if exists deacons add constraint FKh5ggt4gv36qcfas4lofsd2ct8 foreign key (church_id) references churches
+Hibernate: alter table if exists deacons add constraint FKhx2ouodqiwejo2nwwbr97m6gw foreign key (member_id) references members
+Hibernate: alter table if exists elders add constraint FKans08hmg8ytf1rx215hkbwxve foreign key (church_id) references churches
+Hibernate: alter table if exists elders add constraint FKbhyemasw7k7cgud0rpb37dkbk foreign key (member_id) references members
+Hibernate: alter table if exists members add constraint FKcgtedl3h5krc9evcc74rbr62f foreign key (baptism_record_id) references baptism_record
+Hibernate: alter table if exists members add constraint FKgwbitccl07ejyd0xrb2nvrsow foreign key (church_id) references churches
+Hibernate: alter table if exists pastors add constraint FK8vhitls6k6wbsr7oc6lsxyjss foreign key (church_id) references churches
+Hibernate: alter table if exists pastors add constraint FKe189t7dqlq3dx0tu73eheuxgy foreign key (member_id) references members
+Hibernate: alter table if exists pastors add constraint FK3nhdvopdmkkm9u93l9a132h68 foreign key (pastor_role_id) references pastor_roles
+Hibernate: alter table if exists user_church_scopes add constraint FKcohfuxhknkke5i6m0892txmxy foreign key (church_id) references churches
+2026-11-22T21:50:47.460+01:00  INFO 16598 --- [church-api-service-test] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T21:50:47.822+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-22T21:50:53.260+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.shared.config.GrpcConfig           : ===> gRPC Server started successfully, listening on port 0
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/Users/apple/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-22T21:50:55.425+01:00  WARN 16598 --- [church-api-service-test] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T21:50:55.926+01:00  WARN 16598 --- [church-api-service-test] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 745bdf46-78b4-4f4c-8427-1d46d9d73a73
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T21:50:55.954+01:00  INFO 16598 --- [church-api-service-test] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T21:50:58.234+01:00  WARN 16598 --- [church-api-service-test] [           main] i.n.r.d.DnsServerAddressStreamProviders  : Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+2026-11-22T21:50:59.479+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T21:50:59.479+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T21:50:59.522+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-22T21:50:59.550+01:00  INFO 16598 --- [church-api-service-test] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 70 ms
+2026-11-22T21:51:00.187+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.s.s.TokenRevocationIntegrationTest : Started TokenRevocationIntegrationTest in 24.366 seconds (process running for 28.177)
+Hibernate: select count(*) from pastor_roles pr1_0 where (pr1_0.deleted = false)
+Hibernate: select next value for identity_seq
+Hibernate: insert into pastor_roles (created_at,created_by,deleted,name,updated_at,updated_by,id) values (?,?,?,?,?,?,?)
+Hibernate: select next value for identity_seq
+Hibernate: insert into pastor_roles (created_at,created_by,deleted,name,updated_at,updated_by,id) values (?,?,?,?,?,?,?)
+Hibernate: select next value for identity_seq
+Hibernate: insert into pastor_roles (created_at,created_by,deleted,name,updated_at,updated_by,id) values (?,?,?,?,?,?,?)
+Hibernate: select next value for identity_seq
+Hibernate: insert into pastor_roles (created_at,created_by,deleted,name,updated_at,updated_by,id) values (?,?,?,?,?,?,?)
+2026-11-22T21:51:01.243+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.c.a.service.ChurchServiceImpl      : Fetching all the churches with pagination: Page request [number: 0, size 20, sort: UNSORTED]
+Hibernate: select c1_0.id,c1_0.address,c1_0.church_type,c1_0.created_at,c1_0.created_by,c1_0.deleted,c1_0.email_address,c1_0.name,c1_0.church_id,c1_0.status,c1_0.tel_number,c1_0.updated_at,c1_0.updated_by from churches c1_0 where (c1_0.deleted = false) offset ? rows fetch first ? rows only
+2026-11-22T21:51:01.577+01:00  INFO 16598 --- [church-api-service-test] [           main] c.m.c.c.a.service.ChurchServiceImpl      : Fetching all the churches with pagination: Page request [number: 0, size 20, sort: UNSORTED]
+Hibernate: select c1_0.id,c1_0.address,c1_0.church_type,c1_0.created_at,c1_0.created_by,c1_0.deleted,c1_0.email_address,c1_0.name,c1_0.church_id,c1_0.status,c1_0.tel_number,c1_0.updated_at,c1_0.updated_by from churches c1_0 where (c1_0.deleted = false) offset ? rows fetch first ? rows only
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 27.33 s -- in com.mikkytrionze.churchmanagement.shared.security.TokenRevocationIntegrationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ church ---
+[INFO] Loading execution data file /Users/apple/code/nkst-sys/src/api/api-service/target/jacoco.exec
+[INFO] Analyzed bundle '' with 56 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  35.813 s
+[INFO] Finished at: 2026-11-22T21:51:04+01:00
+[INFO] ------------------------------------------------------------------------
+EXIT=0

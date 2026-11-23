@@ -54,6 +54,15 @@ describe('PermissionRoute', () => {
     expect(screen.queryByTestId('navigate')).not.toBeInTheDocument()
   })
 
+  it('allows access when canonical RESOURCE:ACTION permission satisfies legacy-style requirement mapping', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', permissions: ['MEMBERS:READ'] },
+      loading: false,
+    })
+    render(<PermissionRoute permission="CAN_READ_MEMBERS"><div>child</div></PermissionRoute>)
+    expect(screen.getByText('child')).toBeInTheDocument()
+  })
+
   it('renders children when user has all required permissions (array)', () => {
     mockUseAuth.mockReturnValue({
       user: { id: '1', permissions: ['users:read', 'users:write'] },
@@ -105,5 +114,15 @@ describe('PermissionRoute', () => {
     render(<PermissionRoute><div>child</div></PermissionRoute>)
     expect(screen.getByText('child')).toBeInTheDocument()
     expect(screen.queryByTestId('navigate')).not.toBeInTheDocument()
+  })
+
+  it('redirects when the user has no permissions property at all', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '1' },
+      loading: false,
+    })
+    render(<PermissionRoute permission="users:read"><div>child</div></PermissionRoute>)
+    expect(toast.error).toHaveBeenCalled()
+    expect(screen.getByTestId('navigate')).toHaveAttribute('data-to', '/dashboard')
   })
 })

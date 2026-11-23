@@ -1,0 +1,930 @@
+{
+  "results": [
+    {
+      "route": "/dashboard",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/members",
+      "url": "http://localhost:3000/members",
+      "heading": "Members",
+      "buttons": [
+        "",
+        " Add Member",
+        "",
+        "",
+        "",
+        "",
+        "«",
+        "‹",
+        "1",
+        "›",
+        "»"
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search by name, email or phone"
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\nMembers\n\nManage church members\n\nAdd Member\nPosition\nPastor\nElder\nDeacon\nGender\nMale\nFemale\nStatus\nCommunicant\nNon-communicant\nDefault\nName A–Z\nName Z–A\nAge ↑\nAge ↓\nMEMBER\tPHONE\tCHURCH\tSTATUS\tACTIONS\n\nHH\nHemen Hirekaan\nhirekaanmicheal@gmail.com\n\t09020464737\tALAGOMEJI\t\nNon-communicant\t\n«\n‹\n1\n›\n»"
+    },
+    {
+      "route": "/churches",
+      "url": "http://localhost:3000/churches",
+      "heading": "Churches",
+      "buttons": [
+        "",
+        " Create Church",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "«",
+        "‹",
+        "1",
+        "›",
+        "»"
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search churches by name or address"
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\nChurches\n\nManage church branches\n\nCreate Church\nDefault\nName A–Z\nName Z–A\nA\nALAGOMEJI\nAlagomeji Center\nNo leadership assigned\nS\nSABO CENTER\nSabo, Yaba, lagos\nSub of ALAGOMEJI\nNo leadership assigned\n«\n‹\n1\n›\n»"
+    },
+    {
+      "route": "/pastors",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/elders",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/deacons",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/contributions",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/projects",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/announcements",
+      "url": "http://localhost:3000/announcements",
+      "heading": "Announcements",
+      "buttons": [
+        "",
+        "New Announcement"
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search announcements..."
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\nAnnouncements\n\nManage church announcements\n\nNew Announcement\n0 announcements\nNo announcements found"
+    },
+    {
+      "route": "/notifications",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/settings",
+      "url": "http://localhost:3000/settings",
+      "heading": "Settings",
+      "buttons": [
+        "",
+        "Roles & Permissions",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\nSettings\n\nManage system configuration and permissions\n\nRoles & Permissions\nSUPER ADMIN\nCREATE\nCHURCH\nROLES\nPERMISSIONS\nPASTORS\nANNOUNCEMENTS\nSETTINGS\nMEMBERS\nREAD\nPERMISSIONS\nMEMBERS\nROLES\nANNOUNCEMENTS\nCHURCH\nPASTORS\nSETTINGS\nVIEW\nANNOUNCEMENTS\nMEMBERS\nPASTORS\nCHURCH\nROLES\nSETTINGS\nPERMISSIONS\nUPDATE\nROLES\nANNOUNCEMENTS\nPASTORS\nCHURCH\nPERMISSIONS\nSETTINGS\nMEMBERS\nDELETE\nPASTORS\nPERMISSIONS\nCHURCH\nMEMBERS\nANNOUNCEMENTS\nROLES\nSETTINGS\nCHURCH ADMIN\nCREATE\nANNOUNCEMENTS\nDEACONS\nMEMBERS\nELDERS\nREAD\nANNOUNCEMENTS\nELDERS\nMEMBERS\nDEACONS\nVIEW\nANNOUNCEMENTS\nMEMBERS\nELDERS\nDEACONS\nUPDATE\nELDERS\nDEACONS\nANNOUNCEMENTS\nMEMBERS\nDELETE\nELDERS\nDEACONS\nMEMBERS\nANNOUNCEMENTS\nPASTOR\nELDER\nDEACON\nTREASURER\nMEMBER BAPTISED\nMEMBER UNBAPTISED"
+    },
+    {
+      "route": "/admins",
+      "url": "http://localhost:3000/dashboard",
+      "heading": "Welcome, super-admin",
+      "buttons": [
+        ""
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\n“For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.”\n— John 3:16\nWelcome, super-admin\n\nYou are signed in to the Church Management System.\n\n👥\n0\nMembers\n💰\n₦0\nContributions\n⛪\n0\nChurches\n📋\n0\nProjects\n📢\n0\nAnnouncements\n👥 Members\n\nManage congregation and church members\n\n💰 Contributions\n\nTrack tithes, offerings, and donations\n\n⛪ Churches\n\nManage local church branches\n\n📋 Projects\n\nTrack church projects and initiatives"
+    },
+    {
+      "route": "/profile",
+      "url": "http://localhost:3000/profile",
+      "heading": "Profile",
+      "buttons": [
+        "",
+        "Personal Info",
+        "Security",
+        "Save"
+      ],
+      "links": [
+        {
+          "text": "▦Dashboard",
+          "href": "/dashboard"
+        },
+        {
+          "text": "⛪Churches",
+          "href": "/churches"
+        },
+        {
+          "text": "👥Members",
+          "href": "/members"
+        },
+        {
+          "text": "📢Announcements",
+          "href": "/announcements"
+        },
+        {
+          "text": "⚙Settings",
+          "href": "/settings"
+        },
+        {
+          "text": "🔔",
+          "href": "/notifications"
+        },
+        {
+          "text": "Ssuper-admin",
+          "href": "/profile"
+        }
+      ],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "id": "",
+          "name": null,
+          "placeholder": "Search..."
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": null,
+          "id": "",
+          "name": "firstName",
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": null,
+          "id": "",
+          "name": "lastName",
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": null,
+          "id": "",
+          "name": "middleName",
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": "email",
+          "id": "",
+          "name": "emailAddress",
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": null,
+          "id": "",
+          "name": "tel",
+          "placeholder": null
+        },
+        {
+          "tag": "INPUT",
+          "type": null,
+          "id": "",
+          "name": null,
+          "placeholder": null
+        }
+      ],
+      "body": "ChurchMS\nDASHBOARD\n▦\nDashboard\n⛪\nChurches\n👥\nMembers\n📢\nAnnouncements\n⚙\nSettings\n🚪\nLogout\n🔍\nEN\nEnglish\nFrançais\nTiv\nHausa\n🔔\nS\nsuper-admin\nProfile\n\nYour account information\n\nS\nsuper-admin\n\nSuper Admin\n\nPersonal Info\nSecurity"
+    }
+  ],
+  "out": [
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>."
+    },
+    {
+      "type": "console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "type": "console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ]
+}

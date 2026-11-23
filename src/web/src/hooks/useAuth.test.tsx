@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useLogin, useLogout, useRegister, useRequestPasswordReset, useConfirmPasswordReset, useUsers, useAssignRole, useRevokeRole, useProfile, useUpdateProfile, useChangePassword } from './useAuth'
 
-const mockUnwrap = vi.fn()
 vi.mock('../services/api', () => ({
   authApi: {
     login: vi.fn(),
@@ -38,11 +37,10 @@ beforeEach(() => {
 
 describe('useLogin', () => {
   it('calls authApi.login and returns data', async () => {
-    vi.mocked(authApi.login).mockResolvedValueOnce({ data: { token: 'abc' } })
+    vi.mocked(authApi.login).mockResolvedValueOnce({ data: { accessToken: 'abc', refreshToken: 'rt', tokenType: 'Bearer', expiresIn: 3600 } })
     const { result } = renderHook(() => useLogin(), { wrapper: createWrapper() })
 
-    let data: any
-    await waitFor(async () => { data = await result.current.mutateAsync({ username: 'u', password: 'p' }) })
+    await waitFor(async () => { await result.current.mutateAsync({ username: 'u', password: 'p' }) })
 
     expect(authApi.login).toHaveBeenCalledWith({ username: 'u', password: 'p' })
   })
@@ -63,7 +61,7 @@ describe('useLogout', () => {
 
 describe('useRegister', () => {
   it('calls authApi.register', async () => {
-    vi.mocked(authApi.register).mockResolvedValueOnce({ data: { id: 'u1' } })
+    vi.mocked(authApi.register).mockResolvedValueOnce({ data: { message: 'registered' } })
     const { result } = renderHook(() => useRegister(), { wrapper: createWrapper() })
 
     await waitFor(async () => {
@@ -76,7 +74,7 @@ describe('useRegister', () => {
 
 describe('useRequestPasswordReset', () => {
   it('calls authApi.requestPasswordReset', async () => {
-    vi.mocked(authApi.requestPasswordReset).mockResolvedValueOnce({ data: {} })
+    vi.mocked(authApi.requestPasswordReset).mockResolvedValueOnce({ data: { message: 'OTP sent', expiresIn: 300 } })
     const { result } = renderHook(() => useRequestPasswordReset(), { wrapper: createWrapper() })
 
     await waitFor(async () => {
@@ -89,7 +87,7 @@ describe('useRequestPasswordReset', () => {
 
 describe('useConfirmPasswordReset', () => {
   it('calls authApi.confirmPasswordReset', async () => {
-    vi.mocked(authApi.confirmPasswordReset).mockResolvedValueOnce({ data: {} })
+    vi.mocked(authApi.confirmPasswordReset).mockResolvedValueOnce({ data: { message: 'Password reset' } })
     const { result } = renderHook(() => useConfirmPasswordReset(), { wrapper: createWrapper() })
 
     await waitFor(async () => {
@@ -102,11 +100,12 @@ describe('useConfirmPasswordReset', () => {
 
 describe('useUsers', () => {
   it('returns list of users', async () => {
-    vi.mocked(authApi.listUsers).mockResolvedValueOnce({ data: [{ id: 'u1', username: 'admin' }] })
+    const managedUser = { id: 'u1', username: 'admin', roles: ['ADMIN'], status: 'active', churchId: '1', permissions: [] }
+    vi.mocked(authApi.listUsers).mockResolvedValueOnce({ data: [managedUser] })
     const { result } = renderHook(() => useUsers(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.data).toEqual([{ id: 'u1', username: 'admin' }])
+    expect(result.current.data).toEqual([managedUser])
   })
 })
 
@@ -119,7 +118,7 @@ describe('useAssignRole', () => {
       await result.current.mutateAsync({ userId: 'u1', roleId: 'ADMIN' })
     })
 
-    expect(authApi.assignRole).toHaveBeenCalledWith('u1', 'ADMIN')
+    expect(authApi.assignRole).toHaveBeenCalledWith('u1', 'ADMIN', undefined)
   })
 })
 
@@ -132,7 +131,7 @@ describe('useRevokeRole', () => {
       await result.current.mutateAsync({ userId: 'u1', roleId: 'ADMIN' })
     })
 
-    expect(authApi.revokeRole).toHaveBeenCalledWith('u1', 'ADMIN')
+    expect(authApi.revokeRole).toHaveBeenCalledWith('u1', 'ADMIN', undefined)
   })
 })
 
@@ -162,7 +161,7 @@ describe('useUpdateProfile', () => {
 
 describe('useChangePassword', () => {
   it('calls authApi.changePassword', async () => {
-    vi.mocked(authApi.changePassword).mockResolvedValueOnce({ data: {} })
+    vi.mocked(authApi.changePassword).mockResolvedValueOnce({ data: { message: 'Password changed' } })
     const { result } = renderHook(() => useChangePassword(), { wrapper: createWrapper() })
 
     await waitFor(async () => {

@@ -1,8 +1,12 @@
 package com.mikkytrionze.auth.roles.api.request;
 
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -10,9 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class RoleRequest {
-    @NonNull
-    private String name;
 
-    @Builder.Default
-    private List<String> permissions = new ArrayList<>();
+    @NotEmpty(message = "Permissions cannot be null!")
+    private List<@NotBlank(message = "Empty permission value!") String> permissions;
+
+    // required for protected/governance-critical role changes (secondary Super Admin mutations)
+    private String stepUpToken;
 }

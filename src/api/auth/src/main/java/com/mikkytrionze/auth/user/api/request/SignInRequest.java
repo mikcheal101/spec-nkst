@@ -19,5 +19,5 @@ public class SignInRequest {
     private String password;
 
     @Builder.Default
-    private boolean isMobileAuthentication = false;
+    private Boolean isMobileAuthentication = false;
 }

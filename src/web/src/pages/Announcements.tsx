@@ -48,12 +48,11 @@ function formatDate(value?: string) {
 
 export default function Announcements() {
   const { t } = useTranslation()
-  const { user } = useAuth()
-  const allPerms = (user?.permissions ?? []).map((p) => p.toLowerCase())
-  const canCreate = allPerms.includes('can_create_announcements')
-  const canView = allPerms.includes('can_view_announcements')
-  const canUpdate = allPerms.includes('can_update_announcements')
-  const canDelete = allPerms.includes('can_delete_announcements')
+  const { hasPermission } = useAuth()
+  const canCreate = hasPermission(['ANNOUNCEMENTS:CREATE'])
+  const canView = hasPermission(['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW'])
+  const canUpdate = hasPermission(['ANNOUNCEMENTS:UPDATE'])
+  const canDelete = hasPermission(['ANNOUNCEMENTS:DELETE'])
 
   const { data: announcementsData, isLoading: aLoading } = useAnnouncementsList()
   const { data: rolesData } = useRolesList()
@@ -61,7 +60,7 @@ export default function Announcements() {
   const updateAnnMut = useUpdateAnnouncement()
   const deleteAnnMut = useDeleteAnnouncement()
 
-  const announcements = Array.isArray(announcementsData) ? announcementsData as Announcement[] : []
+  const announcements = Array.isArray(announcementsData) ? announcementsData as unknown as Announcement[] : []
   const roles = Array.isArray(rolesData) ? (rolesData as { name: string }[]).map((r) => r.name) : []
   const loading = aLoading
 

@@ -14,9 +14,11 @@ vi.mock('react-hot-toast', () => ({ default: toastMock }))
 const mockAuthUser = vi.fn(() => ({
   user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
   login: vi.fn(), logout: vi.fn(), loading: false,
+  refreshPermissions: vi.fn(),
+  hasPermission: (req: any) => { const reqs = Array.isArray(req) ? req : [req]; const perms = ['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW','ANNOUNCEMENTS:CREATE','ANNOUNCEMENTS:UPDATE','ANNOUNCEMENTS:DELETE','MEMBERS:READ']; return reqs.every((r: string) => perms.includes(String(r).toUpperCase())); },
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 vi.mock('../shared/utils/swal', () => ({
@@ -49,7 +51,6 @@ vi.mock('../hooks/useRoles', () => ({
 }))
 
 import Announcements from './Announcements'
-import { useAuth } from '../context/AuthContext'
 import { useAnnouncementsList, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../hooks/useAnnouncements'
 import { useRolesList } from '../hooks/useRoles'
 import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
@@ -57,9 +58,11 @@ import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
 beforeEach(() => {
   vi.clearAllMocks()
   mockAuthUser.mockReturnValue({
-  user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_view_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
+    user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_view_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
     login: vi.fn(), logout: vi.fn(), loading: false,
-  })
+    refreshPermissions: vi.fn(),
+    hasPermission: (req: any) => { const reqs = Array.isArray(req) ? req : [req]; const perms = ['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW','ANNOUNCEMENTS:CREATE','ANNOUNCEMENTS:UPDATE','ANNOUNCEMENTS:DELETE','MEMBERS:READ']; return reqs.every((r: string) => perms.includes(String(r).toUpperCase())); },
+  } as any)
   vi.mocked(useAnnouncementsList).mockReturnValue({ data: announcements, isLoading: false } as any)
   vi.mocked(useCreateAnnouncement).mockReturnValue({ mutateAsync: mockAnnMutate, isPending: false } as any)
   vi.mocked(useUpdateAnnouncement).mockReturnValue({ mutateAsync: mockUpdateMut, isPending: false } as any)
@@ -283,14 +286,15 @@ describe('Announcements', () => {
     expect(submitBtn.disabled).toBe(true)
   })
 
-  it('hides CRUD buttons without announcement permissions', async () => {
+  it('hides CRUD buttons without announcement write permissions', async () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'user', permissions: ['can_read_announcements'], churchId: '1', roles: [] },
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms=['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())); },
     } as any)
     render(<Announcements />)
     expect(screen.queryByText('New Announcement')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('View')).not.toBeInTheDocument()
     expect(screen.queryAllByLabelText('Edit').length).toBe(0)
     expect(screen.queryAllByLabelText('Delete').length).toBe(0)
   })
@@ -307,6 +311,8 @@ describe('Announcements', () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'viewer', permissions: ['can_read_announcements', 'can_view_announcements'], churchId: '1', roles: [] },
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms=['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())); },
     } as any)
     render(<Announcements />)
     expect(screen.getAllByLabelText('View').length).toBeGreaterThan(0)
@@ -369,5 +375,77 @@ describe('Announcements', () => {
     await user.click(deleteBtns[0])
     await waitFor(() => { expect(showConfirm).toHaveBeenCalled() })
     expect(mockDeleteAnnMutate).not.toHaveBeenCalled()
+  })
+
+  it('view modal handles missing expiry and empty roles', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('View')[1])
+    const dialog = document.querySelector('.announcement-dialog') as HTMLElement
+    expect(within(dialog).getByText('Bible Study')).toBeInTheDocument()
+    expect(within(dialog).getByText('All roles')).toBeInTheDocument()
+    expect(within(dialog).getByText('—')).toBeInTheDocument()
+  })
+
+  it('view modal renders raw value for invalid expiry date', async () => {
+    vi.mocked(useAnnouncementsList).mockReturnValue({
+      data: [{ ...announcements[0], expiresAt: 'not-a-real-date' }],
+      isLoading: false,
+    } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('View')[0])
+    const dialog = document.querySelector('.announcement-dialog') as HTMLElement
+    expect(within(dialog).getByText('not-a-real-date')).toBeInTheDocument()
+  })
+
+  it('shows no roles hint when roles list is empty', async () => {
+    vi.mocked(useRolesList).mockReturnValue({ data: [], isLoading: false } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getByText('New Announcement'))
+    expect(screen.getByText('No roles available.')).toBeInTheDocument()
+  })
+
+  it('shows no roles hint when roles response is not an array', async () => {
+    vi.mocked(useRolesList).mockReturnValue({ data: null, isLoading: false } as any)
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getByText('New Announcement'))
+    expect(screen.getByText('No roles available.')).toBeInTheDocument()
+  })
+
+  it('treats a non-array announcements response as empty', () => {
+    vi.mocked(useAnnouncementsList).mockReturnValue({ data: { content: [] }, isLoading: false } as any)
+    render(<Announcements />)
+    expect(screen.getByText('No announcements found')).toBeInTheDocument()
+  })
+
+  it('clears the search query via the clear button', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    const search = screen.getByPlaceholderText(/search announcements/i) as HTMLInputElement
+    await user.type(search, 'Sunday')
+    expect(screen.queryByText('Bible Study')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Clear search'))
+    expect(search).toHaveValue('')
+    expect(screen.getByText('Bible Study')).toBeInTheDocument()
+  })
+
+  it('shows a search-specific empty state when nothing matches', async () => {
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.type(screen.getByPlaceholderText(/search announcements/i), 'zzzz-no-match')
+    expect(screen.getByText('No announcements match your search')).toBeInTheDocument()
+  })
+
+  it('shows a generic delete error for non-Error rejections', async () => {
+    mockDeleteAnnMutate.mockRejectedValueOnce('string failure')
+    const user = userEvent.setup()
+    render(<Announcements />)
+    await user.click(screen.getAllByLabelText('Delete')[0])
+    await waitFor(() => {
+      expect(showErrorToast).toHaveBeenCalledWith('Delete failed')
+    })
   })
 })

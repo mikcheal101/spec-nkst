@@ -23,9 +23,10 @@ beforeEach(() => { vi.clearAllMocks() })
 
 describe('useDashboardCounters', () => {
   it('returns counters', async () => {
-    vi.mocked(dashboardApi.getCounters).mockResolvedValueOnce({ data: { members: 10, contributions: 20 } })
+    const counters = { dailyMessage: null, members: 10, contributions: 20, churches: 0, projects: 0, announcements: 0 }
+    vi.mocked(dashboardApi.getCounters).mockResolvedValueOnce({ data: counters })
     const { result } = renderHook(() => useDashboardCounters(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.data).toEqual({ members: 10, contributions: 20 })
+    expect(result.current.data).toEqual(counters)
   })
 })

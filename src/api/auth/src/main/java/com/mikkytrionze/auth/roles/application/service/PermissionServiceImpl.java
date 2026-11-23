@@ -23,20 +23,53 @@ public class PermissionServiceImpl implements PermissionService {
             throw new IllegalArgumentException("Permission cannot be null!");
         }
 
-        // check if it is a unique name
-        Optional<Permission> fetchedPermission = permissionRepository.findByName(permission.getName());
-
-        if (fetchedPermission.isPresent()) {
-            log.info("Found a matching permission with name: {}", permission.getName());
-            return fetchedPermission.get();
+        Optional<Permission> fetchedPermission = Optional.empty();
+        if (permission.getKey() != null && !permission.getKey().isBlank()) {
+            fetchedPermission = permissionRepository.findByKey(permission.getKey());
+        }
+        if (fetchedPermission.isEmpty() && permission.getName() != null) {
+            fetchedPermission = permissionRepository.findByName(permission.getName());
+        }
+        if (fetchedPermission.isEmpty() && permission.getLegacyAlias() != null) {
+            fetchedPermission = permissionRepository.findByLegacyAlias(permission.getLegacyAlias());
         }
 
-        log.info("Creating a new permission by name: {}", permission.getName());
+        if (fetchedPermission.isPresent()) {
+            Permission existing = fetchedPermission.get();
+            existing.setName(permission.getName() != null ? permission.getName() : existing.getName());
+            existing.setKey(permission.getKey() != null ? permission.getKey() : existing.getKey());
+            existing.setResource(permission.getResource() != null ? permission.getResource() : existing.getResource());
+            existing.setAction(permission.getAction() != null ? permission.getAction() : existing.getAction());
+            existing.setLegacyAlias(permission.getLegacyAlias() != null ? permission.getLegacyAlias() : existing.getLegacyAlias());
+            existing.setActive(permission.isActive());
+            return permissionRepository.save(existing);
+        }
+
+        log.info("Creating permission: {}", permission.getKey() != null ? permission.getKey() : permission.getName());
         return permissionRepository.saveAndFlush(permission);
     }
 
     @Override
     public Optional<Permission> findByName(String name) {
-        return permissionRepository.findByName(name);
+        Optional<Permission> byName = permissionRepository.findByName(name);
+        if (byName.isPresent()) return byName;
+        Optional<Permission> byAlias = permissionRepository.findByLegacyAlias(name);
+        if (byAlias.isPresent()) return byAlias;
+        return permissionRepository.findByKey(name);
+    }
+
+    @Override
+    public Optional<Permission> findByKey(String key) {
+        return permissionRepository.findByKey(key);
+    }
+
+    @Override
+    public Optional<Permission> findByLegacyAlias(String legacyAlias) {
+        return permissionRepository.findByLegacyAlias(legacyAlias);
+    }
+
+    @Override
+    public Optional<Permission> findByCanonical(String resource, String action) {
+        return permissionRepository.findByResourceAndAction(resource, action);
     }
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+    <changeSet id="011-alter-permissions-canonical-fields" author="opencode-eng">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="permissions"/>
+        </preConditions>
+        <addColumn tableName="permissions">
+            <column name="key_name" type="VARCHAR(100)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="resource" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="action" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="legacy_alias" type="VARCHAR(100)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addUniqueConstraint tableName="permissions" columnNames="resource,action" constraintName="uk_permissions_resource_action"/>
+    </changeSet>
+</databaseChangeLog>

@@ -16,10 +16,12 @@ const { mockAuthUser } = vi.hoisted(() => ({
   mockAuthUser: vi.fn(() => ({
     user: { username: 'admin', permissions: ['can_update_church', 'can_update_member'], churchId: '1', roles: ['ADMIN'] } as any,
     login: vi.fn(), logout: vi.fn(), loading: false,
+    refreshPermissions: vi.fn(),
+    hasPermission: (_req: any) => true,
   })),
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 
@@ -49,7 +51,6 @@ vi.mock('../hooks/useAuth', () => ({
 import Admins from './Admins'
 import { usePeopleList } from '../hooks/usePeople'
 import { useUsers, useAssignRole, useRevokeRole, useRegister } from '../hooks/useAuth'
-import { useAuth } from '../context/AuthContext'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -245,7 +246,9 @@ describe('Admins', () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'admin', permissions: ['can_update_church'], churchId: null, roles: ['ADMIN'] },
       login: vi.fn(), logout: vi.fn(), loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: (_req: any) => true,
+    } as any)
     const user = userEvent.setup()
     render(<Admins />)
     await user.click(screen.getByText('Create Account'))

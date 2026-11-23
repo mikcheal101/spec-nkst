@@ -8,4 +8,6 @@
     <include file="migrations/001-init.xml" relativeToChangelogFile="true"/>
     <include file="migrations/002-update.xml" relativeToChangelogFile="true"/>
 
+    <include file="v2/009-create-user-church-scopes-table.xml" relativeToChangelogFile="true"/>
+    <include file="v2/010-alter-churches-lifecycle-fields.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

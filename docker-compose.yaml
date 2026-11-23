@@ -1,0 +1,241 @@
+name: church-management
+
+networks:
+  church-network:
+    driver: bridge
+
+volumes:
+  church_announcement_db:
+  church_auth_db:
+  church_api_db:
+  kafka-data:
+  redis-data:
+
+services:
+  # ──────────────────────────────────────────────
+  # Infrastructure
+  # ──────────────────────────────────────────────
+  kafka:
+    image: apache/kafka:latest
+    container_name: identity-kafka
+    networks:
+      - church-network
+    ports:
+      # 9092 is used by services inside the compose network
+      # 9094 is for clients running on the host (e.g. IDE)
+      - "9092:9092"
+      - "9094:9094"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+    restart: unless-stopped
+
+  redis:
+    container_name: identity-redis
+    image: redis:7-alpine
+    networks:
+      - church-network
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Micro Services
+  # ──────────────────────────────────────────────
+  auth:
+    container_name: identity-auth-service
+    build:
+      context: src/api
+      dockerfile: auth/Dockerfile
+    networks:
+      - church-network
+    ports:
+      - "81:81"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 81
+      SPRING_DATASOURCE_URL: "jdbc:mysql://auth-db:3306/church_auth_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/81' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    restart: unless-stopped
+
+  api-service:
+    container_name: identity-api-service
+    build:
+      context: src/api
+      dockerfile: api-service/Dockerfile
+    networks:
+      - church-network
+    ports:
+      - "82:82"
+      - "7075:7075"
+    depends_on:
+      api-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 82
+      GRPC_SERVER_PORT: 7075
+      SPRING_DATASOURCE_URL: "jdbc:mysql://api-db:3306/church_api_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/82' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    restart: unless-stopped
+
+  announcement:
+    container_name: identity-announcement-service
+    build:
+      context: src/api
+      dockerfile: announcement/Dockerfile
+    networks:
+      - church-network
+    ports:
+      - "83:83"
+    depends_on:
+      announcement-db:
+        condition: service_healthy
+      api-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 83
+      SPRING_DATASOURCE_URL: "jdbc:mysql://announcement-db:3306/church_announcement_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      GRPC_CHURCH_SERVER_HOST: api-service
+      GRPC_CHURCH_SERVER_PORT: 7075
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/83' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    restart: unless-stopped
+
+  web:
+    container_name: church-web
+    build:
+      context: src/web
+      dockerfile: Dockerfile
+    networks:
+      - church-network
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Databases
+  # ──────────────────────────────────────────────
+  auth-db:
+    container_name: identity-auth-db
+    image: mysql:8.0
+    networks:
+      - church-network
+    volumes:
+      - church_auth_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: church_auth_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u sa -p$$MYSQL_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  api-db:
+    container_name: identity-api-db
+    image: mysql:8.0
+    networks:
+      - church-network
+    volumes:
+      - church_api_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: church_api_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u sa -p$$MYSQL_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  announcement-db:
+    container_name: identity-announcement-db
+    image: mysql:8.0
+    networks:
+      - church-network
+    volumes:
+      - church_announcement_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: church_announcement_db
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: password
+    ports:
+      - "3309:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u sa -p$$MYSQL_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped

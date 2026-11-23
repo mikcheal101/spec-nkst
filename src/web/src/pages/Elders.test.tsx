@@ -631,6 +631,8 @@ describe('Elders', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: null,
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => false),
     } as any)
     render(<Elders />)
     expect(screen.getByText('Elders')).toBeInTheDocument()
@@ -642,7 +644,9 @@ describe('Elders', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_read_pastor', 'can_read_elders', 'can_create_elders', 'can_delete_elders', 'can_read_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
       login: vi.fn(), logout: vi.fn(), loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => true),
+    } as any)
     mockPeopleSearch.mockResolvedValue({
       content: [
         { id: 20, firstName: 'Search', lastName: 'Result', emailAddress: null, tel: null, gender: 'Male' },

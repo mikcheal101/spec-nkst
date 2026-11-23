@@ -104,7 +104,7 @@ async function request<T>(
           if (retryRes.status === 204) return {}
           if (retryRes.ok) {
             const data = await retryRes.json()
-            return { data }
+            return { data: (data as Record<string, unknown>)?.data as T ?? data as T }
           }
           if (retryRes.status === 401) {
             return { error: "You don't have permission to perform this action." }
@@ -115,11 +115,15 @@ async function request<T>(
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         const hadToken = !!token
-        if (hadToken) {
-          toast.error('Session expired. Please login again.')
-          setTimeout(() => { window.location.href = '/dashboard' }, 100)
-        } else {
-          window.location.href = '/login'
+        if (typeof window !== 'undefined') {
+          if (hadToken) {
+            toast.error('Session expired. Please login again.')
+            setTimeout(() => {
+              if (typeof window !== 'undefined') window.location.href = '/dashboard'
+            }, 100)
+          } else {
+            window.location.href = '/login'
+          }
         }
         return { error: 'Session expired. Please login again.' }
       }
@@ -132,7 +136,7 @@ async function request<T>(
         if (retryRes.status === 204) return {} as ApiResponse<T>
         if (retryRes.ok) {
           const data = await retryRes.json()
-          return { data } as ApiResponse<T>
+          return { data: (data as Record<string, unknown>)?.data as T ?? data as T } as ApiResponse<T>
         }
         if (retryRes.status === 401) {
           return { error: "You don't have permission to perform this action." } as ApiResponse<T>
@@ -242,6 +246,7 @@ export interface ProfileResponse {
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
+  stepUpToken?: string
 }
 
 export interface ManagedUser {
@@ -302,19 +307,39 @@ export const authApi = {
   getRoles(userId: string) {
     return request(`/api/v1/users/${userId}/roles`, {}, AUTH_API_BASE)
   },
-  assignRole(userId: string, roleId: string) {
-    return request(`/api/v1/users/${userId}/roles`, { method: 'POST', body: JSON.stringify({ roleId }) }, AUTH_API_BASE)
+  assignRole(userId: string, roleId: string, stepUpToken?: string) {
+    return request(`/api/v1/users/${userId}/roles/${encodeURIComponent(roleId)}`, { method: 'POST', body: JSON.stringify(stepUpToken ? { stepUpToken } : {}) }, AUTH_API_BASE)
   },
-  revokeRole(userId: string, roleId: string) {
-    return request(`/api/v1/users/${userId}/roles/${roleId}`, { method: 'DELETE' }, AUTH_API_BASE)
+  revokeRole(userId: string, roleId: string, stepUpToken?: string) {
+    return request(`/api/v1/users/${userId}/roles/${encodeURIComponent(roleId)}`, { method: 'DELETE', body: JSON.stringify(stepUpToken ? { stepUpToken } : {}) }, AUTH_API_BASE)
+  },
+  setUserStatus(userId: string, status: string, stepUpToken?: string) {
+    return request(`/api/v1/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status, ...(stepUpToken ? { stepUpToken } : {}) }) }, AUTH_API_BASE)
+  },
+  setDirectPermissions(userId: string, permissions: string[], policyEnabled = false, stepUpToken?: string) {
+    return request(`/api/v1/users/${userId}/permissions`, { method: 'PUT', body: JSON.stringify({ permissions, policyEnabled, ...(stepUpToken ? { stepUpToken } : {}) }) }, AUTH_API_BASE)
   },
 
   listUsers() {
     return request<ManagedUser[]>('/api/v1/users', {}, AUTH_API_BASE)
   },
+  getUser(userId: string) {
+    return request<ManagedUser>(`/api/v1/users/${encodeURIComponent(userId)}`, {}, AUTH_API_BASE)
+  },
+  provisionUser(data: { username: string; password: string; roles?: string[]; status?: string }) {
+    return request<ManagedUser>('/api/v1/users', { method: 'POST', body: JSON.stringify(data) }, AUTH_API_BASE)
+  },
 
   changePassword(data: ChangePasswordRequest) {
-    return request<{ message: string }>('/api/v1/auth/change-password', { method: 'PUT', body: JSON.stringify(data) }, AUTH_API_BASE)
+    return request<{ message: string }>('/api/v1/profile/change-password', { method: 'POST', body: JSON.stringify(data) }, AUTH_API_BASE)
+  },
+
+  stepUp(password: string) {
+    return request<{ stepUpToken: string; expiresAt?: string }>('/api/v1/auth/step-up', { method: 'POST', body: JSON.stringify({ password }) }, AUTH_API_BASE)
+  },
+
+  getMyPermissions() {
+    return request<string[] | { permissions: string[] }>('/api/v1/me/permissions', {}, AUTH_API_BASE)
   },
 }
 
@@ -364,6 +389,14 @@ export interface SystemConfig {
   locale?: string
 }
 
+export interface SystemConfigurationEntry {
+  configKey: string
+  configValue: string
+  description?: string
+  updatedAt?: string
+  updatedBy?: string
+}
+
 /** System configuration endpoints (auth-service, `AUTH_API_BASE`). */
 export const configApi = {
   get() {
@@ -371,6 +404,15 @@ export const configApi = {
   },
   update(data: SystemConfig) {
     return request<SystemConfig>('/api/v1/system/config', { method: 'PUT', body: JSON.stringify(data) }, AUTH_API_BASE)
+  },
+  list() {
+    return request<SystemConfigurationEntry[]>('/api/v1/system-configurations', {}, AUTH_API_BASE)
+  },
+  upsert(key: string, value: string, description?: string) {
+    return request<SystemConfigurationEntry>(`/api/v1/system-configurations/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value, description }),
+    }, AUTH_API_BASE)
   },
 }
 
@@ -546,7 +588,7 @@ interface ElderResponse {
   church?: { id: number; name: string } | null
 }
 
-interface DeaconResponse {
+export interface DeaconResponse {
   id: number
   firstName: string
   middleName?: string
@@ -600,7 +642,7 @@ function mapElderToPerson(p: ElderResponse): Person {
   }
 }
 
-function mapDeaconToPerson(p: DeaconResponse): Person {
+export function mapDeaconToPerson(p: DeaconResponse): Person {
   return {
     id: p.id,
     userId: '',
@@ -710,7 +752,7 @@ export const contributionApi = {
     return request(`/api/v1/contribution-requests${query}`, {}, CONTRIBUTION_API_BASE)
   },
   getRequest(id: string) {
-    return request(`/api/v1/contribution-requests/${id}`, {}, CONTRIBUTION_API_BASE)
+    return request<{ id: string }>(`/api/v1/contribution-requests/${id}`, {}, CONTRIBUTION_API_BASE)
   },
   createRequest(data: Record<string, unknown>) {
     return request('/api/v1/contribution-requests', { method: 'POST', body: JSON.stringify(data) }, CONTRIBUTION_API_BASE)
@@ -733,7 +775,7 @@ export const announcementApi = {
       .then((res) => res.error ? { error: res.error } : { data: res.data?.content || [] })
   },
   get(id: string) {
-    return request(`/api/v1/announcements/${id}`, {}, ANNOUNCEMENT_API_BASE)
+    return request<{ id: string }>(`/api/v1/announcements/${id}`, {}, ANNOUNCEMENT_API_BASE)
   },
   create(data: Record<string, unknown>) {
     return request('/api/v1/announcements', { method: 'POST', body: JSON.stringify(data) }, ANNOUNCEMENT_API_BASE)
@@ -769,7 +811,7 @@ export const mediaApi = {
     return request('/api/v1/sermons', {}, MEDIA_API_BASE)
   },
   getSermon(id: string) {
-    return request(`/api/v1/sermons/${id}`, {}, MEDIA_API_BASE)
+    return request<{ id: string }>(`/api/v1/sermons/${id}`, {}, MEDIA_API_BASE)
   },
   createSermon(data: Record<string, unknown>) {
     return request('/api/v1/sermons', { method: 'POST', body: JSON.stringify(data) }, MEDIA_API_BASE)
@@ -814,7 +856,42 @@ export const notificationApi = {
 
 // ─── Audit (audit-service) ───
 
+export interface AuditLogEntry {
+  id: string
+  occurredAt: string
+  actorUserId?: number | string | null
+  actorUsername?: string | null
+  action: string
+  resourceType: string
+  resourceId?: string | null
+  outcome: 'SUCCESS' | 'DENIED' | 'FAILURE' | string
+  reasonCode?: string | null
+  correlationId: string
+  ipAddress?: string | null
+  userAgent?: string | null
+  beforeJson?: string | null
+  afterJson?: string | null
+}
+
+export interface AuditLogPage {
+  content: AuditLogEntry[]
+  totalElements?: number
+  totalPages?: number
+  number?: number
+  size?: number
+}
+
 export const auditApi = {
+  list(params?: { page?: number; size?: number; action?: string; actor?: string; correlationId?: string }) {
+    const qs = new URLSearchParams()
+    if (params?.page !== undefined) qs.set('page', String(params.page))
+    if (params?.size !== undefined) qs.set('size', String(params.size))
+    if (params?.action) qs.set('action', params.action)
+    if (params?.actor) qs.set('actor', params.actor)
+    if (params?.correlationId) qs.set('correlationId', params.correlationId)
+    const q = qs.toString() ? `?${qs}` : ''
+    return request<AuditLogPage | AuditLogEntry[]>(`/api/v1/audit-logs${q}`, {}, AUTH_API_BASE)
+  },
   listEvents() {
     return request('/api/v1/audit-events', {}, AUDIT_API_BASE)
   },
@@ -827,7 +904,7 @@ export const paymentApi = {
     return request('/api/v1/payments/initialize', { method: 'POST', body: JSON.stringify(data) }, PAYMENT_API_BASE)
   },
   getStatus(reference: string) {
-    return request(`/api/v1/payments/${reference}`, {}, PAYMENT_API_BASE)
+    return request<{ status: string }>(`/api/v1/payments/${reference}`, {}, PAYMENT_API_BASE)
   },
 }
 

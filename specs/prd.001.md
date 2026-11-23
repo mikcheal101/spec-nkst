@@ -3,16 +3,16 @@
 | Field | Value |
 |---|---|
 | Document Title | Enterprise Product Requirement Document (PRD) |
-| Document Reference | PRD-NKST-2026-001 |
+| Document Reference | PRD-Church Management System-2026-001 |
 | Target Systems | Cross-Platform Mobile App (Members) & Administrative Web Portal (Back-Office / Clerks / Leadership) |
-| Source Document | BSD-NKST-2026-001 (Enterprise Business Strategy Document) |
+| Source Document | BSD-Church Management System-2026-001 (Enterprise Business Strategy Document) |
 | Status | Approved for Implementation |
 
 ---
 
 ## Section 1: Executive Overview and Product Vision
 
-The NKST church keeps its member records in a single hard cover note. Registration, contributions, awards, punishment, and member updates all go into that book by hand. It works as the sacred source of truth, but it does not scale and it does not answer questions quickly.
+The Church Management System church keeps its member records in a single hard cover note. Registration, contributions, awards, punishment, and member updates all go into that book by hand. It works as the sacred source of truth, but it does not scale and it does not answer questions quickly.
 
 The daily reality is slow. A clerk searches the book for a member by baptismal number, then writes the new entry in the margin. Two people cannot use the book at once. If the book is lost or carried away to a branch, there is no live copy. A member who wants to know their giving for the year has to wait while someone traces entries by hand.
 

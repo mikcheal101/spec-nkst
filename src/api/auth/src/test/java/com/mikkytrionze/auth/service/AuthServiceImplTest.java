@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import com.mikkytrionze.auth.user.domain.model.AccountStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +61,13 @@ class AuthServiceImplTest {
     @Mock
     private TokenBlacklistService tokenBlacklistService;
 
+    @Mock
+    private com.mikkytrionze.auth.common.application.service.RateLimitService rateLimitService;
+    @Mock
+    private com.mikkytrionze.auth.common.infrastructure.config.RateLimitConfig rateLimitConfig;
+    @Mock
+    private com.mikkytrionze.auth.common.application.service.AuditLogService auditLogService;
+
     private AuthServiceImpl authService;
 
     @BeforeEach
@@ -70,7 +78,13 @@ class AuthServiceImplTest {
                 refreshTokenRepository,
                 passwordEncoder,
                 tokenBlacklistService,
-                refreshTokenService);
+                refreshTokenService,
+                rateLimitService,
+                rateLimitConfig,
+                auditLogService);
+        org.springframework.test.util.ReflectionTestUtils.setField(authService, "accessTtlMinutes", 15L);
+        lenient().when(rateLimitConfig.getSigninMaxAttempts()).thenReturn(5);
+        lenient().when(rateLimitConfig.getSigninWindowMinutes()).thenReturn(15);
     }
 
     @Test
@@ -97,15 +111,17 @@ class AuthServiceImplTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
-        when(jwtUtil.generateToken(eq(username), any(Map.class))).thenReturn(expectedToken);
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(User.builder().id(1L).username(username).accountStatus(AccountStatus.ACTIVE).permissionEpoch(0L).build()));
+        when(jwtUtil.generateToken(eq(username), anyLong(), eq("access"), any(Map.class))).thenReturn(expectedToken);
         when(refreshTokenService.createRefreshToken(username)).thenReturn(refreshToken);
 
         SignInResponse response = authService.authenticateUser(request);
 
         assertEquals(expectedToken, response.getToken());
+        assertEquals(expectedToken, response.getAccessToken());
         assertEquals(refreshToken.getToken(), response.getRefreshToken());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil).generateToken(eq(username), any(Map.class));
+        verify(jwtUtil).generateToken(eq(username), anyLong(), eq("access"), any(Map.class));
     }
 
     @Test
@@ -118,7 +134,7 @@ class AuthServiceImplTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        assertThrows(BadCredentialsException.class, () -> authService.authenticateUser(request));
+        assertThrows(com.mikkytrionze.auth.common.application.exception.ApiException.class, () -> authService.authenticateUser(request));
     }
 
     @Test
@@ -168,9 +184,7 @@ class AuthServiceImplTest {
         SignOutRequest request = SignOutRequest.builder()
                 .refreshToken(refreshTokenValue)
                 .build();
-        RefreshToken storedToken = RefreshToken.builder()
-                .token(refreshTokenValue)
-                .build();
+        RefreshToken storedToken = RefreshToken.builder().token(refreshTokenValue).user(User.builder().id(1L).username("u").build()).build();
 
         when(refreshTokenRepository.findByToken(refreshTokenValue)).thenReturn(Optional.of(storedToken));
 
@@ -178,22 +192,20 @@ class AuthServiceImplTest {
 
         assertTrue(result);
         verify(refreshTokenRepository).findByToken(refreshTokenValue);
-        verify(refreshTokenRepository).delete(storedToken);
+        verify(refreshTokenRepository).save(storedToken);
         verify(tokenBlacklistService, never()).blacklist(any(), anyLong());
     }
 
     @Test
-    void logOutUser_withNonExistentToken_returnsFalse() {
+    void logOutUser_withNonExistentToken_throws() {
         String token = "nonexistent-token";
         SignOutRequest request = SignOutRequest.builder().refreshToken(token).build();
 
         when(refreshTokenRepository.findByToken(token)).thenReturn(Optional.empty());
 
-        Boolean result = authService.logOutUser(request);
-
-        assertFalse(result);
+        assertThrows(com.mikkytrionze.auth.common.application.exception.ApiException.class, () -> authService.logOutUser(request));
         verify(refreshTokenRepository).findByToken(token);
-        verify(refreshTokenRepository, never()).delete(any());
+        verify(refreshTokenRepository, never()).save(any());
         verify(tokenBlacklistService, never()).blacklist(any(), anyLong());
     }
 
@@ -206,11 +218,10 @@ class AuthServiceImplTest {
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenValue)
                 .build();
-        RefreshToken storedToken = RefreshToken.builder()
-                .token(refreshTokenValue).build();
+        RefreshToken storedToken = RefreshToken.builder().token(refreshTokenValue).user(User.builder().id(1L).username("u").build()).build();
 
         when(jwtUtil.getTokenIdFromToken(accessToken)).thenReturn(jti);
-        when(jwtUtil.getExpirationFromToken(accessToken)).thenReturn(1800000L);
+        when(jwtUtil.getExpirationFromToken(accessToken)).thenReturn(System.currentTimeMillis() + 1800000L);
         when(refreshTokenRepository.findByToken(refreshTokenValue)).thenReturn(Optional.of(storedToken));
 
         Boolean result = authService.logOutUser(request);
@@ -218,9 +229,9 @@ class AuthServiceImplTest {
         assertTrue(result);
         verify(jwtUtil).getTokenIdFromToken(accessToken);
         verify(jwtUtil).getExpirationFromToken(accessToken);
-        verify(tokenBlacklistService).blacklist(jti, 1800000L);
+        verify(tokenBlacklistService).blacklist(eq(jti), anyLong());
         verify(refreshTokenRepository).findByToken(refreshTokenValue);
-        verify(refreshTokenRepository).delete(storedToken);
+        verify(refreshTokenRepository).save(storedToken);
     }
 
     @Test
@@ -231,7 +242,7 @@ class AuthServiceImplTest {
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenValue)
                 .build();
-        RefreshToken storedToken = RefreshToken.builder().token(refreshTokenValue).build();
+        RefreshToken storedToken = RefreshToken.builder().token("valid-refresh-jwt").user(User.builder().id(1L).username("u").build()).build();
 
         when(jwtUtil.getTokenIdFromToken(accessToken)).thenReturn("some-jti");
         when(jwtUtil.getExpirationFromToken(accessToken)).thenReturn(-1000L);
@@ -243,7 +254,57 @@ class AuthServiceImplTest {
         verify(jwtUtil).getTokenIdFromToken(accessToken);
         verify(jwtUtil).getExpirationFromToken(accessToken);
         verify(tokenBlacklistService, never()).blacklist(any(), anyLong());
-        verify(refreshTokenRepository).delete(storedToken);
+        verify(refreshTokenRepository).save(storedToken);
+    }
+
+    @Test
+    void authenticateUser_withDisabledAccount_throwsNotEligibleAndAuditsDenial() {
+        SignInRequest request = SignInRequest.builder().username("disabled-user").password("pw").build();
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User("disabled-user", "pw", Collections.emptyList());
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
+        when(userRepository.findByUsername("disabled-user")).thenReturn(Optional.of(User.builder().id(9L).username("disabled-user").accountStatus(AccountStatus.DISABLED).permissionEpoch(0L).build()));
+
+        com.mikkytrionze.auth.common.application.exception.ApiException ex = assertThrows(com.mikkytrionze.auth.common.application.exception.ApiException.class, () -> authService.authenticateUser(request));
+        assertEquals(401, ex.getStatus().value());
+        assertEquals("AUTH_ACCOUNT_NOT_ELIGIBLE", ex.getCode());
+        verify(auditLogService).record(eq("AUTH_SIGN_IN"), eq("USER"), eq("9"), eq("DENIED"), eq("ACCOUNT_NOT_ELIGIBLE"), eq(9L), eq("disabled-user"), any(), any(), any(), any());
+        verify(jwtUtil, never()).generateToken(any(), anyLong(), any(), any());
+    }
+
+    @Test
+    void authenticateUser_withBadCredentials_throwsStandardized401AndAudits() {
+        SignInRequest request = SignInRequest.builder().username("bad-user").password("wrong").build();
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("bad"));
+
+        com.mikkytrionze.auth.common.application.exception.ApiException ex = assertThrows(com.mikkytrionze.auth.common.application.exception.ApiException.class, () -> authService.authenticateUser(request));
+        assertEquals(401, ex.getStatus().value());
+        assertEquals("AUTH_INVALID_CREDENTIALS", ex.getCode());
+        assertEquals("Invalid credentials", ex.getMessage());
+        verify(auditLogService).record(eq("AUTH_SIGN_IN"), eq("USER"), isNull(), eq("DENIED"), eq("AUTH_INVALID_CREDENTIALS"), isNull(), eq("bad-user"), any(), any(), any(), any());
+    }
+
+    @Test
+    void authenticateUser_successIncludesPermissionEpochClaim() {
+        String username = "epoch-user";
+        SignInRequest request = SignInRequest.builder().username(username).password("pw").build();
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, "pw", Collections.emptyList());
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(User.builder().id(7L).username(username).accountStatus(AccountStatus.ACTIVE).permissionEpoch(3L).build()));
+        when(refreshTokenService.createRefreshToken(username)).thenReturn(RefreshToken.builder().token("rt").build());
+        when(jwtUtil.generateToken(eq(username), anyLong(), eq("access"), any(Map.class))).thenReturn("at");
+
+        SignInResponse response = authService.authenticateUser(request);
+
+        assertEquals(3L, response.getPermissionsVersion());
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> claims = org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(jwtUtil).generateToken(eq(username), anyLong(), eq("access"), claims.capture());
+        assertEquals(3L, claims.getValue().get("perm_epoch"));
+        assertEquals(7L, claims.getValue().get("uid"));
     }
 
     @Test
@@ -253,7 +314,7 @@ class AuthServiceImplTest {
                 .accessToken("   ")
                 .refreshToken(refreshTokenValue)
                 .build();
-        RefreshToken storedToken = RefreshToken.builder().token(refreshTokenValue).build();
+        RefreshToken storedToken = RefreshToken.builder().token("valid-refresh-jwt").user(User.builder().id(1L).username("u").build()).build();
 
         when(refreshTokenRepository.findByToken(refreshTokenValue)).thenReturn(Optional.of(storedToken));
 
@@ -261,7 +322,7 @@ class AuthServiceImplTest {
 
         assertTrue(result);
         verify(tokenBlacklistService, never()).blacklist(any(), anyLong());
-        verify(refreshTokenRepository).delete(storedToken);
+        verify(refreshTokenRepository).save(storedToken);
     }
 
     @Test
@@ -272,7 +333,7 @@ class AuthServiceImplTest {
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenValue)
                 .build();
-        RefreshToken storedToken = RefreshToken.builder().token(refreshTokenValue).build();
+        RefreshToken storedToken = RefreshToken.builder().token("valid-refresh-jwt").user(User.builder().id(1L).username("u").build()).build();
 
         when(jwtUtil.getTokenIdFromToken(accessToken)).thenThrow(new RuntimeException("JWT error"));
         when(refreshTokenRepository.findByToken(refreshTokenValue)).thenReturn(Optional.of(storedToken));
@@ -280,6 +341,6 @@ class AuthServiceImplTest {
         Boolean result = authService.logOutUser(request);
 
         assertTrue(result);
-        verify(refreshTokenRepository).delete(storedToken);
+        verify(refreshTokenRepository).save(storedToken);
     }
 }

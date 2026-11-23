@@ -24,6 +24,24 @@ public class Role extends Auditable {
     @Column(name = "name", nullable = false, unique = true, length = 25)
     private ERole name = ERole.MEMBER_UNBAPTISED;
 
+    @Column(name = "display_name", length = 100)
+    private String displayName;
+
+    @Builder.Default
+    @Column(name = "is_system", nullable = false)
+    private boolean system = false;
+
+    @Builder.Default
+    @Column(name = "is_protected", nullable = false)
+    private boolean protectedRole = false;
+
+    @Column(name = "description", length = 500)
+    private String description;
+
+    @Builder.Default
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

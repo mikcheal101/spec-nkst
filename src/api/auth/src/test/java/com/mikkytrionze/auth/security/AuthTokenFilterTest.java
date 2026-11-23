@@ -34,6 +34,9 @@ class AuthTokenFilterTest {
     private TokenBlacklistService tokenBlacklistService;
 
     @Mock
+    private com.mikkytrionze.auth.user.domain.repository.UserRepository userRepository;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -48,6 +51,9 @@ class AuthTokenFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
+        org.mockito.Mockito.lenient().when(request.getHeader("X-Correlation-ID")).thenReturn("test-corr");
+        org.mockito.Mockito.lenient().when(request.getRequestURI()).thenReturn("/test");
+        org.mockito.Mockito.lenient().when(userRepository.findByUsername(any())).thenReturn(java.util.Optional.empty());
     }
 
     @Test
@@ -66,10 +72,17 @@ class AuthTokenFilterTest {
         String username = "test-user";
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 username, "password", Collections.emptyList());
+        var claims = io.jsonwebtoken.Jwts.claims().add("perm_epoch", 0).build();
+        com.mikkytrionze.auth.user.domain.model.User user = com.mikkytrionze.auth.user.domain.model.User.builder()
+                .id(1L).username(username).accountStatus(com.mikkytrionze.auth.user.domain.model.AccountStatus.ACTIVE).permissionEpoch(0L).build();
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(jwtUtil.validateJwt(token)).thenReturn(true);
+        when(jwtUtil.getTokenIdFromToken(token)).thenReturn("jti-ok");
+        when(tokenBlacklistService.isBlacklisted("jti-ok")).thenReturn(false);
         when(jwtUtil.getUsernameFromToken(token)).thenReturn(username);
+        when(jwtUtil.getAllClaims(token)).thenReturn(claims);
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
         when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
         authTokenFilter.doFilterInternal(request, response, filterChain);
@@ -116,23 +129,70 @@ class AuthTokenFilterTest {
     }
 
     @Test
-    void doFilterInternal_withBlacklistedJwt_doesNotSetAuthentication() throws Exception {
+    void doFilterInternal_withBlacklistedJwt_returns401AndDoesNotContinue() throws Exception {
         String token = "blacklisted-jwt";
         String jti = "compromised-jti";
-
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(request.getRequestURI()).thenReturn("/api/v1/users");
         when(jwtUtil.validateJwt(token)).thenReturn(true);
         when(jwtUtil.getTokenIdFromToken(token)).thenReturn(jti);
         when(tokenBlacklistService.isBlacklisted(jti)).thenReturn(true);
+        java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.StringWriter());
+        when(response.getWriter()).thenReturn(writer);
+
+        authTokenFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).setStatus(401);
+        verify(filterChain, never()).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(userDetailsService, never()).loadUserByUsername(any());
+    }
+
+    @Test
+    void doFilterInternal_withStalePermissionEpoch_returns401() throws Exception {
+        String token = "stale-jwt";
+        String username = "test-user";
+        var claims = io.jsonwebtoken.Jwts.claims().add("perm_epoch", 1).build();
+        com.mikkytrionze.auth.user.domain.model.User user = com.mikkytrionze.auth.user.domain.model.User.builder()
+                .id(1L).username(username).accountStatus(com.mikkytrionze.auth.user.domain.model.AccountStatus.ACTIVE).permissionEpoch(2L).build();
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(request.getRequestURI()).thenReturn("/api/v1/users");
+        when(jwtUtil.validateJwt(token)).thenReturn(true);
+        when(jwtUtil.getTokenIdFromToken(token)).thenReturn("jti-1");
+        when(tokenBlacklistService.isBlacklisted("jti-1")).thenReturn(false);
+        when(jwtUtil.getUsernameFromToken(token)).thenReturn(username);
+        when(jwtUtil.getAllClaims(token)).thenReturn(claims);
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
+        java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.StringWriter());
+        when(response.getWriter()).thenReturn(writer);
+
+        authTokenFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).setStatus(401);
+        verify(filterChain, never()).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void doFilterInternal_withMatchingPermissionEpoch_setsAuthentication() throws Exception {
+        String token = "ok-jwt";
+        String username = "test-user";
+        var claims = io.jsonwebtoken.Jwts.claims().add("perm_epoch", 2).build();
+        com.mikkytrionze.auth.user.domain.model.User user = com.mikkytrionze.auth.user.domain.model.User.builder()
+                .id(1L).username(username).accountStatus(com.mikkytrionze.auth.user.domain.model.AccountStatus.ACTIVE).permissionEpoch(2L).build();
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, "password", Collections.emptyList());
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(jwtUtil.validateJwt(token)).thenReturn(true);
+        when(jwtUtil.getTokenIdFromToken(token)).thenReturn("jti-2");
+        when(tokenBlacklistService.isBlacklisted("jti-2")).thenReturn(false);
+        when(jwtUtil.getUsernameFromToken(token)).thenReturn(username);
+        when(jwtUtil.getAllClaims(token)).thenReturn(claims);
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(jwtUtil).validateJwt(token);
-        verify(jwtUtil).getTokenIdFromToken(token);
-        verify(tokenBlacklistService).isBlacklisted(jti);
-        verify(jwtUtil, never()).getUsernameFromToken(token);
-        verify(userDetailsService, never()).loadUserByUsername(any());
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
     }
 }

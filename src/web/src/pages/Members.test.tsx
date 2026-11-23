@@ -15,10 +15,11 @@ vi.mock('react-router-dom', async () => {
 vi.mock('react-hot-toast', () => ({ default: { success: vi.fn(), error: vi.fn() } }))
 const mockAuthUser = vi.fn(() => ({
   user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] } as any,
-  login: vi.fn(), logout: vi.fn(), loading: false,
+  login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(),
+  hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['MEMBERS:READ','MEMBERS:UPDATE','MEMBERS:CREATE','MEMBERS:DELETE','MEMBERS:VIEW','CHURCHES:READ','CHURCHES:UPDATE','CHURCHES:CREATE','CHURCHES:DELETE','CHURCH:READ','CHURCH:UPDATE','CHURCH:CREATE','CHURCH:DELETE','PASTORS:READ','ELDERS:READ','DEACONS:READ','DEACONS:UPDATE','DEACONS:DELETE','SETTINGS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
 }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: (...args: any[]) => mockAuthUser(...args),
+  useAuth: () => mockAuthUser(),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
 
@@ -52,7 +53,7 @@ vi.mock('../hooks/useChurches', () => ({
   })),
 }))
 vi.mock('../shared/components/ConfirmDialog', () => ({
-  default: ({ open, title, message, onConfirm, onCancel, danger, loading }: any) =>
+  default: ({ open, title, message, onConfirm, onCancel, loading }: any) =>
     open ? (
       <div data-testid="confirm-dialog">
         <span>{title}</span>
@@ -64,7 +65,7 @@ vi.mock('../shared/components/ConfirmDialog', () => ({
 }))
 
 import Members from './Members'
-import { usePeopleList, useCreatePerson } from '../hooks/usePeople'
+import { usePeopleList } from '../hooks/usePeople'
 import { useAllChurches } from '../hooks/useChurches'
 
 beforeEach(() => {
@@ -72,7 +73,7 @@ beforeEach(() => {
   mockNavigate.mockClear()
   mockAuthUser.mockReturnValue({
     user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
-    login: vi.fn(), logout: vi.fn(), loading: false,
+    login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['MEMBERS:READ','MEMBERS:UPDATE','MEMBERS:CREATE','MEMBERS:DELETE','MEMBERS:VIEW','CHURCHES:READ','CHURCHES:UPDATE','CHURCHES:CREATE','CHURCHES:DELETE','CHURCH:READ','CHURCH:UPDATE','CHURCH:CREATE','CHURCH:DELETE','PASTORS:READ','ELDERS:READ','DEACONS:READ','DEACONS:UPDATE','DEACONS:DELETE','SETTINGS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
   })
   vi.mocked(usePeopleList).mockReturnValue({
     data: { content: membersData, totalPages: 2, totalElements: 24 },
@@ -238,7 +239,6 @@ describe('Members', () => {
   })
 
   it('shows already admin badge', async () => {
-    const user = userEvent.setup()
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/Jane/)).toBeInTheDocument() })
     expect(screen.getAllByText('Admin').length).toBeGreaterThan(0)
@@ -639,7 +639,6 @@ describe('Members', () => {
     const user = userEvent.setup()
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/Jane/)).toBeInTheDocument() })
-    const editBtn = document.querySelector('[data-tooltip="Edit"]') as HTMLButtonElement
     const editBtns = document.querySelectorAll('[data-tooltip="Edit"]')
     await user.click(editBtns[1])
     expect(screen.getByText('Church Admin')).toBeInTheDocument()
@@ -1178,7 +1177,7 @@ describe('Members', () => {
   it('user without makeAdmin permission does not show admin button', async () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'user', permissions: ['can_read_members'], churchId: '1', roles: [] },
-      login: vi.fn(), logout: vi.fn(), loading: false,
+      login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['MEMBERS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
     })
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/John/)).toBeInTheDocument() })
@@ -1188,7 +1187,7 @@ describe('Members', () => {
   it('hides edit, delete and add buttons without permissions', async () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'user', permissions: ['can_read_members'], churchId: '1', roles: [] },
-      login: vi.fn(), logout: vi.fn(), loading: false,
+      login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['MEMBERS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
     })
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/John/)).toBeInTheDocument() })
@@ -1271,7 +1270,9 @@ describe('Members', () => {
     mockAuthUser.mockReturnValue({
       user: null,
       login: vi.fn(), logout: vi.fn(), loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: (_req: any) => false,
+    } as any)
     render(<Members />)
     await waitFor(() => { expect(screen.getByText(/John/)).toBeInTheDocument() })
   })

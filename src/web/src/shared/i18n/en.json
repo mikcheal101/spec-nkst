@@ -1,5 +1,5 @@
 {
-  "app": { "title": "NKST CMS", "subtitle": "Church Management System" },
+  "app": { "title": "ChurchMS", "subtitle": "Church Management System" },
   "nav": { "dashboard": "Dashboard", "pastors": "Pastors", "elders": "Elders", "deacons": "Deacons", "members": "Members", "admins": "Admins", "announcements": "Announcements", "projects": "Projects", "contributions": "Contributions", "notifications": "Notifications", "settings": "Settings", "churches": "Churches" },
   "auth": {
     "login": "Login", "logout": "Logout",
@@ -7,7 +7,7 @@
     "forgotPassword": "Forgot Password?",
     "resetPassword": "Reset Password",
     "phoneNumber": "Phone Number",
-    "signInTitle": "Sign in to NKST",
+    "signInTitle": "Sign in to Church Management System",
     "signInSuccess": "Signed in successfully",
     "signingIn": "Signing in...",
     "signIn": "Sign In",
@@ -28,7 +28,7 @@
   },
   "dashboard": {
     "welcome": "Welcome, {{username}}",
-    "description": "You are signed in to the NKST Church Management System.",
+    "description": "You are signed in to the Church Management System.",
     "members": "Members",
     "membersDesc": "Manage congregation and church members",
     "contributions": "Contributions",

@@ -36,6 +36,11 @@ class AuthControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @org.junit.jupiter.api.BeforeEach
+    void init() {
+        org.springframework.test.util.ReflectionTestUtils.setField(authController, "memberSelfServiceEnabled", true);
+    }
+
     @Test
     void authenticateUser_withValidRequest_returns200AndToken() {
         String token = "jwt-token";
@@ -47,7 +52,7 @@ class AuthControllerTest {
                 .build();
         SignInResponse signInResponse = SignInResponse.builder()
                 .refreshToken(refreshToken)
-                .token(token)
+                .accessToken(token)
                 .build();
 
         when(authService.authenticateUser(request)).thenReturn(signInResponse);

@@ -43,10 +43,10 @@ describe('Layout', () => {
     expect(screen.getByText('Child content')).toBeInTheDocument()
   })
 
-  it('renders brand name', () => {
+  it('renders brand name without the old Tiv slogan', () => {
     renderLayout()
-    expect(screen.getByText('NKST')).toBeInTheDocument()
-    expect(screen.getByText('Nongo u Kristu u ken Sudan hen Tiv')).toBeInTheDocument()
+    expect(screen.getByText('ChurchMS')).toBeInTheDocument()
+    expect(screen.queryByText(/Nongo u Kristu u ken Sudan hen Tiv/i)).not.toBeInTheDocument()
   })
 
   it('renders sidebar navigation items based on permissions', () => {
@@ -161,6 +161,16 @@ describe('Layout', () => {
     mockAuthData.user = { ...saved, username: '' }
     renderLayout()
     expect(screen.getByText('U')).toBeInTheDocument()
+    mockAuthData.user = saved
+  })
+
+  it('renders safely when the user object is null', () => {
+    const saved = mockAuthData.user
+    mockAuthData.user = null
+    renderLayout()
+    expect(screen.getByText('Child content')).toBeInTheDocument()
+    expect(screen.getByText('U')).toBeInTheDocument()
+    expect(screen.queryByText('nav.churches')).not.toBeInTheDocument()
     mockAuthData.user = saved
   })
 })

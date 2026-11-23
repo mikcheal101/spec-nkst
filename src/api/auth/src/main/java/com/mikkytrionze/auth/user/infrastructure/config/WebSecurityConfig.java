@@ -2,6 +2,7 @@ package com.mikkytrionze.auth.user.infrastructure.config;
 
 import com.mikkytrionze.auth.user.infrastructure.security.AuthEntryPoint;
 import com.mikkytrionze.auth.user.infrastructure.security.AuthTokenFilter;
+import com.mikkytrionze.auth.common.infrastructure.observability.RequestTimingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ public class WebSecurityConfig {
 
     private final AuthEntryPoint authEntryPoint;
     private final AuthTokenFilter authTokenFilter;
+    private final RequestTimingFilter requestTimingFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -67,6 +69,7 @@ public class WebSecurityConfig {
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())
+                .addFilterBefore(requestTimingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

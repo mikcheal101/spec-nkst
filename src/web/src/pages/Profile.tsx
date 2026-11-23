@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
 import { useAuth } from '../context/AuthContext'
 import { useProfile, useUpdateProfile, useChangePassword } from '../hooks/useAuth'
+import { authApi } from '../services/api'
 import type { ProfileUpdateRequest } from '../services/api'
 import LoadingSpinner from '../shared/components/LoadingSpinner'
 
@@ -45,7 +46,7 @@ export default function Profile() {
   })
   const [dirty, setDirty] = useState(false)
 
-  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '', stepUpPassword: '' })
 
   useEffect(() => {
     if (profile) {
@@ -77,7 +78,7 @@ export default function Profile() {
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault()
-    const { currentPassword, newPassword, confirmPassword } = pwForm
+    const { currentPassword, newPassword, confirmPassword, stepUpPassword } = pwForm
     if (newPassword !== confirmPassword) {
       showErrorToast(t('validation.passwordMismatch'))
       return
@@ -87,9 +88,15 @@ export default function Profile() {
       return
     }
     try {
-      await changePwMut.mutateAsync({ currentPassword, newPassword })
+      let stepUpToken: string | undefined
+      if (stepUpPassword) {
+        const stepUp = await authApi.stepUp(stepUpPassword)
+        if (stepUp.error || !stepUp.data?.stepUpToken) throw new Error(stepUp.error || 'Step-up confirmation failed')
+        stepUpToken = stepUp.data.stepUpToken
+      }
+      await changePwMut.mutateAsync({ currentPassword, newPassword, stepUpToken })
       showSuccessToast(t('profile.passwordChanged'))
-      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '', stepUpPassword: '' })
     } catch (err) {
       showErrorToast(err instanceof Error ? err.message : 'Password change failed')
     }
@@ -208,6 +215,12 @@ export default function Profile() {
               <label>{t('profile.confirmPassword')}</label>
               <InputWrap icon="🔒">
                 <input name="confirmPassword" type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} required minLength={8} style={{ paddingLeft: '2.25rem', width: '100%' }} />
+              </InputWrap>
+            </div>
+            <div className="form-group">
+              <label>Step-up confirmation password (required for protected accounts)</label>
+              <InputWrap icon="🛡️">
+                <input name="stepUpPassword" type="password" value={pwForm.stepUpPassword} onChange={(e) => setPwForm({ ...pwForm, stepUpPassword: e.target.value })} style={{ paddingLeft: '2.25rem', width: '100%' }} placeholder="Enter password again for sensitive action" />
               </InputWrap>
             </div>
             <div style={{ marginTop: '1.25rem' }}>

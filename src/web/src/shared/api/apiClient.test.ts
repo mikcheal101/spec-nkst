@@ -135,6 +135,17 @@ describe('Response handling', () => {
     expect(result).toEqual({ error: 'Request failed' })
   })
 
+  it('surfaces standardized 401/403/429 error messages for UX handling', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 'AUTH_TOKEN_REVOKED', message: 'Session expired' }, 401))
+    expect(await api.get('/protected')).toEqual({ error: 'Session expired' })
+
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 'ACCESS_DENIED', message: 'Forbidden' }, 403))
+    expect(await api.get('/forbidden')).toEqual({ error: 'Forbidden' })
+
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 'RATE_LIMITED', message: 'Too many requests' }, 429))
+    expect(await api.get('/limited')).toEqual({ error: 'Too many requests' })
+  })
+
   it('returns empty object on 204 No Content', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(null, 204))
 

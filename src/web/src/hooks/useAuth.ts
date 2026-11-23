@@ -55,7 +55,7 @@ export function useUsers() {
 export function useAssignRole() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) => unwrap(authApi.assignRole(userId, roleId)),
+    mutationFn: ({ userId, roleId, stepUpToken }: { userId: string; roleId: string; stepUpToken?: string }) => unwrap(authApi.assignRole(userId, roleId, stepUpToken)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   })
 }
@@ -63,7 +63,24 @@ export function useAssignRole() {
 export function useRevokeRole() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) => unwrap(authApi.revokeRole(userId, roleId)),
+    mutationFn: ({ userId, roleId, stepUpToken }: { userId: string; roleId: string; stepUpToken?: string }) => unwrap(authApi.revokeRole(userId, roleId, stepUpToken)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  })
+}
+
+export function useSetUserStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, status, stepUpToken }: { userId: string; status: string; stepUpToken?: string }) => unwrap(authApi.setUserStatus(userId, status, stepUpToken)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  })
+}
+
+export function useSetDirectPermissions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, permissions, policyEnabled, stepUpToken }: { userId: string; permissions: string[]; policyEnabled?: boolean; stepUpToken?: string }) =>
+      unwrap(authApi.setDirectPermissions(userId, permissions, policyEnabled ?? false, stepUpToken)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   })
 }

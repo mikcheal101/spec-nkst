@@ -15,6 +15,8 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_create_church', 'can_delete_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
     login: vi.fn(), logout: vi.fn(), loading: false,
+    refreshPermissions: vi.fn(),
+    hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['MEMBERS:READ','MEMBERS:UPDATE','MEMBERS:CREATE','MEMBERS:DELETE','CHURCHES:READ','CHURCHES:UPDATE','CHURCHES:CREATE','CHURCHES:DELETE','CHURCHES:VIEW','PASTORS:READ','ELDERS:READ','DEACONS:READ','DEACONS:UPDATE','DEACONS:DELETE','SETTINGS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) },
   })),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
@@ -79,7 +81,8 @@ beforeEach(() => {
   vi.mocked(useChurchesAdminStatus).mockReturnValue(new Map([[1, true]]))
   vi.mocked(useAuth).mockReturnValue({
     user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_create_church', 'can_delete_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
-    login: vi.fn(), logout: vi.fn(), loading: false,
+    login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(),
+    hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms=['MEMBERS:READ','MEMBERS:UPDATE','MEMBERS:CREATE','MEMBERS:DELETE','CHURCHES:READ','CHURCHES:UPDATE','CHURCHES:CREATE','CHURCHES:DELETE','CHURCHES:VIEW','CHURCH:READ','CHURCH:UPDATE','CHURCH:CREATE','CHURCH:DELETE','CHURCH:VIEW','PASTORS:READ','ELDERS:READ','DEACONS:READ','DEACONS:UPDATE','DEACONS:DELETE','SETTINGS:READ']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) },
   } as any)
 })
 
@@ -342,7 +345,7 @@ describe('Churches', () => {
     vi.mocked(useChurchesAdminStatus).mockReturnValue(new Map())
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'user', permissions: ['can_read_church'], churchId: '1', roles: [] },
-      login: vi.fn(), logout: vi.fn(), loading: false,
+      login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['CHURCHES:READ','CHURCHES:VIEW','CHURCH:READ','CHURCH:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
     } as any)
     render(<Churches />)
     expect(screen.queryByText('churches.createChurch')).not.toBeInTheDocument()
@@ -448,7 +451,7 @@ describe('Churches', () => {
     vi.mocked(useChurchesAdminStatus).mockReturnValue(new Map())
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'u', permissions: [], churchId: '1', roles: [] },
-      login: vi.fn(), logout: vi.fn(), loading: false,
+      login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = []; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
     } as any)
     render(<Churches />)
     expect(screen.queryByTitle('View')).not.toBeInTheDocument()
@@ -595,6 +598,8 @@ describe('Churches', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: undefined as any,
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: (_req: any) => false,
     } as any)
     render(<Churches />)
     expect(screen.queryByText('churches.createChurch')).not.toBeInTheDocument()
@@ -712,7 +717,7 @@ describe('Churches', () => {
   it('user with only can_read_church permission', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'reader', permissions: ['can_read_church'], churchId: '1', roles: [] },
-      login: vi.fn(), logout: vi.fn(), loading: false,
+      login: vi.fn(), logout: vi.fn(), loading: false, refreshPermissions: vi.fn(), hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms: string[] = ['CHURCHES:READ','CHURCHES:VIEW','CHURCH:READ','CHURCH:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())) }
     } as any)
     render(<Churches />)
     expect(screen.queryByText('churches.createChurch')).not.toBeInTheDocument()

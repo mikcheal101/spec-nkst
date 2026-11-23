@@ -135,12 +135,11 @@ function SelectFilter({ value, onChange, options, placeholder }: {
 export default function Members() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const allPerms = (user?.permissions ?? []).map((p) => p.toLowerCase())
-  const canCreate = allPerms.includes('can_create_members')
-  const canUpdate = allPerms.includes('can_update_members')
-  const canDelete = allPerms.includes('can_delete_members')
-  const canMakeAdmin = allPerms.includes('can_update_church') && allPerms.includes('can_update_members')
+  const { hasPermission } = useAuth()
+  const canCreate = hasPermission(['MEMBERS:CREATE'])
+  const canUpdate = hasPermission(['MEMBERS:UPDATE'])
+  const canDelete = hasPermission(['MEMBERS:DELETE'])
+  const canMakeAdmin = hasPermission(['CHURCHES:UPDATE','CHURCH:UPDATE']) && hasPermission(['MEMBERS:UPDATE'])
 
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)

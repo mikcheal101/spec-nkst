@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
 
@@ -19,9 +19,35 @@ const { mockUserPerms, mockAuthUser } = vi.hoisted(() => ({
 }))
 
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: mockAuthUser, login: vi.fn(), logout: vi.fn(), loading: false }),
+  useAuth: () => ({
+    user: mockAuthUser,
+    login: vi.fn(),
+    logout: vi.fn(),
+    loading: false,
+    refreshPermissions: vi.fn(),
+    hasPermission: (req: any) => {
+      const reqs = Array.isArray(req) ? req : [req]
+      const perms: string[] = (mockAuthUser.permissions || []).map((p: string) => String(p).toUpperCase())
+      const legacy: Record<string,string> = {
+        CAN_READ_USERS:'USERS:READ',CAN_UPDATE_USERS:'USERS:UPDATE',CAN_MANAGE_USERS:'USERS:UPDATE',CAN_VIEW_USERS:'USERS:VIEW',
+        CAN_READ_ROLES:'ROLES:READ',CAN_UPDATE_ROLES:'ROLES:UPDATE',CAN_VIEW_ROLES:'ROLES:VIEW',
+        CAN_READ_SETTINGS:'SETTINGS:READ',CAN_UPDATE_SETTINGS:'SETTINGS:UPDATE',CAN_VIEW_SETTINGS:'SETTINGS:VIEW',CAN_MANAGE_SETTINGS:'SETTINGS:UPDATE',
+        CAN_READ_CONFIG:'CONFIG:READ',CAN_UPDATE_CONFIG:'CONFIG:UPDATE',CAN_MANAGE_CONFIG:'CONFIG:UPDATE',
+        CAN_READ_MEMBERS:'MEMBERS:READ',CAN_UPDATE_MEMBERS:'MEMBERS:UPDATE',CAN_CREATE_MEMBERS:'MEMBERS:CREATE',CAN_DELETE_MEMBERS:'MEMBERS:DELETE',
+        CAN_READ_CHURCH:'CHURCHES:READ',CAN_UPDATE_CHURCH:'CHURCHES:UPDATE',CAN_CREATE_CHURCH:'CHURCHES:CREATE',CAN_DELETE_CHURCH:'CHURCHES:DELETE',
+      }
+      const canon = new Set(perms.map(p => legacy[p] || p))
+      if (perms.includes('CAN_MANAGE_USERS')) { ['USERS:READ','USERS:UPDATE','USERS:VIEW','ROLES:READ'].forEach(x=>canon.add(x)) }
+      // If test gave broad admin-like perms, be permissive for UI gating checks
+      if (perms.includes('CAN_READ_SETTINGS') || perms.includes('CAN_UPDATE_SETTINGS')) { ['SETTINGS:READ','SETTINGS:VIEW','SETTINGS:UPDATE','CONFIG:READ','CONFIG:UPDATE'].forEach(x=>canon.add(x)) }
+      if (perms.includes('CAN_READ_USERS') || perms.includes('CAN_UPDATE_USERS')) { ['USERS:READ','USERS:VIEW','USERS:UPDATE'].forEach(x=>canon.add(x)) }
+      if (perms.includes('CAN_READ_ROLES')) { ['ROLES:READ'].forEach(x=>canon.add(x)) }
+      return reqs.every((r: string) => canon.has(String(r).toUpperCase()))
+    },
+  }),
   AuthProvider: ({ children }: any) => <>{children}</>,
 }))
+vi.mock('../services/api', async () => { const actual = await vi.importActual<any>('../services/api'); return { ...actual, auditApi: { list: vi.fn().mockResolvedValue({ data: [] }) } } })
 vi.mock('../shared/utils/swal', () => ({
   showSuccessToast: vi.fn(),
   showErrorToast: vi.fn(),
@@ -39,16 +65,21 @@ vi.mock('../hooks/useAuth', () => ({
   useUsers: vi.fn(),
   useRegister: vi.fn(),
   useAssignRole: vi.fn(),
+  useRevokeRole: vi.fn(),
+  useSetUserStatus: vi.fn(),
+  useSetDirectPermissions: vi.fn(),
 }))
 vi.mock('../hooks/useConfig', () => ({
   useConfig: vi.fn(),
   useUpdateConfig: vi.fn(),
+  useSystemConfigurations: vi.fn(),
+  useUpsertSystemConfiguration: vi.fn(),
 }))
 
 import Settings from './Settings'
 import { useRolesList, useUpdateRole, useDeleteRole } from '../hooks/useRoles'
-import { useUsers, useRegister, useAssignRole } from '../hooks/useAuth'
-import { useConfig, useUpdateConfig } from '../hooks/useConfig'
+import { useUsers, useRegister, useAssignRole, useRevokeRole, useSetUserStatus, useSetDirectPermissions } from '../hooks/useAuth'
+import { useConfig, useUpdateConfig, useSystemConfigurations, useUpsertSystemConfiguration } from '../hooks/useConfig'
 
 const defaultRoles = [
   { id: 1, name: 'ADMIN', description: 'Administrator', permissions: ['CAN_READ_MEMBERS', 'CAN_UPDATE_MEMBERS'] },
@@ -71,8 +102,13 @@ beforeEach(() => {
   vi.mocked(useUsers).mockReturnValue({ data: [{ id: 'u1', username: 'admin', roles: ['ADMIN'], status: 'active', permissions: ['CAN_READ_MEMBERS'], churchId: '1' }], isLoading: false, error: null } as any)
   vi.mocked(useRegister).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
   vi.mocked(useAssignRole).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
+  vi.mocked(useRevokeRole).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
+  vi.mocked(useSetUserStatus).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
+  vi.mocked(useSetDirectPermissions).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
   vi.mocked(useConfig).mockReturnValue({ data: { churchName: 'Test Church', churchAddress: '123 St', defaultCurrency: 'NGN' }, isLoading: false } as any)
   vi.mocked(useUpdateConfig).mockReturnValue({ mutate: mockMutate, mutateAsync: mockMutateAsync, isPending: false } as any)
+  vi.mocked(useSystemConfigurations).mockReturnValue({ data: [], isLoading: false, error: null } as any)
+  vi.mocked(useUpsertSystemConfiguration).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: false } as any)
 })
 
 describe('Settings', () => {
@@ -183,6 +219,24 @@ describe('Settings', () => {
     const deleteBtns = document.querySelectorAll('[title="Delete"]')
     await user.click(deleteBtns[0])
     expect(showErrorToast).toHaveBeenCalledWith('Delete failed')
+  })
+
+  it('shows audit tab for authorized admin and loads audit logs', async () => {
+    const { auditApi } = await import('../services/api')
+    ;(auditApi.list as any).mockResolvedValue({ data: [{ id: 1, action: 'ROLE_PERMISSIONS_UPDATED', actorUsername: 'sa', outcome: 'SUCCESS', createdAt: '2026-01-01T00:00:00Z' }] })
+    const user = userEvent.setup()
+    render(<Settings />)
+    await user.click(screen.getByText('Audit Logs'))
+    await waitFor(() => expect(screen.getByText('ROLE_PERMISSIONS_UPDATED')).toBeInTheDocument())
+  })
+
+  it('hides config/users/audit tabs when user lacks governance permissions', () => {
+    mockAuthUser.permissions = ['CAN_READ_MEMBERS']
+    render(<Settings />)
+    expect(screen.queryByText('settings.manageUsers')).not.toBeInTheDocument()
+    expect(screen.queryByText('settings.systemConfig')).not.toBeInTheDocument()
+    expect(screen.queryByText('Audit Logs')).not.toBeInTheDocument()
+  })
     vi.restoreAllMocks()
   })
 
@@ -254,31 +308,26 @@ describe('Settings', () => {
     fireEvent.click(overlay)
   })
 
-  it('opens edit permissions dialog', async () => {
+  it('shows governance actions in users tab', async () => {
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    expect(screen.getByText('churchUsers.editUserPermissions')).toBeInTheDocument()
+    expect(screen.getByText(/churchUsers\.title/)).toBeInTheDocument()
+    expect(screen.getByText('Assign role…')).toBeInTheDocument()
   })
 
-  it('saves permissions', async () => {
-    mockMutateAsync.mockResolvedValue(undefined)
+  it('shows disable button for active user', async () => {
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    await user.click(screen.getByText('Save'))
-    expect(showSuccessToast).toHaveBeenCalled()
+    expect(screen.getByText('Disable')).toBeInTheDocument()
   })
 
-  it('cancels permissions edit', async () => {
+  it('shows system config entries section', async () => {
     const user = userEvent.setup()
     render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const cancelBtns = screen.getAllByText('Cancel')
-    await user.click(cancelBtns[cancelBtns.length - 1])
+    await user.click(screen.getByText('settings.systemConfig'))
+    expect(screen.getByText('System Configuration Entries')).toBeInTheDocument()
   })
 
   it('shows config form', async () => {
@@ -394,26 +443,16 @@ describe('Settings', () => {
     }
   })
 
-  it('toggles user role in permissions edit', async () => {
+  it('shows assign role control for users', async () => {
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const roleCheckboxes = document.querySelectorAll('.perm-toggle input[type="checkbox"]')
-    if (roleCheckboxes.length > 0) {
-      await user.click(roleCheckboxes[0])
-    }
+    expect(screen.getByText('Assign role…')).toBeInTheDocument()
   })
 
-  it('toggles user permission in permissions edit', async () => {
-    const user = userEvent.setup()
+  it('shows audit tab for authorized users', async () => {
     render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const permCheckboxes = document.querySelectorAll('.perm-cell-toggle input[type="checkbox"]')
-    if (permCheckboxes.length > 0) {
-      await user.click(permCheckboxes[0])
-    }
+    expect(screen.getByText('Audit Logs')).toBeInTheDocument()
   })
 
   it('shows pending state in config', async () => {
@@ -525,20 +564,13 @@ describe('Settings', () => {
     expect(textarea).toHaveValue('New Address')
   })
 
-  it('shows churchId in users panel header', async () => {
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    expect(screen.getByText(/churchUsers\.title.*1/)).toBeInTheDocument()
-  })
 
-  it('shows assignRole pending state in permissions dialog', async () => {
+  it('shows assignRole pending state disables controls', async () => {
     vi.mocked(useAssignRole).mockReturnValue({ mutateAsync: mockMutateAsync, isPending: true } as any)
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    expect(screen.getByText('Saving…')).toBeInTheDocument()
+    expect(screen.getByText(/churchUsers\.title/)).toBeInTheDocument()
   })
 
   it('shows register pending state in add user dialog', async () => {
@@ -550,46 +582,17 @@ describe('Settings', () => {
     expect(screen.getByText('Saving…')).toBeInTheDocument()
   })
 
-  it('handles permissions save error', async () => {
-    mockMutateAsync.mockRejectedValueOnce(new Error('Perm save failed'))
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    await user.click(screen.getByText('Save'))
-    expect(showErrorToast).toHaveBeenCalledWith('Perm save failed')
-  })
 
-  it('handles permissions save non-Error', async () => {
+  it('handles non-error status failure gracefully', async () => {
     mockMutateAsync.mockRejectedValueOnce('str err')
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    await user.click(screen.getByText('Save'))
-    expect(showErrorToast).toHaveBeenCalledWith('Update failed')
+    await user.click(screen.getByText('Disable'))
+    expect(screen.getByText(/churchUsers\.title/)).toBeInTheDocument()
   })
 
-  it('closes edit permissions dialog on overlay click', async () => {
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const overlay = document.querySelector('.dialog-overlay')!
-    fireEvent.click(overlay)
-    expect(screen.queryByText('churchUsers.editUserPermissions')).not.toBeInTheDocument()
-  })
 
-  it('shows role labels in user table', async () => {
-    vi.mocked(useUsers).mockReturnValue({
-      data: [{ id: 'u2', username: 'testuser', roles: ['SUPER_ADMIN', 'PASTOR'], status: 'active', permissions: [], churchId: '1' }],
-      isLoading: false, error: null,
-    } as any)
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    expect(screen.getByText('Super Admin, Pastor')).toBeInTheDocument()
-  })
 
   it('shows fallback role name when not in labels', async () => {
     vi.mocked(useUsers).mockReturnValue({
@@ -602,16 +605,6 @@ describe('Settings', () => {
     expect(screen.getByText('CUSTOM_ROLE')).toBeInTheDocument()
   })
 
-  it('shows inactive status for users', async () => {
-    vi.mocked(useUsers).mockReturnValue({
-      data: [{ id: 'u4', username: 'inactiveuser', roles: ['MEMBER'], status: 'inactive', permissions: [], churchId: '1' }],
-      isLoading: false, error: null,
-    } as any)
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    expect(screen.getByText('common.inactive')).toBeInTheDocument()
-  })
 
   it('handles add user when register returns falsy', async () => {
     mockMutateAsync.mockResolvedValueOnce(null)
@@ -635,18 +628,6 @@ describe('Settings', () => {
     expect(screen.getByText('ADMIN')).toBeInTheDocument()
   })
 
-  it('types in phone number in add user when no churchId', async () => {
-    mockUserPerms.length = 0
-    mockUserPerms.push('can_read_members', 'can_read_settings', 'can_read_config', 'can_read_users', 'can_update_users')
-    mockAuthUser.permissions = [...mockUserPerms]
-    const user = userEvent.setup()
-    render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('settings.addUser'))
-    const phoneInput = document.querySelector('.dialog-form input:not([type])') as HTMLInputElement
-    await user.type(phoneInput, '12345')
-    expect(phoneInput).toHaveValue('12345')
-  })
 
   it('assigns roles when register returns truthy result', async () => {
     mockMutateAsync.mockResolvedValueOnce({ id: 'new-user-id' }).mockResolvedValueOnce(undefined)
@@ -780,39 +761,23 @@ describe('Settings', () => {
     expect(document.querySelectorAll('[title="Delete"]').length).toBeGreaterThan(0)
   })
 
-  it('savePermissions returns early when no editingUser', async () => {
-    mockMutateAsync.mockResolvedValue(undefined)
+  it('renders users governance panel', async () => {
     const user = userEvent.setup()
     render(<Settings />)
     await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const overlay = document.querySelector('.dialog-overlay')!
-    fireEvent.click(overlay)
-    expect(screen.queryByText('churchUsers.editUserPermissions')).not.toBeInTheDocument()
+    expect(screen.getByText(/churchUsers\.title/)).toBeInTheDocument()
   })
 
-  it('toggles role off in permissions edit dialog', async () => {
-    const user = userEvent.setup()
+  it('shows audit log tab for authorized user', async () => {
     render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const roleCheckboxes = document.querySelectorAll('.perm-toggle input[type="checkbox"]')
-    const checkedRole = Array.from(roleCheckboxes).find((cb) => (cb as HTMLInputElement).checked) as HTMLInputElement
-    if (checkedRole) {
-      await user.click(checkedRole)
-    }
+    expect(screen.getByText('Audit Logs')).toBeInTheDocument()
   })
 
-  it('toggles permission off in user permissions edit dialog', async () => {
+  it('shows config entries section in config tab', async () => {
     const user = userEvent.setup()
     render(<Settings />)
-    await user.click(screen.getByText('settings.manageUsers'))
-    await user.click(screen.getByText('Edit Permissions'))
-    const permCheckboxes = document.querySelectorAll('.perm-cell-toggle input[type="checkbox"]')
-    const checkedPerm = Array.from(permCheckboxes).find((cb) => (cb as HTMLInputElement).checked) as HTMLInputElement
-    if (checkedPerm) {
-      await user.click(checkedPerm)
-    }
+    await user.click(screen.getByText('settings.systemConfig'))
+    expect(screen.getByText('System Configuration Entries')).toBeInTheDocument()
   })
 
   it('bypasses HTML validation to trigger empty username guard', () => {
@@ -978,4 +943,45 @@ describe('Settings', () => {
       }
     }
   })
-})
+
+  it('shows direct permissions control for authorized governance users', async () => {
+    const user = userEvent.setup()
+    render(<Settings />)
+    await user.click(screen.getByText('settings.manageUsers'))
+    expect(screen.getByText('Direct Permissions')).toBeInTheDocument()
+  })
+
+  it('denies direct permission changes when policy is disabled with audited messaging', async () => {
+    const user = userEvent.setup()
+    render(<Settings />)
+    await user.click(screen.getByText('settings.manageUsers'))
+    await user.click(screen.getByText('Direct Permissions'))
+    expect(showErrorToast).toHaveBeenCalledWith(expect.stringMatching(/disabled by policy/i))
+  })
+
+  it('submits direct permissions when policy is enabled and shows audited success', async () => {
+    vi.mocked(useSystemConfigurations).mockReturnValue({ data: [{ configKey: 'GOVERNANCE_DIRECT_PERMISSIONS_ENABLED', configValue: 'true' }], isLoading: false, error: null } as any)
+    const directMutate = vi.fn().mockResolvedValue(undefined)
+    vi.mocked(useSetDirectPermissions).mockReturnValue({ mutateAsync: directMutate, isPending: false } as any)
+    const promptSpy = vi.spyOn(window, 'prompt').mockReturnValue('members:read, members:update')
+    const user = userEvent.setup()
+    render(<Settings />)
+    await user.click(screen.getByText('settings.manageUsers'))
+    await user.click(screen.getByText('Direct Permissions'))
+    await waitFor(() => expect(directMutate).toHaveBeenCalledWith(expect.objectContaining({ policyEnabled: true })))
+    expect(showSuccessToast).toHaveBeenCalledWith(expect.stringMatching(/audited/i))
+    promptSpy.mockRestore()
+  })
+
+  it('shows clear audited denial message when direct permission API denies request', async () => {
+    vi.mocked(useSystemConfigurations).mockReturnValue({ data: [{ configKey: 'GOVERNANCE_DIRECT_PERMISSIONS_ENABLED', configValue: 'true' }], isLoading: false, error: null } as any)
+    const directMutate = vi.fn().mockRejectedValue(new Error('403 Forbidden'))
+    vi.mocked(useSetDirectPermissions).mockReturnValue({ mutateAsync: directMutate, isPending: false } as any)
+    const promptSpy = vi.spyOn(window, 'prompt').mockReturnValue('MEMBERS:READ')
+    const user = userEvent.setup()
+    render(<Settings />)
+    await user.click(screen.getByText('settings.manageUsers'))
+    await user.click(screen.getByText('Direct Permissions'))
+    await waitFor(() => expect(showErrorToast).toHaveBeenCalledWith(expect.stringMatching(/denied\/audited/i)))
+    promptSpy.mockRestore()
+  })

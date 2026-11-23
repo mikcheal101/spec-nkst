@@ -118,7 +118,7 @@ describe('useAssignRole', () => {
       await result.current.mutateAsync({ userId: 'u1', roleId: 'ADMIN' })
     })
 
-    expect(authApi.assignRole).toHaveBeenCalledWith('u1', 'ADMIN')
+    expect(authApi.assignRole).toHaveBeenCalledWith('u1', 'ADMIN', undefined)
   })
 })
 
@@ -131,7 +131,7 @@ describe('useRevokeRole', () => {
       await result.current.mutateAsync({ userId: 'u1', roleId: 'ADMIN' })
     })
 
-    expect(authApi.revokeRole).toHaveBeenCalledWith('u1', 'ADMIN')
+    expect(authApi.revokeRole).toHaveBeenCalledWith('u1', 'ADMIN', undefined)
   })
 })
 

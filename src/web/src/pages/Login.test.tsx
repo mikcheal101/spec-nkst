@@ -49,7 +49,9 @@ describe('Login', () => {
       login: mockLogin,
       logout: vi.fn(),
       loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => true),
+    } as any)
     render(<Login />)
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
   })

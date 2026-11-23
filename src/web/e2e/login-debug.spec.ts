@@ -17,12 +17,14 @@ test('debug login redirect', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign In' }).click()
 
   await page.waitForURL('**/dashboard', { timeout: 15000 })
+  await expect(page.getByRole('heading', { name: /welcome, super-admin/i })).toBeVisible({ timeout: 15000 })
 
   const finalUrl = page.url()
   console.log('=== DEBUG LOGS ===')
   logs.forEach((l) => console.log(l))
   console.log('=== FINAL URL ===', finalUrl)
   console.log('=== LOCALSTORAGE ===')
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('accessToken')), { timeout: 10000 }).not.toBeNull()
   const token = await page.evaluate(() => localStorage.getItem('accessToken'))
   console.log('accessToken:', token ? token.substring(0, 50) + '...' : 'null')
   const refresh = await page.evaluate(() => localStorage.getItem('refreshToken'))

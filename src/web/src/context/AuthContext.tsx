@@ -1,5 +1,7 @@
-import { createContext, useContext, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useLogin, useLogout } from '../hooks/useAuth'
+import { authApi } from '../services/api'
+import { hasPermission as hasPerm, normalizePermissions } from '../shared/utils/permissions'
 
 interface User {
   username: string
@@ -14,6 +16,8 @@ interface AuthContextType {
   loading: boolean
   login: (username: string, password: string) => Promise<string | null>
   logout: () => Promise<void>
+  hasPermission: (required: string | string[]) => boolean
+  refreshPermissions: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -55,8 +59,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMut = useLogin()
   const logoutMut = useLogout()
 
-  const user = readUser()
+  const [user, setUser] = useState<User | null>(() => readUser())
   const loading = false
+
+  const refreshPermissions = useCallback(async () => {
+    try {
+      const res = await authApi.getMyPermissions()
+      if (res.data) {
+        const p = normalizePermissions((res.data as any).permissions || (res.data as any))
+        setUser((prev) => prev ? { ...prev, permissions: p } : prev)
+      }
+    } catch {
+      // keep JWT-derived permissions
+    }
+  }, [])
+
+  useEffect(() => {
+    const handler = () => {
+      clearTokens()
+      setUser(null)
+      window.location.href = '/login'
+    }
+    window.addEventListener('auth:unauthorized', handler)
+    return () => window.removeEventListener('auth:unauthorized', handler)
+  }, [])
+
+  useEffect(() => {
+    if (user) void refreshPermissions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const login = useCallback(async (username: string, password: string): Promise<string | null> => {
     try {
@@ -64,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persistTokens(data)
       const parsed = parseToken(localStorage.getItem('accessToken') || '')
       if (parsed) {
+        setUser(parsed)
         window.location.reload()
       }
       return null
@@ -80,11 +112,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
     }
     clearTokens()
+    setUser(null)
     window.location.href = '/login'
   }, [logoutMut])
 
+  const hasPermission = useCallback((required: string | string[]) => hasPerm(user?.permissions, required), [user])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, hasPermission, refreshPermissions }}>
       {children}
     </AuthContext.Provider>
   )

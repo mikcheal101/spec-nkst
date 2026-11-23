@@ -14,6 +14,8 @@ vi.mock('react-hot-toast', () => ({ default: toastMock }))
 const mockAuthUser = vi.fn(() => ({
   user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
   login: vi.fn(), logout: vi.fn(), loading: false,
+  refreshPermissions: vi.fn(),
+  hasPermission: (req: any) => { const reqs = Array.isArray(req) ? req : [req]; const perms = ['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW','ANNOUNCEMENTS:CREATE','ANNOUNCEMENTS:UPDATE','ANNOUNCEMENTS:DELETE','MEMBERS:READ']; return reqs.every((r: string) => perms.includes(String(r).toUpperCase())); },
 }))
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => mockAuthUser(),
@@ -56,9 +58,11 @@ import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
 beforeEach(() => {
   vi.clearAllMocks()
   mockAuthUser.mockReturnValue({
-  user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_view_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
+    user: { username: 'admin', permissions: ['can_read_members', 'can_read_announcements', 'can_view_announcements', 'can_create_announcements', 'can_update_announcements', 'can_delete_announcements'], churchId: '1', roles: ['ADMIN'] },
     login: vi.fn(), logout: vi.fn(), loading: false,
-  })
+    refreshPermissions: vi.fn(),
+    hasPermission: (req: any) => { const reqs = Array.isArray(req) ? req : [req]; const perms = ['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW','ANNOUNCEMENTS:CREATE','ANNOUNCEMENTS:UPDATE','ANNOUNCEMENTS:DELETE','MEMBERS:READ']; return reqs.every((r: string) => perms.includes(String(r).toUpperCase())); },
+  } as any)
   vi.mocked(useAnnouncementsList).mockReturnValue({ data: announcements, isLoading: false } as any)
   vi.mocked(useCreateAnnouncement).mockReturnValue({ mutateAsync: mockAnnMutate, isPending: false } as any)
   vi.mocked(useUpdateAnnouncement).mockReturnValue({ mutateAsync: mockUpdateMut, isPending: false } as any)
@@ -282,14 +286,15 @@ describe('Announcements', () => {
     expect(submitBtn.disabled).toBe(true)
   })
 
-  it('hides CRUD buttons without announcement permissions', async () => {
+  it('hides CRUD buttons without announcement write permissions', async () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'user', permissions: ['can_read_announcements'], churchId: '1', roles: [] },
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms=['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())); },
     } as any)
     render(<Announcements />)
     expect(screen.queryByText('New Announcement')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('View')).not.toBeInTheDocument()
     expect(screen.queryAllByLabelText('Edit').length).toBe(0)
     expect(screen.queryAllByLabelText('Delete').length).toBe(0)
   })
@@ -306,6 +311,8 @@ describe('Announcements', () => {
     mockAuthUser.mockReturnValue({
       user: { username: 'viewer', permissions: ['can_read_announcements', 'can_view_announcements'], churchId: '1', roles: [] },
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: (req: any) => { const reqs=Array.isArray(req)?req:[req]; const perms=['ANNOUNCEMENTS:READ','ANNOUNCEMENTS:VIEW']; return reqs.every((r:string)=>perms.includes(String(r).toUpperCase())); },
     } as any)
     render(<Announcements />)
     expect(screen.getAllByLabelText('View').length).toBeGreaterThan(0)

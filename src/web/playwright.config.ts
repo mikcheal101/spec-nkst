@@ -1,4 +1,12 @@
-import { defineConfig } from '@playwright/test'
+import fs from 'node:fs'
+import { defineConfig, devices } from '@playwright/test'
+
+const hasMsEdge =
+  process.platform === 'darwin'
+    ? fs.existsSync('/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge')
+    : process.platform === 'win32'
+      ? true
+      : fs.existsSync('/usr/bin/microsoft-edge') || fs.existsSync('/usr/bin/microsoft-edge-stable')
 
 export default defineConfig({
   testDir: '.',
@@ -13,11 +21,16 @@ export default defineConfig({
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000', headless: true } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'], baseURL: 'http://localhost:3000', headless: true } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'], baseURL: 'http://localhost:3000', headless: true } },
+    ...(hasMsEdge
+      ? [{ name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge' as const, baseURL: 'http://localhost:3000', headless: true } }]
+      : []),
+  ],
   use: {
     baseURL: 'http://localhost:3000',
-    browserName: 'chromium',
-    channel: process.env.PW_CHANNEL || 'chrome',
-    headless: true,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',

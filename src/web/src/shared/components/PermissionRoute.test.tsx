@@ -54,6 +54,15 @@ describe('PermissionRoute', () => {
     expect(screen.queryByTestId('navigate')).not.toBeInTheDocument()
   })
 
+  it('allows access when canonical RESOURCE:ACTION permission satisfies legacy-style requirement mapping', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '1', permissions: ['MEMBERS:READ'] },
+      loading: false,
+    })
+    render(<PermissionRoute permission="CAN_READ_MEMBERS"><div>child</div></PermissionRoute>)
+    expect(screen.getByText('child')).toBeInTheDocument()
+  })
+
   it('renders children when user has all required permissions (array)', () => {
     mockUseAuth.mockReturnValue({
       user: { id: '1', permissions: ['users:read', 'users:write'] },

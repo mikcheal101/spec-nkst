@@ -1,12 +1,16 @@
-import { useState, useMemo, type FormEvent } from 'react'
+import { useState, useMemo, useEffect, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { showSuccessToast, showErrorToast } from '../shared/utils/swal'
 import { useAuth } from '../context/AuthContext'
 import { useRolesList, useUpdateRole, useDeleteRole } from '../hooks/useRoles'
-import { useUsers, useRegister, useAssignRole } from '../hooks/useAuth'
-import { useConfig, useUpdateConfig } from '../hooks/useConfig'
+import { useUsers, useRegister, useAssignRole, useRevokeRole, useSetUserStatus, useSetDirectPermissions } from '../hooks/useAuth'
+import { useConfig, useUpdateConfig, useSystemConfigurations, useUpsertSystemConfiguration } from '../hooks/useConfig'
 import type { SystemConfig } from '../services/api'
+import { authApi, auditApi, type AuditLogEntry, type SystemConfigurationEntry } from '../services/api'
 import Skeleton from '../shared/components/Skeleton'
+
+type PermObj = { id?: number; name?: string; key?: string; legacyAlias?: string; resource?: string; action?: string }
+type RoleLike = { id?: string | number; name: string; description?: string; permissions?: Array<string | PermObj>; displayName?: string; isSystem?: boolean; isProtected?: boolean; active?: boolean }
 
 function toPermNames(perms: unknown): string[] {
   if (!Array.isArray(perms)) return []
@@ -78,12 +82,12 @@ function PermissionToggles({ selected, onToggle }: { selected: string[]; onToggl
 
 export default function Settings() {
   const { t } = useTranslation()
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<'roles' | 'users' | 'config'>('roles')
+  const { hasPermission } = useAuth()
+  const [activeTab, setActiveTab] = useState<'roles' | 'users' | 'config' | 'audit'>('roles')
 
-  const allPerms = (user?.permissions ?? []).map((p) => String(p).toLowerCase())
-  const canManageUsers = allPerms.some((p) => p.includes('_users'))
-  const canManageConfig = allPerms.some((p) => p.includes('_config'))
+  const canManageUsers = hasPermission(['USERS:READ']) || hasPermission(['USERS:UPDATE']) || hasPermission(['ROLES:READ'])
+  const canManageConfig = hasPermission(['SETTINGS:READ']) || hasPermission(['SETTINGS:UPDATE']) || hasPermission(['CONFIG:READ']) || hasPermission(['CONFIG:UPDATE'])
+  const canViewAudit = hasPermission(['SETTINGS:READ']) || hasPermission(['ROLES:READ']) || hasPermission(['USERS:READ'])
 
   return (
     <div className="page page-settings">
@@ -111,12 +115,20 @@ export default function Settings() {
             {t('settings.systemConfig')}
           </button>
         )}
+
+        {canViewAudit && (
+          <button className={`settings-tab ${activeTab === 'audit' ? 'is-active' : ''}`} onClick={() => setActiveTab('audit')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Audit Logs
+          </button>
+        )}
       </div>
 
       <div className="tab-content">
         {activeTab === 'roles' && <RolesPanel />}
         {activeTab === 'users' && canManageUsers && <UsersPanel />}
         {activeTab === 'config' && canManageConfig && <ConfigPanel />}
+        {activeTab === 'audit' && canViewAudit && <AuditLogPanel />}
       </div>
     </div>
   )
@@ -320,93 +332,152 @@ function RolesPanel() {
   )
 }
 
-const roleLabels: Record<string, string> = {
-  SUPER_ADMIN: 'Super Admin',
-  CHURCH_ADMIN: 'Church Admin',
-  PASTOR: 'Pastor',
-  ELDER: 'Elder',
-  DEACON: 'Deacon',
-  TREASURER: 'Treasurer',
-  MEMBER_BAPTISED: 'Member (Baptised)',
-  MEMBER_UNBAPTISED: 'Member (Unbaptised)',
-}
 
 /* ─── Users Panel ─── */
 
 function UsersPanel() {
   const { t } = useTranslation()
-  const { user: currentUser } = useAuth()
-  const churchId = currentUser?.churchId ?? ''
+  const { user: currentUser, hasPermission, refreshPermissions } = useAuth()
   const { data: users = [], isLoading, error: queryError } = useUsers()
+  const { data: rawRoles = [] } = useRolesList()
+  const { data: sysConfigs = [] } = useSystemConfigurations()
   const registerMut = useRegister()
   const assignRoleMut = useAssignRole()
+  const revokeRoleMut = useRevokeRole()
+  const setStatusMut = useSetUserStatus()
+  const setDirectPermsMut = useSetDirectPermissions()
+  const roles = useMemo(() => rawRoles as RoleLike[], [rawRoles])
+  const directPermissionsPolicyEnabled = useMemo(() => {
+    const entry = (sysConfigs as SystemConfigurationEntry[]).find((c) => String(c.configKey).toUpperCase() === 'GOVERNANCE_DIRECT_PERMISSIONS_ENABLED')
+    return String(entry?.configValue ?? '').toLowerCase() === 'true'
+  }, [sysConfigs])
 
-  const [editingUser, setEditingUser] = useState<any | null>(null)
-  const [editRoles, setEditRoles] = useState<string[]>([])
-  const [editPerms, setEditPerms] = useState<string[]>([])
+  const canManageUsers = hasPermission(['USERS:UPDATE', 'ROLES:UPDATE', 'SETTINGS:UPDATE'])
+  const [stepUpOpen, setStepUpOpen] = useState(false)
+  const [stepUpLoading, setStepUpLoading] = useState(false)
+  const [pendingAction, setPendingAction] = useState<null | ((stepUpToken: string) => Promise<void>)>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [newUsername, setNewUsername] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPhone, setNewPhone] = useState('')
-  const [newRoles, setNewRoles] = useState<string[]>(['MEMBER'])
+  const [newRole, setNewRole] = useState('MEMBER')
 
-  function openEditPermissions(u: any) {
-    setEditingUser(u)
-    setEditRoles([...u.roles])
-    setEditPerms(toPermNames(u.permissions))
-  }
-
-  function toggleEditPerm(perm: string) {
-    setEditPerms((prev) => prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm])
-  }
-
-  function toggleEditRole(role: string) {
-    setEditRoles((prev) => prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role])
-  }
-
-  async function savePermissions() {
-    if (!editingUser) return
+  async function runStepUpConfirm(password: string) {
+    if (!pendingAction) return
+    setStepUpLoading(true)
     try {
-      for (const role of editRoles) {
-        await assignRoleMut.mutateAsync({ userId: editingUser.id, roleId: role })
-      }
-      showSuccessToast(t('churchUsers.userUpdated'))
-      setEditingUser(null)
+      const res = await authApi.stepUp(password)
+      if (!res.data?.stepUpToken) throw new Error(res.error || 'Step-up failed')
+      await pendingAction(res.data.stepUpToken)
+      setStepUpOpen(false)
+      setPendingAction(null)
     } catch (err) {
-      showErrorToast(err instanceof Error ? err.message : 'Update failed')
+      showErrorToast(err instanceof Error ? err.message : 'Step-up failed')
+    } finally {
+      setStepUpLoading(false)
     }
+  }
+
+  function queueStepUp(action: (stepUpToken: string) => Promise<void>) {
+    setPendingAction(() => action)
+    setStepUpOpen(true)
   }
 
   async function handleAddUser(e: FormEvent) {
     e.preventDefault()
     if (!newUsername.trim()) return
     try {
-      const result = await registerMut.mutateAsync({ username: newUsername.trim(), password: newPassword, phoneNumber: newPhone || undefined, churchId: churchId || undefined } as any)
-      for (const role of newRoles) {
-        if (result) {
-          await assignRoleMut.mutateAsync({ userId: '', roleId: role })
-        }
+      const res = await registerMut.mutateAsync({ username: newUsername.trim(), password: newPassword, phoneNumber: newPhone || undefined, churchId: currentUser?.churchId || undefined } as any)
+      const createdId = (res as any)?.id || (res as any)?.data?.id
+      if (createdId && newRole) {
+        try { await assignRoleMut.mutateAsync({ userId: String(createdId), roleId: newRole }) } catch { /* role can be assigned manually */ }
       }
       showSuccessToast('User created')
       setShowAdd(false)
-      setNewUsername('')
-      setNewPassword('')
-      setNewPhone('')
-      setNewRoles(['MEMBER'])
+      setNewUsername(''); setNewPassword(''); setNewPhone(''); setNewRole('MEMBER')
     } catch (err) {
       showErrorToast(err instanceof Error ? err.message : 'Create failed')
     }
   }
 
-  const churchUsers = churchId ? users.filter((u: any) => u.churchId === churchId) : users
+  async function handleAssign(u: any, role: string) {
+    const needs = String(role).toUpperCase().includes('SUPER_ADMIN') || (u.roles || []).some((r: string) => String(r).toUpperCase().includes('SUPER_ADMIN'))
+    const doAssign = async (stepUpToken?: string) => {
+      await assignRoleMut.mutateAsync({ userId: String(u.id), roleId: role, stepUpToken })
+      showSuccessToast('Role assigned')
+      await refreshPermissions()
+    }
+    try {
+      if (needs) queueStepUp(async (token) => { await doAssign(token) })
+      else await doAssign()
+    } catch (err) { showErrorToast(err instanceof Error ? err.message : 'Assign failed') }
+  }
+
+  async function handleRevoke(u: any, role: string) {
+    const isProtectedTarget = String(role).toUpperCase().includes('SUPER_ADMIN') || (u.roles || []).some((r: string) => String(r).toUpperCase().includes('SUPER_ADMIN'))
+    const doRevoke = async (stepUpToken?: string) => {
+      await revokeRoleMut.mutateAsync({ userId: String(u.id), roleId: role, stepUpToken })
+      showSuccessToast('Role revoked')
+      await refreshPermissions()
+    }
+    try {
+      if (isProtectedTarget) queueStepUp(async (token) => { await doRevoke(token) })
+      else await doRevoke()
+    } catch (err) { showErrorToast(err instanceof Error ? err.message : 'Revoke failed') }
+  }
+
+  async function handleStatus(u: any, status: string) {
+    const isProtectedTarget = (u.roles || []).some((r: string) => String(r).toUpperCase().includes('SUPER_ADMIN'))
+    const doSet = async (stepUpToken?: string) => {
+      await setStatusMut.mutateAsync({ userId: String(u.id), status, stepUpToken })
+      showSuccessToast(`User ${status.toLowerCase()}`)
+    }
+    try {
+      if (isProtectedTarget) queueStepUp(async (token) => { await doSet(token) })
+      else await doSet()
+    } catch (err) { showErrorToast(err instanceof Error ? err.message : 'Status update failed') }
+  }
+
+  async function handleDirectPermissions(u: any) {
+    const isRoot = Boolean(u.isRootSuperAdmin || u.rootSuperAdmin)
+    if (isRoot) {
+      showErrorToast('Root Super Admin direct permissions are immutable.')
+      return
+    }
+    if (!canManageUsers) {
+      showErrorToast('Access denied. Direct permission changes require governance permission and are audited.')
+      return
+    }
+    if (!directPermissionsPolicyEnabled) {
+      showErrorToast('Direct user-permission assignment is disabled by policy. Request was denied and audited.')
+      return
+    }
+    const current = Array.isArray(u.permissions) ? u.permissions : []
+    const nextRaw = window.prompt('Enter direct permissions as comma-separated canonical RESOURCE:ACTION keys', current.join(','))
+    if (nextRaw === null) return
+    const permissions = nextRaw.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
+    const isProtectedTarget = (u.roles || []).some((r: string) => String(r).toUpperCase().includes('SUPER_ADMIN'))
+    const doSet = async (stepUpToken?: string) => {
+      await setDirectPermsMut.mutateAsync({ userId: String(u.id), permissions, policyEnabled: true, stepUpToken })
+      showSuccessToast('Direct permissions updated. Change is audited.')
+      await refreshPermissions()
+    }
+    try {
+      if (isProtectedTarget) queueStepUp(async (token) => { await doSet(token) })
+      else await doSet()
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Direct permission update failed'
+      showErrorToast(/policy|disabled|forbidden|403/i.test(msg) ? `Direct permission request denied/audited: ${msg}` : msg)
+    }
+  }
 
   if (isLoading) return <Skeleton.Card rows={3} />
 
   return (
     <div className="settings-panel">
       <div className="settings-panel-header">
-        <p className="settings-panel-desc">{t('churchUsers.title')}{churchId ? ` — ${churchId}` : ''}</p>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowAdd(true)}>{t('settings.addUser')}</button>
+        <p className="settings-panel-desc">{t('churchUsers.title')}</p>
+        {canManageUsers && <button className="btn btn-primary btn-sm" onClick={() => setShowAdd(true)}>{t('settings.addUser')}</button>}
       </div>
 
       {queryError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{queryError instanceof Error ? queryError.message : 'Error loading users'}</div>}
@@ -418,112 +489,125 @@ function UsersPanel() {
               <th>User</th>
               <th>Roles</th>
               <th>Status</th>
-              <th className="settings-th-actions">Actions</th>
+              <th className="settings-th-actions">Governance Actions</th>
             </tr>
           </thead>
           <tbody>
-            {churchUsers.length === 0 && (
+            {users.length === 0 && (
               <tr><td colSpan={4} className="text-center" style={{ padding: '2rem', color: 'var(--color-text-muted)' }}>{t('churchUsers.noUsers')}</td></tr>
             )}
-            {churchUsers.map((u: any) => (
-              <tr key={u.id}>
-                <td>
-                  <div className="settings-user-cell">
-                    <span className="settings-user-avatar">{u.username?.charAt(0).toUpperCase()}</span>
-                    <span>{u.username}</span>
-                  </div>
-                </td>
-                <td>{u.roles.map((r: string) => roleLabels[r] || r).join(', ')}</td>
-                <td><span className={`settings-status ${u.status === 'active' ? 'is-active' : 'is-inactive'}`}>{t(`common.${u.status}`)}</span></td>
-                <td className="settings-td-actions">
-                  <button className="btn btn-sm btn-outline" onClick={() => openEditPermissions(u)}>Edit Permissions</button>
-                </td>
-              </tr>
-            ))}
+            {users.map((u: any) => {
+              const isSuperAdmin = (u.roles || []).some((r: string) => String(r).toUpperCase().includes('SUPER_ADMIN'))
+              const isRoot = Boolean(u.isRootSuperAdmin || u.rootSuperAdmin)
+              return (
+                <tr key={u.id}>
+                  <td>
+                    <div className="settings-user-cell">
+                      <span className="settings-user-avatar">{u.username?.charAt(0).toUpperCase()}</span>
+                      <div>
+                        <div>{u.username}</div>
+                        {isSuperAdmin && <div style={{ fontSize: '0.72rem', color: 'var(--color-warning, #b45309)' }}>{isRoot ? 'Root Super Admin (immutable)' : 'Super Admin - safeguards apply'}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                      {(u.roles || []).map((r: string) => (
+                        <span key={r} className="badge badge-secondary" style={{ display:'inline-flex', gap:'0.25rem', alignItems:'center' }}>
+                          {r}
+                          {canManageUsers && !isRoot && <button type="button" className="btn-icon" style={{ width:18,height:18 }} title={`Revoke ${r}`} onClick={() => handleRevoke(u, r)}>×</button>}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td><span className={`settings-status ${String(u.status).toLowerCase() === 'active' ? 'is-active' : 'is-inactive'}`}>{u.status || 'ACTIVE'}</span></td>
+                  <td className="settings-td-actions">
+                    <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
+                      <select defaultValue="" onChange={(e) => { const v=e.target.value; if(v){ handleAssign(u,v); e.currentTarget.value=''} }} disabled={!canManageUsers || isRoot}>
+                        <option value="">Assign role…</option>
+                        {roles.map(r => <option key={String(r.id ?? r.name)} value={r.name}>{r.displayName || r.name}</option>)}
+                      </select>
+                      {String(u.status).toUpperCase() === 'ACTIVE' ? (
+                        <button className="btn btn-sm btn-outline" disabled={!canManageUsers || isRoot} onClick={() => handleStatus(u, 'DISABLED')}>Disable</button>
+                      ) : (
+                        <button className="btn btn-sm btn-outline" disabled={!canManageUsers || isRoot} onClick={() => handleStatus(u, 'ACTIVE')}>Enable</button>
+                      )}
+                      <button
+                        className="btn btn-sm btn-outline"
+                        disabled={!canManageUsers || isRoot || setDirectPermsMut.isPending}
+                        title={!directPermissionsPolicyEnabled ? 'Direct permissions disabled by policy; attempts are denied and audited.' : 'Set direct permissions (audited)'}
+                        onClick={() => handleDirectPermissions(u)}
+                      >
+                        Direct Permissions
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
-
-      {editingUser && (
-        <div className="dialog-overlay" onClick={() => setEditingUser(null)}>
-          <div className="dialog dialog-lg" onClick={(e) => e.stopPropagation()}>
-            <h3>{t('churchUsers.editUserPermissions', { username: editingUser.username })}</h3>
-            <div className="dialog-form">
-              <div className="form-group">
-                <label>Roles</label>
-                <div className="perm-section-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
-                  {Object.entries(roleLabels).map(([key, label]) => (
-                    <label key={key} className="perm-toggle">
-                      <input type="checkbox" checked={editRoles.includes(key)} onChange={() => toggleEditRole(key)} />
-                      <span className="perm-toggle-track" />
-                      <span className="perm-toggle-label">{label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Permissions</label>
-                <div className="perm-scroll">
-                  <PermissionToggles selected={editPerms} onToggle={toggleEditPerm} />
-                </div>
-              </div>
-              <div className="dialog-actions">
-                <button type="button" className="btn btn-outline" onClick={() => setEditingUser(null)}>Cancel</button>
-                <button type="button" className="btn btn-primary" onClick={savePermissions} disabled={assignRoleMut.isPending}>
-                  {assignRoleMut.isPending ? 'Saving…' : 'Save'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showAdd && (
         <div className="dialog-overlay" onClick={() => setShowAdd(false)}>
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <h3>{t('settings.addUser')}</h3>
             <form onSubmit={handleAddUser} className="dialog-form">
-              <div className="form-group">
-                <label>{t('auth.username')} <span className="required">*</span></label>
-                <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label>{t('auth.password')} <span className="required">*</span></label>
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
-              </div>
-              <div className="form-group">
-                <label>{t('auth.phoneNumber')}</label>
-                <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Role</label>
-                <select value={newRoles[0]} onChange={(e) => setNewRoles([e.target.value])}>
-                  {Object.entries(roleLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-                </select>
-              </div>
+              <div className="form-group"><label>{t('auth.username')} <span className="required">*</span></label><input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required /></div>
+              <div className="form-group"><label>{t('auth.password')} <span className="required">*</span></label><input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} /></div>
+              <div className="form-group"><label>{t('auth.phoneNumber')}</label><input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} /></div>
+              <div className="form-group"><label>Role</label><select value={newRole} onChange={(e) => setNewRole(e.target.value)}>{roles.map(r => <option key={String(r.id ?? r.name)} value={r.name}>{r.displayName || r.name}</option>)}</select></div>
               <div className="dialog-actions">
                 <button type="button" className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={registerMut.isPending}>
-                  {registerMut.isPending ? 'Saving…' : 'Save'}
-                </button>
+                <button type="submit" className="btn btn-primary" disabled={registerMut.isPending}>{registerMut.isPending ? 'Saving…' : 'Save'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      <StepUpModal open={stepUpOpen} loading={stepUpLoading} onClose={() => { setStepUpOpen(false); setPendingAction(null) }} onConfirm={runStepUpConfirm} />
     </div>
   )
 }
 
+
+function StepUpModal({ open, loading, onClose, onConfirm }: { open: boolean; loading: boolean; onClose: () => void; onConfirm: (password: string) => Promise<void> }) {
+  const [password, setPassword] = useState('')
+  if (!open) return null
+  return (
+    <div className="dialog-overlay" onClick={onClose}>
+      <div className="dialog" onClick={(e) => e.stopPropagation()}>
+        <h3>Step-up Confirmation</h3>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Confirm your password to continue this sensitive governance action.</p>
+        <form onSubmit={async (e) => { e.preventDefault(); await onConfirm(password); setPassword('') }} className="dialog-form">
+          <div className="form-group"><label>Password</label><input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required /></div>
+          <div className="dialog-actions">
+            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={loading || !password}>{loading ? 'Confirming…' : 'Confirm'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 /* ─── Config Panel ─── */
 
 function ConfigPanel() {
   const { t } = useTranslation()
+  const { hasPermission } = useAuth()
   const { data: configData, isLoading } = useConfig()
   const updateMut = useUpdateConfig()
+  const { data: sysConfigs = [], isLoading: sysLoading, error: sysError } = useSystemConfigurations()
+  const upsertMut = useUpsertSystemConfiguration()
   const [form, setForm] = useState<SystemConfig>({ churchName: '', churchAddress: '', defaultCurrency: 'NGN' })
   const [dirty, setDirty] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [newKey, setNewKey] = useState('')
+  const [newValue, setNewValue] = useState('')
+  const [newDesc, setNewDesc] = useState('')
+  const canUpdate = hasPermission(['SETTINGS:UPDATE'])
 
   if (configData && !loaded) {
     setForm(configData)
@@ -538,33 +622,125 @@ function ConfigPanel() {
     })
   }
 
-  if (isLoading) return <Skeleton.Card rows={3} />
+  async function handleUpsert(e: FormEvent) {
+    e.preventDefault()
+    if (!newKey.trim()) return
+    try {
+      await upsertMut.mutateAsync({ key: newKey.trim(), value: newValue, description: newDesc || undefined })
+      showSuccessToast('Configuration saved')
+      setNewKey(''); setNewValue(''); setNewDesc('')
+    } catch (err) {
+      showErrorToast(err instanceof Error ? err.message : 'Save failed')
+    }
+  }
+
+  if (isLoading || sysLoading) return <Skeleton.Card rows={3} />
 
   return (
     <div className="settings-panel">
-      <form onSubmit={handleSubmit} className="settings-config-form">
-        <div className="form-group">
-          <label>Church Name</label>
-          <input value={form.churchName} onChange={(e) => { setForm({ ...form, churchName: e.target.value }); setDirty(true) }} />
-        </div>
-        <div className="form-group">
-          <label>Church Address</label>
-          <textarea value={form.churchAddress} onChange={(e) => { setForm({ ...form, churchAddress: e.target.value }); setDirty(true) }} rows={3} />
-        </div>
-        <div className="form-group">
-          <label>Default Currency</label>
+      <form onSubmit={handleSubmit} className="settings-config-form" style={{ marginBottom: '2rem' }}>
+        <h4 style={{ marginBottom: '0.75rem' }}>Basic Configuration</h4>
+        <div className="form-group"><label>Church Name</label><input value={form.churchName} onChange={(e) => { setForm({ ...form, churchName: e.target.value }); setDirty(true) }} /></div>
+        <div className="form-group"><label>Church Address</label><textarea value={form.churchAddress} onChange={(e) => { setForm({ ...form, churchAddress: e.target.value }); setDirty(true) }} rows={3} /></div>
+        <div className="form-group"><label>Default Currency</label>
           <select value={form.defaultCurrency} onChange={(e) => { setForm({ ...form, defaultCurrency: e.target.value }); setDirty(true) }}>
             <option value="NGN">NGN — Nigerian Naira</option>
             <option value="USD">USD — US Dollar</option>
           </select>
         </div>
         <div className="settings-config-bar">
-          <button type="submit" className="btn btn-primary" disabled={updateMut.isPending || !dirty}>
-            {updateMut.isPending ? 'Saving…' : 'Save Changes'}
-          </button>
+          <button type="submit" className="btn btn-primary" disabled={updateMut.isPending || !dirty || !canUpdate}>{updateMut.isPending ? 'Saving…' : 'Save Changes'}</button>
           {!dirty && <span className="settings-config-hint">No changes to save</span>}
         </div>
       </form>
+
+      <div className="settings-config-form">
+        <h4 style={{ marginBottom: '0.75rem' }}>System Configuration Entries</h4>
+        {sysError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{sysError instanceof Error ? sysError.message : 'Failed to load configurations'}</div>}
+        <div className="settings-table-wrap" style={{ marginBottom: '1rem' }}>
+          <table className="settings-table">
+            <thead><tr><th>Key</th><th>Value</th><th>Description</th><th>Updated</th></tr></thead>
+            <tbody>
+              {(sysConfigs as SystemConfigurationEntry[]).length === 0 && <tr><td colSpan={4} style={{ padding: '1rem', color:'var(--color-text-muted)' }}>No configuration entries</td></tr>}
+              {(sysConfigs as SystemConfigurationEntry[]).map((c) => (
+                <tr key={c.configKey}><td><code>{c.configKey}</code></td><td style={{ maxWidth:320, overflow:'hidden', textOverflow:'ellipsis' }}>{c.configValue}</td><td>{c.description || '—'}</td><td>{c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '—'}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {canUpdate && (
+          <form onSubmit={handleUpsert} className="dialog-form">
+            <div className="form-row">
+              <div className="form-group"><label>Key</label><input value={newKey} onChange={(e)=>setNewKey(e.target.value)} required /></div>
+              <div className="form-group"><label>Value</label><input value={newValue} onChange={(e)=>setNewValue(e.target.value)} required /></div>
+            </div>
+            <div className="form-group"><label>Description</label><input value={newDesc} onChange={(e)=>setNewDesc(e.target.value)} /></div>
+            <button type="submit" className="btn btn-primary" disabled={upsertMut.isPending}>{upsertMut.isPending ? 'Saving…' : 'Save Configuration'}</button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function AuditLogPanel() {
+  const { hasPermission } = useAuth()
+  const canRead = hasPermission(['SETTINGS:READ', 'ROLES:READ', 'SETTINGS:VIEW'])
+  const [action, setAction] = useState('')
+  const [actor, setActor] = useState('')
+  const [correlationId, setCorrelationId] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [logs, setLogs] = useState<AuditLogEntry[]>([])
+
+  async function load() {
+    if (!canRead) return
+    setLoading(true); setError('')
+    try {
+      const res = await auditApi.list({ page: 0, size: 50, action: action || undefined, actor: actor || undefined, correlationId: correlationId || undefined })
+      if (res.error) throw new Error(res.error)
+      const data = res.data as any
+      setLogs(Array.isArray(data) ? data : (data?.content || []))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load audit logs')
+    } finally { setLoading(false) }
+  }
+
+  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!canRead) return <div className="settings-panel"><p style={{ color: 'var(--color-text-muted)' }}>You don't have permission to view audit logs.</p></div>
+
+  return (
+    <div className="settings-panel">
+      <div className="settings-panel-header">
+        <p className="settings-panel-desc">Governance and security audit events (append-only).</p>
+        <button className="btn btn-sm btn-outline" onClick={load} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
+      </div>
+      <div className="form-row" style={{ marginBottom: '1rem' }}>
+        <div className="form-group"><label>Action</label><input value={action} onChange={e=>setAction(e.target.value)} placeholder="Filter action" /></div>
+        <div className="form-group"><label>Actor</label><input value={actor} onChange={e=>setActor(e.target.value)} placeholder="Filter actor" /></div>
+        <div className="form-group"><label>Correlation ID</label><input value={correlationId} onChange={e=>setCorrelationId(e.target.value)} placeholder="Filter correlation" /></div>
+      </div>
+      <div style={{ marginBottom:'1rem' }}><button className="btn btn-primary btn-sm" onClick={load} disabled={loading}>Apply Filters</button></div>
+      {error && <div className="alert alert-error" style={{ marginBottom:'1rem' }}>{error}</div>}
+      <div className="settings-table-wrap">
+        <table className="settings-table">
+          <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Resource</th><th>Outcome</th><th>Correlation</th></tr></thead>
+          <tbody>
+            {logs.length === 0 && !loading && <tr><td colSpan={6} style={{ padding:'1rem', color:'var(--color-text-muted)' }}>No audit logs found</td></tr>}
+            {logs.map((l) => (
+              <tr key={String(l.id)}>
+                <td style={{ whiteSpace:'nowrap' }}>{l.occurredAt ? new Date(l.occurredAt).toLocaleString() : '—'}</td>
+                <td>{l.actorUsername || l.actorUserId || '—'}</td>
+                <td><code>{l.action}</code></td>
+                <td>{l.resourceType}{l.resourceId ? `:${l.resourceId}` : ''}</td>
+                <td><span className={`badge ${l.outcome==='SUCCESS'?'badge-success': l.outcome==='DENIED'?'badge-warning':'badge-danger'}`}>{l.outcome}</span></td>
+                <td style={{ fontSize:'0.75rem', maxWidth:180, overflow:'hidden', textOverflow:'ellipsis' }}>{l.correlationId}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

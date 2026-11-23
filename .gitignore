@@ -11,3 +11,4 @@ completed_tickets.json
 coverage-json/
 .opencode/
 playwright-report/
+coverage/

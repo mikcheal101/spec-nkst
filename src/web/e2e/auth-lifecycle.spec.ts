@@ -295,10 +295,14 @@ test.describe('Token Refresh', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
     
     // Tokens should be cleared after logout
-    const at = await page.evaluate(() => localStorage.getItem('accessToken'))
-    const rt = await page.evaluate(() => localStorage.getItem('refreshToken'))
-    expect(at).toBeNull()
-    expect(rt).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('accessToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('refreshToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
   })
 
   test('no tokens at all triggers immediate redirect', async ({ page }) => {
@@ -345,10 +349,14 @@ test.describe('Logout and Session Invalidation', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
 
     // Verify tokens are cleared after logout
-    const accessToken = await page.evaluate(() => localStorage.getItem('accessToken'))
-    const refreshToken = await page.evaluate(() => localStorage.getItem('refreshToken'))
-    expect(accessToken).toBeNull()
-    expect(refreshToken).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('accessToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('refreshToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
   })
 
   test('post-logout access token is blacklisted (401)', async ({ page, request }) => {
@@ -367,10 +375,14 @@ test.describe('Logout and Session Invalidation', () => {
     // Note: The access token is not immediately blacklisted by the backend.
     // It remains valid until it expires naturally (JWT tokens).
     // This test verifies the logout clears local state.
-    const accessToken = await page.evaluate(() => localStorage.getItem('accessToken'))
-    const refreshToken = await page.evaluate(() => localStorage.getItem('refreshToken'))
-    expect(accessToken).toBeNull()
-    expect(refreshToken).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('accessToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('refreshToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
   })
 
   test('post-logout refresh token is invalidated (non-200)', async ({ page }) => {
@@ -389,8 +401,7 @@ test.describe('Logout and Session Invalidation', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
     
     // Tokens should be cleared after logout
-    const refreshToken = await page.evaluate(() => localStorage.getItem('refreshToken'))
-    expect(refreshToken).toBeNull()
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('refreshToken')), { timeout: 5000 }).toBeNull()
   })
 
   test('logout while offline still clears local state', async ({ page }) => {
@@ -403,9 +414,13 @@ test.describe('Logout and Session Invalidation', () => {
     // AuthContext.logout() catches and still calls clearTokens()
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
 
-    const at = await page.evaluate(() => localStorage.getItem('accessToken'))
-    const rt = await page.evaluate(() => localStorage.getItem('refreshToken'))
-    expect(at).toBeNull()
-    expect(rt).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('accessToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
+    await expect.poll(async () => {
+      try { return await page.evaluate(() => localStorage.getItem('refreshToken')) }
+      catch { return '__pending__' }
+    }, { timeout: 5000 }).toBeNull()
   })
 })

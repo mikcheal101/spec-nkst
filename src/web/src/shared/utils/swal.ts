@@ -34,7 +34,6 @@ const Toast = Swal.mixin({
   showCloseButton: true,
   background: theme.surface,
   color: theme.text,
-  heightAuto: false,
   buttonsStyling: false,
   customClass: {
     popup: 'swal-toast-popup',
@@ -124,6 +123,7 @@ const base = Swal.mixin({
   color: theme.text,
   reverseButtons: true,
   heightAuto: false,
+  didOpen: (popup) => { popup.style.height = 'auto' },
   buttonsStyling: false,
   customClass: {
     popup: 'swal-popup',

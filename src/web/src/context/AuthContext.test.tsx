@@ -1,13 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
 const mockMutateAsyncLogin = vi.fn()
 const mockMutateAsyncLogout = vi.fn()
+const mockGetMyPermissions = vi.fn()
 
 vi.mock('../hooks/useAuth', () => ({
   useLogin: () => ({ mutateAsync: mockMutateAsyncLogin }),
   useLogout: () => ({ mutateAsync: mockMutateAsyncLogout }),
+}))
+vi.mock('../services/api', () => ({
+  authApi: { getMyPermissions: (...args: any[]) => mockGetMyPermissions(...args) },
 }))
 
 import { AuthProvider, useAuth } from './AuthContext'
@@ -24,6 +28,7 @@ function wrapper({ children }: { children: ReactNode }) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockGetMyPermissions.mockResolvedValue({ data: { permissions: [] } })
   localStorage.clear()
   delete (window as any).location
   ;(window as any).location = { reload: vi.fn(), href: '' }
@@ -38,19 +43,15 @@ describe('useAuth', () => {
 })
 
 describe('AuthProvider user', () => {
-  it('provides user parsed from JWT in localStorage', () => {
+  it('provides user parsed from JWT in localStorage and refreshes effective permissions', async () => {
     const token = makeToken({ sub: 'testuser', churchId: '1', permissions: ['read'], roles: ['ADMIN'] })
     localStorage.setItem('accessToken', token)
+    mockGetMyPermissions.mockResolvedValueOnce({ data: { permissions: ['MEMBERS:READ', 'CAN_UPDATE_MEMBERS'] } })
 
     const { result } = renderHook(() => useAuth(), { wrapper })
 
-    expect(result.current.user).toEqual({
-      username: 'testuser',
-      churchId: '1',
-      phoneNumber: undefined,
-      permissions: ['read'],
-      roles: ['ADMIN'],
-    })
+    await waitFor(() => expect(result.current.user?.permissions).toEqual(['MEMBERS:READ', 'MEMBERS:UPDATE']))
+    expect(result.current.user?.username).toBe('testuser')
   })
 
   it('provides null user when no token', () => {
@@ -291,5 +292,28 @@ describe('loading property', () => {
   it('always returns false', () => {
     const { result } = renderHook(() => useAuth(), { wrapper })
     expect(result.current.loading).toBe(false)
+  })
+})
+
+describe('permission refresh and session cutoff', () => {
+  it('refreshPermissions normalizes canonical and legacy permission payloads', async () => {
+    const token = makeToken({ sub: 'u', permissions: ['OLD'], roles: [] })
+    localStorage.setItem('accessToken', token)
+    mockGetMyPermissions.mockResolvedValueOnce({ data: ['CAN_READ_ROLES'] })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current.user?.permissions).toEqual(['ROLES:READ']))
+    mockGetMyPermissions.mockResolvedValueOnce({ data: { permissions: ['SETTINGS:READ', 'CAN_UPDATE_SETTINGS'] } })
+    await act(async () => { await result.current.refreshPermissions() })
+    await waitFor(() => expect(result.current.user?.permissions).toEqual(['SETTINGS:READ', 'SETTINGS:UPDATE']))
+  })
+
+  it('handles auth:unauthorized by clearing tokens and redirecting to login', async () => {
+    localStorage.setItem('accessToken', 'at')
+    localStorage.setItem('refreshToken', 'rt')
+    renderHook(() => useAuth(), { wrapper })
+    act(() => { window.dispatchEvent(new Event('auth:unauthorized')) })
+    expect(localStorage.getItem('accessToken')).toBeNull()
+    expect(localStorage.getItem('refreshToken')).toBeNull()
+    expect(window.location.href).toBe('/login')
   })
 })

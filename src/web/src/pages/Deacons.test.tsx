@@ -542,6 +542,8 @@ describe('Deacons', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: null,
       login: vi.fn(), logout: vi.fn(), loading: false,
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => false),
     } as any)
     render(<Deacons />)
     expect(screen.getByText('Deacons')).toBeInTheDocument()
@@ -553,7 +555,9 @@ describe('Deacons', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { username: 'admin', permissions: ['can_read_members', 'can_update_members', 'can_create_members', 'can_delete_members', 'can_read_church', 'can_update_church', 'can_read_pastor', 'can_read_elders', 'can_read_deacons', 'can_create_deacons', 'can_update_deacons', 'can_delete_deacons', 'can_read_settings'], churchId: '1', roles: ['ADMIN'] },
       login: vi.fn(), logout: vi.fn(), loading: false,
-    })
+      refreshPermissions: vi.fn(),
+      hasPermission: vi.fn(() => true),
+    } as any)
     mockSearch.mockResolvedValue({
       content: [
         { id: 20, firstName: 'Search', lastName: 'Result', emailAddress: null, tel: null, gender: 'Male' },

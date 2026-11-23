@@ -1,0 +1,6 @@
+{
+  "created" : [ "permission:CHURCH:VIEW", "role:SUPER_ADMIN", "user:super-admin" ],
+  "updated" : [ ],
+  "unchanged" : [ ],
+  "warnings" : [ ]
+}

@@ -1,15 +1,22 @@
 package com.mikkytrionze.churchmanagement.shared.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
-
-    private String message;
-    private Integer status;
     private Instant timestamp;
+    private Integer status;
+    private String error;
+    private String code;
+    private String message;
+    private String path;
+    private String correlationId;
+    private Map<String, Object> details;
 }

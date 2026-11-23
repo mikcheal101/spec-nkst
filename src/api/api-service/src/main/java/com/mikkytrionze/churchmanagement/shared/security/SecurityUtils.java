@@ -15,6 +15,24 @@ public class SecurityUtils {
 
     private final MemberRepository memberRepository;
     private final ChurchRepository churchRepository;
+    private final com.mikkytrionze.churchmanagement.church.domain.repository.UserChurchScopeRepository userChurchScopeRepository;
+
+    public boolean hasChurchScope(Long churchId) {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null) return false;
+            boolean superAdmin = auth.getAuthorities().stream().anyMatch(a -> "ROLE_SUPER_ADMIN".equals(a.getAuthority()) || "SUPER_ADMIN".equals(a.getAuthority()));
+            if (superAdmin) return true;
+            String identifier = auth.getName();
+            Member member = memberRepository.findByIdentifier(identifier).orElse(null);
+            if (member == null || member.getUserId() == null) return false;
+            return userChurchScopeRepository.existsByUserIdAndChurchId(member.getUserId(), churchId);
+        } catch (Exception e) { return false; }
+    }
+
+    public void assertChurchScope(Long churchId) {
+        if (!hasChurchScope(churchId)) throw new org.springframework.security.access.AccessDeniedException("Church scope denied");
+    }
 
     /**
      * Resolves and returns the Church associated with the currently authenticated user.

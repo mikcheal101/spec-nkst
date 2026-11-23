@@ -137,6 +137,9 @@ class UserLookupServiceImplTest {
         UserDetails result = userLookupService.loadUserByUsername("multi-role-user");
 
         assertNotNull(result);
-        assertEquals(2, result.getAuthorities().size());
+        assertTrue(result.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("can_read_church")));
+        assertTrue(result.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("can_write_church")));
+        assertTrue(result.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MEMBER_UNBAPTISED")));
+        assertTrue(result.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ELDER")));
     }
 }

@@ -35,18 +35,28 @@ public class UserLookupServiceImpl implements UserLookupService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User with username: %s not found!", username)));
 
-        Set<GrantedAuthority> permissions = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> {
-                    String permissionName = permission.getName().trim().toLowerCase();
-                    return new SimpleGrantedAuthority(permissionName);
-                })
-                .collect(Collectors.toSet());
-
+        Set<GrantedAuthority> authorities = new java.util.HashSet<>();
+        if (user.getRoles() != null) {
+            user.getRoles().forEach(role -> {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
+                if (role.getPermissions() != null) {
+                    role.getPermissions().forEach(p -> {
+                        if (p.getName() != null) authorities.add(new SimpleGrantedAuthority(p.getName().trim().toLowerCase()));
+                        if (p.getKey() != null) { authorities.add(new SimpleGrantedAuthority(p.getKey())); authorities.add(new SimpleGrantedAuthority(p.getKey().trim().toLowerCase())); }
+                    });
+                }
+            });
+        }
+        if (user.getPermissions() != null) {
+            user.getPermissions().forEach(p -> {
+                if (p.getName() != null) authorities.add(new SimpleGrantedAuthority(p.getName().trim().toLowerCase()));
+                if (p.getKey() != null) { authorities.add(new SimpleGrantedAuthority(p.getKey())); authorities.add(new SimpleGrantedAuthority(p.getKey().trim().toLowerCase())); }
+            });
+        }
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                permissions);
+                authorities);
     }
 
     @Override

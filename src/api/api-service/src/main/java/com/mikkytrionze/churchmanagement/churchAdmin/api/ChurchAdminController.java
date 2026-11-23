@@ -16,14 +16,14 @@ public class ChurchAdminController {
     private final ChurchAdminService churchAdminService;
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_update_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'UPDATE')")
     public ResponseEntity<Boolean> makeChurchAdmin(@PathVariable Long id) {
         boolean response = this.churchAdminService.setChurchAdmin(id);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_view_church') and hasAuthority('can_read_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'VIEW') and @perm.has(authentication, 'CHURCH', 'READ')")
     public ResponseEntity<Boolean> churchHasAdmin(@PathVariable Long id) {
         boolean hasAdmin = this.churchAdminService.churchHasAdmin(id);
         return ResponseEntity.ok().body(hasAdmin);

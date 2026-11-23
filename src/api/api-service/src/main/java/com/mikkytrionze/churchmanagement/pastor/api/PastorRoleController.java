@@ -22,7 +22,7 @@ public class PastorRoleController {
     private final PastorRoleService pastorRoleService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('can_view_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'VIEW')")
     public ResponseEntity<Page<PastorRoleResponse>> getPastorRoles(Pageable pageable) {
         log.info("Fetching pastor roles: {}", pageable);
 
@@ -32,7 +32,7 @@ public class PastorRoleController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_read_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'READ')")
     public ResponseEntity<PastorRoleResponse> getPastorRole(@PathVariable("id") Long id) {
         log.info("Fetching pastor role with id: {}", id);
 

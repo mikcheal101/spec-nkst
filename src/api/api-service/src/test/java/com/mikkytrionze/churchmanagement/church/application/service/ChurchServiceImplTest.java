@@ -27,11 +27,14 @@ class ChurchServiceImplTest {
     @Mock
     private ChurchRepository churchRepository;
 
+    @Mock
+    private com.mikkytrionze.churchmanagement.shared.security.SecurityUtils securityUtils;
+
     private ChurchServiceImpl churchService;
 
     @BeforeEach
     void setUp() {
-        churchService = new ChurchServiceImpl(churchRepository);
+        churchService = new ChurchServiceImpl(churchRepository, securityUtils);
     }
 
     @Test
@@ -71,6 +74,7 @@ class ChurchServiceImplTest {
         Page<Church> churchPage = new PageImpl<>(List.of(church));
 
         when(churchRepository.findAll(pageable)).thenReturn(churchPage);
+        when(securityUtils.hasChurchScope(1L)).thenReturn(true);
 
         Page<ChurchResponse> result = churchService.getChurches(pageable);
 

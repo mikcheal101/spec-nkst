@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,8 +26,21 @@ public class User extends Identity {
     @Column(nullable = false)
     private String password;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private RefreshToken refreshToken;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false, length = 32)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
+
+    @Builder.Default
+    @Column(name = "is_root_super_admin", nullable = false)
+    private boolean rootSuperAdmin = false;
+
+    @Builder.Default
+    @Column(name = "permission_epoch", nullable = false)
+    private long permissionEpoch = 0L;
+
+    @Column(name = "last_security_change_at")
+    private Instant lastSecurityChangeAt;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)

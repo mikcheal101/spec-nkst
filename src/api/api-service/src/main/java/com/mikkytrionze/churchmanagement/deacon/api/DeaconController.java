@@ -25,7 +25,7 @@ public class DeaconController {
     private final DeaconService deaconService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('can_view_deacons')")
+    @PreAuthorize("@perm.has(authentication, 'DEACONS', 'VIEW')")
     public ResponseEntity<Page<MemberResponse>> getDeacons(Pageable pageable) {
         log.info("Fetching paginated list of deacons with page number: {} and size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
@@ -38,7 +38,7 @@ public class DeaconController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_read_deacons')")
+    @PreAuthorize("@perm.has(authentication, 'DEACONS', 'READ')")
     public ResponseEntity<MemberResponse> getDeacon(@PathVariable("id") Long id) {
         log.info("Fetching details for deacon with ID: {}", id);
 
@@ -49,7 +49,7 @@ public class DeaconController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('can_create_deacons')")
+    @PreAuthorize("@perm.has(authentication, 'DEACONS', 'CREATE')")
     public ResponseEntity<Boolean> makeDeacon(@Valid @RequestBody MakeDeaconRequest makeDeaconRequest) {
         log.info("Processing request to promote member to deacon. Request details: {}", makeDeaconRequest);
 
@@ -60,7 +60,7 @@ public class DeaconController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('can_view_deacons')")
+    @PreAuthorize("@perm.has(authentication, 'DEACONS', 'VIEW')")
     public ResponseEntity<Page<MemberResponse>> search(
             @RequestParam("query") String query,
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {
@@ -75,7 +75,7 @@ public class DeaconController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_update_deacons')")
+    @PreAuthorize("@perm.has(authentication, 'DEACONS', 'UPDATE')")
     public ResponseEntity<MemberResponse> updateDeacon(@PathVariable("id") Long id,
                                                        @Valid @RequestBody UpdateMemberRequest memberRequest) {
         var response = deaconService.updateDeacon(id, memberRequest);

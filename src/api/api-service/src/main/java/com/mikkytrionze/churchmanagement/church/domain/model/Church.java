@@ -33,6 +33,14 @@ public class Church extends Auditable {
 
     private String emailAddress;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private String status = "ACTIVE";
+
+    @Column(name = "church_type", nullable = false)
+    @Builder.Default
+    private String churchType = "PARENT";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "church_id")
     private Church parentChurch;

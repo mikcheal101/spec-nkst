@@ -13,5 +13,11 @@
     <include file="v1/006-create-user-permissions-join-table.xml" relativeToChangelogFile="true"/>
     <include file="v1/007-create-role-permissions-join-table.xml" relativeToChangelogFile="true"/>
     <include file="v1/008-create-sequence-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v2/009-alter-users-governance-fields.xml" relativeToChangelogFile="true"/>
+    <include file="v2/010-alter-roles-protection-fields.xml" relativeToChangelogFile="true"/>
+    <include file="v2/011-alter-permissions-canonical-fields.xml" relativeToChangelogFile="true"/>
+    <include file="v2/012-alter-refresh-tokens-rotation-fields.xml" relativeToChangelogFile="true"/>
+    <include file="v2/013-create-audit-log-table.xml" relativeToChangelogFile="true"/>
 
+    <include file="db/changelog/v2/009-seed-system-configurations.xml"/>
 </databaseChangeLog>

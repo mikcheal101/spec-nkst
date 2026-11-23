@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+    <changeSet id="009-seed-system-configurations" author="opencode-eng">
+        <preConditions onFail="MARK_RAN"><tableExists tableName="system_configurations"/></preConditions>
+        <insert tableName="system_configurations"><column name="config_key" value="auth.access.ttl.minutes"/><column name="config_value" value="15"/><column name="description" value="Access token TTL minutes"/></insert>
+        <insert tableName="system_configurations"><column name="config_key" value="auth.refresh.ttl.days"/><column name="config_value" value="7"/><column name="description" value="Refresh token TTL days"/></insert>
+        <insert tableName="system_configurations"><column name="config_key" value="security.direct.permissions.enabled"/><column name="config_value" value="false"/><column name="description" value="Allow direct user permission grants"/></insert>
+    </changeSet>
+</databaseChangeLog>

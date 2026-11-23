@@ -27,6 +27,7 @@ import java.util.Objects;
 public class ChurchServiceImpl implements ChurchService {
 
     private final ChurchRepository churchRepository;
+    private final com.mikkytrionze.churchmanagement.shared.security.SecurityUtils securityUtils;
 
     @Override
     @CacheEvict(value = "churches", beforeInvocation = true, allEntries = true)
@@ -44,6 +45,7 @@ public class ChurchServiceImpl implements ChurchService {
     @Cacheable(value = "churches", key = "#id")
     public ChurchResponse getChurch(Long id) {
         log.info("Get Church with id: {}", id);
+        securityUtils.assertChurchScope(id);
         Church church = getChurchById(id);
         return ChurchMapper.toResponse(church);
     }
@@ -54,9 +56,16 @@ public class ChurchServiceImpl implements ChurchService {
 
         Church parentChurch = churchRequest.getParentChurchId() == null ? null : churchRepository.findById(churchRequest.getParentChurchId()).orElse(null);
 
+        if (parentChurch != null && !"ACTIVE".equalsIgnoreCase(parentChurch.getStatus())) {
+            throw new IllegalArgumentException("Parent church must be active");
+        }
         Church church = Church.builder()
                 .name(churchRequest.getName().toUpperCase())
                 .address(churchRequest.getAddress())
+                .emailAddress(churchRequest.getEmailAddress())
+                .telNumber(churchRequest.getTelNumber())
+                .status(churchRequest.getStatus() == null ? "ACTIVE" : churchRequest.getStatus().toUpperCase())
+                .churchType(parentChurch == null ? "PARENT" : "SUB_CHURCH")
                 .parentChurch(parentChurch)
                 .build();
         Church savedChurch = churchRepository.save(church);
@@ -89,6 +98,18 @@ public class ChurchServiceImpl implements ChurchService {
 
         existingChurch.setName(churchRequest.getName().toUpperCase());
         existingChurch.setAddress(churchRequest.getAddress());
+        existingChurch.setEmailAddress(churchRequest.getEmailAddress());
+        existingChurch.setTelNumber(churchRequest.getTelNumber());
+        if (churchRequest.getStatus() != null) {
+            String next = churchRequest.getStatus().toUpperCase();
+            String current = existingChurch.getStatus() == null ? "ACTIVE" : existingChurch.getStatus().toUpperCase();
+            if (!isAllowedTransition(current, next)) throw new IllegalArgumentException("Invalid church status transition: " + current + " -> " + next);
+            existingChurch.setStatus(next);
+            if (!"ACTIVE".equals(next)) {
+                existingChurch.getSubChurches().forEach(sc -> { if (isAllowedTransition(sc.getStatus()==null?"ACTIVE":sc.getStatus().toUpperCase(), next)) sc.setStatus(next); });
+            }
+        }
+        existingChurch.setChurchType(existingChurch.getParentChurch() == null ? "PARENT" : "SUB_CHURCH");
 
         Church updatedChurch = churchRepository.save(existingChurch);
         return ChurchMapper.toResponse(updatedChurch);
@@ -97,18 +118,31 @@ public class ChurchServiceImpl implements ChurchService {
     @Override
     public Page<ChurchResponse> getChurches(Pageable pageable) {
         log.info("Fetching all the churches with pagination: {}", pageable);
-
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean superAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_SUPER_ADMIN".equals(a.getAuthority()) || "SUPER_ADMIN".equals(a.getAuthority()));
         Page<Church> churchPage = churchRepository.findAll(pageable);
+        if (superAdmin) return churchPage.map(ChurchMapper::toResponse);
+        // filter to explicitly scoped churches only
+        var scoped = churchPage.getContent().stream().filter(c -> securityUtils.hasChurchScope(c.getId())).toList();
+        return new org.springframework.data.domain.PageImpl<>(scoped.stream().map(ChurchMapper::toResponse).toList(), pageable, scoped.size());
+    }
 
-        return churchPage.map(ChurchMapper::toResponse);
+    private boolean isAllowedTransition(String current, String next) {
+        if (current.equals(next)) return true;
+        return switch (current) {
+            case "ACTIVE" -> java.util.Set.of("SUSPENDED","INACTIVE","ARCHIVED").contains(next);
+            case "SUSPENDED" -> java.util.Set.of("ACTIVE","INACTIVE","ARCHIVED").contains(next);
+            case "INACTIVE" -> java.util.Set.of("ACTIVE","ARCHIVED").contains(next);
+            case "ARCHIVED" -> false;
+            default -> false;
+        };
     }
 
     @Override
     public Page<ChurchResponse> getSubChurches(Long id, Pageable pageable) {
         log.info("Fetching all the sub churches for church with id: {},  with pagination: {}", id, pageable);
-
+        securityUtils.assertChurchScope(id);
         Page<Church> churchPage = churchRepository.findByParentChurchId(id, pageable);
-
         return churchPage.map(ChurchMapper::toResponse);
     }
 

@@ -24,7 +24,7 @@ public class ElderController {
     private final ElderService elderService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('can_view_elders')")
+    @PreAuthorize("@perm.has(authentication, 'ELDERS', 'VIEW')")
     public ResponseEntity<Page<MemberResponse>> elders(Pageable pageable) {
 
         log.info("Fetching paginated list of elders with page number: {} and size: {}",
@@ -37,7 +37,7 @@ public class ElderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_read_elders')")
+    @PreAuthorize("@perm.has(authentication, 'ELDERS', 'READ')")
     public ResponseEntity<MemberResponse> elder(@PathVariable("id") Long id) {
 
         log.info("Fetching details for elder with ID: {}", id);
@@ -48,7 +48,7 @@ public class ElderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('can_create_elders') OR hasAuthority('can_update_elders')")
+    @PreAuthorize("@perm.has(authentication, 'ELDERS', 'CREATE') or @perm.has(authentication, 'ELDERS', 'UPDATE')")
     public ResponseEntity<Boolean> makeAnElder(@Valid @RequestBody MakeElderRequest makeElderRequest) {
 
         log.info("Processing request to promote member to elder. Request details: {}", makeElderRequest);
@@ -59,7 +59,7 @@ public class ElderController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('can_view_elders')")
+    @PreAuthorize("@perm.has(authentication, 'ELDERS', 'VIEW')")
     public ResponseEntity<Page<MemberResponse>> search(
             @RequestParam(value = "query") String query,
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {

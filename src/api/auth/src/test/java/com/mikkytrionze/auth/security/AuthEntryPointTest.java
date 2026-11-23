@@ -10,7 +10,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.AuthenticationException;
 
-import static org.mockito.Mockito.verify;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthEntryPointTest {
@@ -33,8 +37,18 @@ class AuthEntryPointTest {
 
     @Test
     void commence_sendsUnauthorizedError() throws Exception {
+        when(request.getRequestURI()).thenReturn("/api/v1/test");
+        when(request.getHeader("X-Correlation-ID")).thenReturn("cid-1");
+        StringWriter sw = new StringWriter();
+        when(response.getWriter()).thenReturn(new PrintWriter(sw));
+
         authEntryPoint.commence(request, response, authException);
 
-        verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized!");
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("application/json");
+        verify(response).setHeader("X-Correlation-ID", "cid-1");
+        String body = sw.toString();
+        assertTrue(body.contains("\"AUTH_UNAUTHORIZED\""));
+        assertTrue(body.contains("\"status\":401"));
     }
 }

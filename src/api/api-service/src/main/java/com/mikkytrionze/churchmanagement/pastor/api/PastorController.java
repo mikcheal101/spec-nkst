@@ -23,7 +23,7 @@ public class PastorController {
     private final PastorService pastorService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('can_view_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'VIEW')")
     public ResponseEntity<Page<PastorResponse>> getPastors(
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {
         Page<PastorResponse> pastors = pastorService.getPastors(pageable);
@@ -31,21 +31,21 @@ public class PastorController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_read_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'READ')")
     public ResponseEntity<PastorResponse> getPastor(@PathVariable("id") Long id) {
         PastorResponse pastorResponse = pastorService.getPastorById(id);
         return ResponseEntity.ok(pastorResponse);
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('can_create_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'CREATE')")
     public ResponseEntity<PastorResponse> createPastor(@RequestBody @Valid PastorRequest pastorRequest) {
         PastorResponse pastorResponse = pastorService.createPastor(pastorRequest);
         return ResponseEntity.ok(pastorResponse);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_update_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'UPDATE')")
     public ResponseEntity<PastorResponse> updatePastor(
             @PathVariable("id") Long id,
             @RequestBody @Valid PastorRequest pastorRequest) {
@@ -54,7 +54,7 @@ public class PastorController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_delete_pastor')")
+    @PreAuthorize("@perm.has(authentication, 'PASTOR', 'DELETE')")
     public ResponseEntity<Void> deletePastor(@PathVariable("id") Long id) {
         this.pastorService.deletePastorById(id);
         return ResponseEntity.noContent().build();

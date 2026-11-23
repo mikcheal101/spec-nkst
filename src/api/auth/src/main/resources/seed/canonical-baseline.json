@@ -1,0 +1,901 @@
+{
+  "capturedAt": "2026-11-22T00:00:00Z",
+  "metadata": {
+    "notes": "Canonical baseline captured from live DB; extend via reviewed seed/migration updates only.",
+    "rootSuperAdminUsername": "super-admin"
+  },
+  "permissions": [
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 1,
+      "key": "CHURCH:VIEW",
+      "legacyAlias": "CAN_VIEW_CHURCH",
+      "resource": "CHURCH"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 2,
+      "key": "CHURCH:READ",
+      "legacyAlias": "CAN_READ_CHURCH",
+      "resource": "CHURCH"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 3,
+      "key": "CHURCH:UPDATE",
+      "legacyAlias": "CAN_UPDATE_CHURCH",
+      "resource": "CHURCH"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 4,
+      "key": "CHURCH:CREATE",
+      "legacyAlias": "CAN_CREATE_CHURCH",
+      "resource": "CHURCH"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 5,
+      "key": "CHURCH:DELETE",
+      "legacyAlias": "CAN_DELETE_CHURCH",
+      "resource": "CHURCH"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 6,
+      "key": "SETTINGS:VIEW",
+      "legacyAlias": "CAN_VIEW_SETTINGS",
+      "resource": "SETTINGS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 7,
+      "key": "SETTINGS:READ",
+      "legacyAlias": "CAN_READ_SETTINGS",
+      "resource": "SETTINGS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 8,
+      "key": "SETTINGS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_SETTINGS",
+      "resource": "SETTINGS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 9,
+      "key": "SETTINGS:CREATE",
+      "legacyAlias": "CAN_CREATE_SETTINGS",
+      "resource": "SETTINGS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 10,
+      "key": "SETTINGS:DELETE",
+      "legacyAlias": "CAN_DELETE_SETTINGS",
+      "resource": "SETTINGS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 11,
+      "key": "PASTORS:VIEW",
+      "legacyAlias": "CAN_VIEW_PASTORS",
+      "resource": "PASTORS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 12,
+      "key": "PASTORS:READ",
+      "legacyAlias": "CAN_READ_PASTORS",
+      "resource": "PASTORS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 13,
+      "key": "PASTORS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_PASTORS",
+      "resource": "PASTORS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 14,
+      "key": "PASTORS:CREATE",
+      "legacyAlias": "CAN_CREATE_PASTORS",
+      "resource": "PASTORS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 15,
+      "key": "PASTORS:DELETE",
+      "legacyAlias": "CAN_DELETE_PASTORS",
+      "resource": "PASTORS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 16,
+      "key": "ELDERS:VIEW",
+      "legacyAlias": "CAN_VIEW_ELDERS",
+      "resource": "ELDERS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 17,
+      "key": "ELDERS:READ",
+      "legacyAlias": "CAN_READ_ELDERS",
+      "resource": "ELDERS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 18,
+      "key": "ELDERS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_ELDERS",
+      "resource": "ELDERS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 19,
+      "key": "ELDERS:CREATE",
+      "legacyAlias": "CAN_CREATE_ELDERS",
+      "resource": "ELDERS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 20,
+      "key": "ELDERS:DELETE",
+      "legacyAlias": "CAN_DELETE_ELDERS",
+      "resource": "ELDERS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 21,
+      "key": "MEMBERS:VIEW",
+      "legacyAlias": "CAN_VIEW_MEMBERS",
+      "resource": "MEMBERS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 22,
+      "key": "MEMBERS:READ",
+      "legacyAlias": "CAN_READ_MEMBERS",
+      "resource": "MEMBERS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 23,
+      "key": "MEMBERS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_MEMBERS",
+      "resource": "MEMBERS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 24,
+      "key": "MEMBERS:CREATE",
+      "legacyAlias": "CAN_CREATE_MEMBERS",
+      "resource": "MEMBERS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 25,
+      "key": "MEMBERS:DELETE",
+      "legacyAlias": "CAN_DELETE_MEMBERS",
+      "resource": "MEMBERS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 26,
+      "key": "DEACONS:VIEW",
+      "legacyAlias": "CAN_VIEW_DEACONS",
+      "resource": "DEACONS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 27,
+      "key": "DEACONS:READ",
+      "legacyAlias": "CAN_READ_DEACONS",
+      "resource": "DEACONS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 28,
+      "key": "DEACONS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_DEACONS",
+      "resource": "DEACONS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 29,
+      "key": "DEACONS:CREATE",
+      "legacyAlias": "CAN_CREATE_DEACONS",
+      "resource": "DEACONS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 30,
+      "key": "DEACONS:DELETE",
+      "legacyAlias": "CAN_DELETE_DEACONS",
+      "resource": "DEACONS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 31,
+      "key": "PROJECTS:VIEW",
+      "legacyAlias": "CAN_VIEW_PROJECTS",
+      "resource": "PROJECTS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 32,
+      "key": "PROJECTS:READ",
+      "legacyAlias": "CAN_READ_PROJECTS",
+      "resource": "PROJECTS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 33,
+      "key": "PROJECTS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_PROJECTS",
+      "resource": "PROJECTS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 34,
+      "key": "PROJECTS:CREATE",
+      "legacyAlias": "CAN_CREATE_PROJECTS",
+      "resource": "PROJECTS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 35,
+      "key": "PROJECTS:DELETE",
+      "legacyAlias": "CAN_DELETE_PROJECTS",
+      "resource": "PROJECTS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 36,
+      "key": "NOTIFICATIONS:VIEW",
+      "legacyAlias": "CAN_VIEW_NOTIFICATIONS",
+      "resource": "NOTIFICATIONS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 37,
+      "key": "NOTIFICATIONS:READ",
+      "legacyAlias": "CAN_READ_NOTIFICATIONS",
+      "resource": "NOTIFICATIONS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 38,
+      "key": "NOTIFICATIONS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_NOTIFICATIONS",
+      "resource": "NOTIFICATIONS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 39,
+      "key": "NOTIFICATIONS:CREATE",
+      "legacyAlias": "CAN_CREATE_NOTIFICATIONS",
+      "resource": "NOTIFICATIONS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 40,
+      "key": "NOTIFICATIONS:DELETE",
+      "legacyAlias": "CAN_DELETE_NOTIFICATIONS",
+      "resource": "NOTIFICATIONS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 41,
+      "key": "ANNOUNCEMENTS:VIEW",
+      "legacyAlias": "CAN_VIEW_ANNOUNCEMENTS",
+      "resource": "ANNOUNCEMENTS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 42,
+      "key": "ANNOUNCEMENTS:READ",
+      "legacyAlias": "CAN_READ_ANNOUNCEMENTS",
+      "resource": "ANNOUNCEMENTS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 43,
+      "key": "ANNOUNCEMENTS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_ANNOUNCEMENTS",
+      "resource": "ANNOUNCEMENTS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 44,
+      "key": "ANNOUNCEMENTS:CREATE",
+      "legacyAlias": "CAN_CREATE_ANNOUNCEMENTS",
+      "resource": "ANNOUNCEMENTS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 45,
+      "key": "ANNOUNCEMENTS:DELETE",
+      "legacyAlias": "CAN_DELETE_ANNOUNCEMENTS",
+      "resource": "ANNOUNCEMENTS"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 46,
+      "key": "ROLES:VIEW",
+      "legacyAlias": "CAN_VIEW_ROLES",
+      "resource": "ROLES"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 47,
+      "key": "ROLES:READ",
+      "legacyAlias": "CAN_READ_ROLES",
+      "resource": "ROLES"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 48,
+      "key": "ROLES:UPDATE",
+      "legacyAlias": "CAN_UPDATE_ROLES",
+      "resource": "ROLES"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 49,
+      "key": "ROLES:CREATE",
+      "legacyAlias": "CAN_CREATE_ROLES",
+      "resource": "ROLES"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 50,
+      "key": "ROLES:DELETE",
+      "legacyAlias": "CAN_DELETE_ROLES",
+      "resource": "ROLES"
+    },
+    {
+      "action": "VIEW",
+      "active": true,
+      "id": 51,
+      "key": "PERMISSIONS:VIEW",
+      "legacyAlias": "CAN_VIEW_PERMISSIONS",
+      "resource": "PERMISSIONS"
+    },
+    {
+      "action": "READ",
+      "active": true,
+      "id": 52,
+      "key": "PERMISSIONS:READ",
+      "legacyAlias": "CAN_READ_PERMISSIONS",
+      "resource": "PERMISSIONS"
+    },
+    {
+      "action": "UPDATE",
+      "active": true,
+      "id": 53,
+      "key": "PERMISSIONS:UPDATE",
+      "legacyAlias": "CAN_UPDATE_PERMISSIONS",
+      "resource": "PERMISSIONS"
+    },
+    {
+      "action": "CREATE",
+      "active": true,
+      "id": 54,
+      "key": "PERMISSIONS:CREATE",
+      "legacyAlias": "CAN_CREATE_PERMISSIONS",
+      "resource": "PERMISSIONS"
+    },
+    {
+      "action": "DELETE",
+      "active": true,
+      "id": 55,
+      "key": "PERMISSIONS:DELETE",
+      "legacyAlias": "CAN_DELETE_PERMISSIONS",
+      "resource": "PERMISSIONS"
+    }
+  ],
+  "rolePermissions": [
+    {
+      "permissionId": 1,
+      "roleId": 1
+    },
+    {
+      "permissionId": 2,
+      "roleId": 1
+    },
+    {
+      "permissionId": 3,
+      "roleId": 1
+    },
+    {
+      "permissionId": 4,
+      "roleId": 1
+    },
+    {
+      "permissionId": 5,
+      "roleId": 1
+    },
+    {
+      "permissionId": 6,
+      "roleId": 1
+    },
+    {
+      "permissionId": 7,
+      "roleId": 1
+    },
+    {
+      "permissionId": 8,
+      "roleId": 1
+    },
+    {
+      "permissionId": 9,
+      "roleId": 1
+    },
+    {
+      "permissionId": 10,
+      "roleId": 1
+    },
+    {
+      "permissionId": 11,
+      "roleId": 1
+    },
+    {
+      "permissionId": 12,
+      "roleId": 1
+    },
+    {
+      "permissionId": 13,
+      "roleId": 1
+    },
+    {
+      "permissionId": 14,
+      "roleId": 1
+    },
+    {
+      "permissionId": 15,
+      "roleId": 1
+    },
+    {
+      "permissionId": 21,
+      "roleId": 1
+    },
+    {
+      "permissionId": 22,
+      "roleId": 1
+    },
+    {
+      "permissionId": 23,
+      "roleId": 1
+    },
+    {
+      "permissionId": 24,
+      "roleId": 1
+    },
+    {
+      "permissionId": 25,
+      "roleId": 1
+    },
+    {
+      "permissionId": 41,
+      "roleId": 1
+    },
+    {
+      "permissionId": 42,
+      "roleId": 1
+    },
+    {
+      "permissionId": 43,
+      "roleId": 1
+    },
+    {
+      "permissionId": 44,
+      "roleId": 1
+    },
+    {
+      "permissionId": 45,
+      "roleId": 1
+    },
+    {
+      "permissionId": 46,
+      "roleId": 1
+    },
+    {
+      "permissionId": 47,
+      "roleId": 1
+    },
+    {
+      "permissionId": 48,
+      "roleId": 1
+    },
+    {
+      "permissionId": 49,
+      "roleId": 1
+    },
+    {
+      "permissionId": 50,
+      "roleId": 1
+    },
+    {
+      "permissionId": 51,
+      "roleId": 1
+    },
+    {
+      "permissionId": 52,
+      "roleId": 1
+    },
+    {
+      "permissionId": 53,
+      "roleId": 1
+    },
+    {
+      "permissionId": 54,
+      "roleId": 1
+    },
+    {
+      "permissionId": 55,
+      "roleId": 1
+    },
+    {
+      "permissionId": 16,
+      "roleId": 2
+    },
+    {
+      "permissionId": 17,
+      "roleId": 2
+    },
+    {
+      "permissionId": 18,
+      "roleId": 2
+    },
+    {
+      "permissionId": 19,
+      "roleId": 2
+    },
+    {
+      "permissionId": 20,
+      "roleId": 2
+    },
+    {
+      "permissionId": 21,
+      "roleId": 2
+    },
+    {
+      "permissionId": 22,
+      "roleId": 2
+    },
+    {
+      "permissionId": 23,
+      "roleId": 2
+    },
+    {
+      "permissionId": 24,
+      "roleId": 2
+    },
+    {
+      "permissionId": 25,
+      "roleId": 2
+    },
+    {
+      "permissionId": 26,
+      "roleId": 2
+    },
+    {
+      "permissionId": 27,
+      "roleId": 2
+    },
+    {
+      "permissionId": 28,
+      "roleId": 2
+    },
+    {
+      "permissionId": 29,
+      "roleId": 2
+    },
+    {
+      "permissionId": 30,
+      "roleId": 2
+    },
+    {
+      "permissionId": 41,
+      "roleId": 2
+    },
+    {
+      "permissionId": 42,
+      "roleId": 2
+    },
+    {
+      "permissionId": 43,
+      "roleId": 2
+    },
+    {
+      "permissionId": 44,
+      "roleId": 2
+    },
+    {
+      "permissionId": 45,
+      "roleId": 2
+    },
+    {
+      "permissionId": 1,
+      "roleId": 3
+    },
+    {
+      "permissionId": 2,
+      "roleId": 3
+    },
+    {
+      "permissionId": 11,
+      "roleId": 3
+    },
+    {
+      "permissionId": 16,
+      "roleId": 3
+    },
+    {
+      "permissionId": 21,
+      "roleId": 3
+    },
+    {
+      "permissionId": 26,
+      "roleId": 3
+    },
+    {
+      "permissionId": 31,
+      "roleId": 3
+    },
+    {
+      "permissionId": 41,
+      "roleId": 3
+    },
+    {
+      "permissionId": 42,
+      "roleId": 3
+    },
+    {
+      "permissionId": 1,
+      "roleId": 4
+    },
+    {
+      "permissionId": 11,
+      "roleId": 4
+    },
+    {
+      "permissionId": 16,
+      "roleId": 4
+    },
+    {
+      "permissionId": 21,
+      "roleId": 4
+    },
+    {
+      "permissionId": 26,
+      "roleId": 4
+    },
+    {
+      "permissionId": 31,
+      "roleId": 4
+    },
+    {
+      "permissionId": 33,
+      "roleId": 4
+    },
+    {
+      "permissionId": 34,
+      "roleId": 4
+    },
+    {
+      "permissionId": 41,
+      "roleId": 4
+    },
+    {
+      "permissionId": 1,
+      "roleId": 5
+    },
+    {
+      "permissionId": 11,
+      "roleId": 5
+    },
+    {
+      "permissionId": 16,
+      "roleId": 5
+    },
+    {
+      "permissionId": 21,
+      "roleId": 5
+    },
+    {
+      "permissionId": 22,
+      "roleId": 5
+    },
+    {
+      "permissionId": 26,
+      "roleId": 5
+    },
+    {
+      "permissionId": 31,
+      "roleId": 5
+    },
+    {
+      "permissionId": 41,
+      "roleId": 5
+    },
+    {
+      "permissionId": 1,
+      "roleId": 6
+    },
+    {
+      "permissionId": 11,
+      "roleId": 6
+    },
+    {
+      "permissionId": 16,
+      "roleId": 6
+    },
+    {
+      "permissionId": 21,
+      "roleId": 6
+    },
+    {
+      "permissionId": 26,
+      "roleId": 6
+    },
+    {
+      "permissionId": 31,
+      "roleId": 6
+    },
+    {
+      "permissionId": 32,
+      "roleId": 6
+    },
+    {
+      "permissionId": 34,
+      "roleId": 6
+    },
+    {
+      "permissionId": 41,
+      "roleId": 6
+    }
+  ],
+  "roles": [
+    {
+      "active": true,
+      "displayName": "Super Admin",
+      "id": 1,
+      "isProtected": true,
+      "isSystem": true,
+      "name": "SUPER_ADMIN"
+    },
+    {
+      "active": true,
+      "displayName": "Church Admin",
+      "id": 2,
+      "isProtected": true,
+      "isSystem": true,
+      "name": "CHURCH_ADMIN"
+    },
+    {
+      "active": true,
+      "displayName": "Pastor",
+      "id": 3,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "PASTOR"
+    },
+    {
+      "active": true,
+      "displayName": "Elder",
+      "id": 4,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "ELDER"
+    },
+    {
+      "active": true,
+      "displayName": "Deacon",
+      "id": 5,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "DEACON"
+    },
+    {
+      "active": true,
+      "displayName": "Treasurer",
+      "id": 6,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "TREASURER"
+    },
+    {
+      "active": true,
+      "displayName": "Member Baptised",
+      "id": 7,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "MEMBER_BAPTISED"
+    },
+    {
+      "active": true,
+      "displayName": "Member Unbaptised",
+      "id": 8,
+      "isProtected": false,
+      "isSystem": true,
+      "name": "MEMBER_UNBAPTISED"
+    }
+  ],
+  "source": {
+    "capturedFrom": "Settings -> Roles & Permissions UI (live DB)",
+    "container": "identity-auth-db",
+    "database": "church_auth_db",
+    "option": "C-hybrid",
+    "type": "live-db-snapshot"
+  },
+  "userRoles": [
+    {
+      "roleId": 1,
+      "userId": 1
+    }
+  ],
+  "users": [
+    {
+      "accountStatus": "ACTIVE",
+      "id": 1,
+      "isRootSuperAdmin": true,
+      "passwordHash": "$2a$10$ETjUIhB0KJsdUyMqS/4j6OZkt1DZTMxFy5jIkbE2bTmTdpE8Q1ZqO",
+      "permissionEpoch": 0,
+      "username": "super-admin"
+    }
+  ],
+  "version": "1.0.0"
+}

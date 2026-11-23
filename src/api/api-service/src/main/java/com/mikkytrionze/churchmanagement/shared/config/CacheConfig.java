@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(RedisConnectionFactory.class)
 public class CacheConfig {
 
     @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(org.springframework.cache.CacheManager.class)
     public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
 
         Map<String, RedisCacheConfiguration> cacheConfigurationMap = new HashMap<>();

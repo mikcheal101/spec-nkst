@@ -27,7 +27,7 @@ public class ChurchController {
     private final MemberService memberService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('can_view_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'VIEW')")
     public ResponseEntity<Page<ChurchResponse>> getChurches(
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {
         Page<ChurchResponse> churches = this.churchService.getChurches(pageable);
@@ -35,14 +35,14 @@ public class ChurchController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('can_create_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'CREATE')")
     public ResponseEntity<ChurchResponse> createChurch(@RequestBody @Valid ChurchRequest churchRequest) {
         ChurchResponse churchResponse = this.churchService.createChurch(churchRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(churchResponse);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_update_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'UPDATE')")
     public ResponseEntity<ChurchResponse> updateChurch(
             @PathVariable("id") Long id,
             @RequestBody @Valid ChurchRequest churchRequest) {
@@ -51,21 +51,21 @@ public class ChurchController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_read_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'READ')")
     public ResponseEntity<ChurchResponse> getChurch(@PathVariable("id") Long id) {
         ChurchResponse churchResponse = this.churchService.getChurch(id);
         return ResponseEntity.ok().body(churchResponse);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('can_delete_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'DELETE')")
     public ResponseEntity<Void> deleteChurch(@PathVariable("id") Long id) {
         this.churchService.deleteChurch(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/sub-churches/{id}")
-    @PreAuthorize("hasAuthority('can_view_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'VIEW')")
     public ResponseEntity<Page<ChurchResponse>> getSubChurches(
             @PathVariable("id") Long id,
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {
@@ -74,7 +74,7 @@ public class ChurchController {
     }
 
     @GetMapping("/church-admins/{churchId}")
-    @PreAuthorize("hasAuthority('can_update_church')")
+    @PreAuthorize("@perm.has(authentication, 'CHURCH', 'UPDATE')")
     public ResponseEntity<Page<MemberResponse>> fetchChurchAdmins(
             @PathVariable("churchId") Long churchId,
             @PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {

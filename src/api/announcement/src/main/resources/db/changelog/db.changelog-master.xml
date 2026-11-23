@@ -8,4 +8,5 @@
     <include file="migrations/001-create.xml" relativeToChangelogFile="true"/>
     <include file="migrations/002-update.xml" relativeToChangelogFile="true"/>
 
+    <include file="db/changelog/v2/002-add-announcement-scope-fields.xml"/>
 </databaseChangeLog>

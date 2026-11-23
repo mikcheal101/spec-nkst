@@ -45,7 +45,7 @@ class GlobalExceptionHandlerTest {
     void shouldHandleDataIntegrityViolation() throws Exception {
         mockMvc.perform(get("/dummy/conflict"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("CONFLICT: A record with these details already exist!."))
+                .andExpect(jsonPath("$.code").value("CONFLICT"))
                 .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()));
     }
 
@@ -78,7 +78,7 @@ class GlobalExceptionHandlerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("name: must not be blank"))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
@@ -90,12 +90,12 @@ class GlobalExceptionHandlerTest {
                 new BeanPropertyBindingResult(new ValidationPayload(), "validationPayload");
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(parameter, bindingResult);
 
-        ResponseEntity<ErrorResponse> response = handler.handleValidationException(exception);
+        ResponseEntity<ErrorResponse> response = handler.handleValidationException(exception, new org.springframework.mock.web.MockHttpServletRequest());
 
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Validation failed", response.getBody().getMessage());
+        assertEquals("VALIDATION_ERROR", response.getBody().getCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
     }
 

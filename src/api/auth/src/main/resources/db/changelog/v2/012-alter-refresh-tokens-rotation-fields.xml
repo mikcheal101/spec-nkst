@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd">
+    <changeSet id="012-alter-refresh-tokens-rotation-fields" author="opencode-eng">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="refresh_tokens"/>
+        </preConditions>
+        <addColumn tableName="refresh_tokens">
+            <column name="token_jti" type="VARCHAR(255)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="family_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="token_hash" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="issued_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rotated_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="revoked_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="replaced_by_jti" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="revocation_reason" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_agent" type="VARCHAR(512)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

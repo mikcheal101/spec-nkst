@@ -45,6 +45,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse getById(Long id) {
         log.info("Getting Member by Id: {}", id);
 
+        securityUtils.assertChurchScope(findById(id,null).getChurch().getId());
         Member member = findById(id, null);
 
         return MemberMapper.toResponse(member);
@@ -71,8 +72,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberResponse saveMember(MemberRequest memberRequest) {
+        securityUtils.assertChurchScope(memberRequest.getChurchId());
         Church church = churchRepository.findById(memberRequest.getChurchId())
                 .orElseThrow(() -> new ResourceNotFoundException("Church", memberRequest.getChurchId()));
+        if (!"ACTIVE".equalsIgnoreCase(church.getStatus())) throw new IllegalArgumentException("Church is not active");
 
         Member member = Member.builder()
                 .tel(memberRequest.getTel())
@@ -137,8 +140,18 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (Boolean.TRUE.equals(memberRequest.getIsBaptised())) {
-            BaptismRecord baptismRecord = getBaptismRecord(memberRequest, savedMember.getBaptismRecord());
-            savedMember.setBaptismRecord(baptismRecordService.update(baptismRecord.getId(), baptismRecord));
+            if (memberRequest.getDateOfBaptism() == null || memberRequest.getSerialNumber() == null) {
+                throw new IllegalArgumentException("Baptised members require baptism date and serial number");
+            }
+            BaptismRecord existing = savedMember.getBaptismRecord();
+            BaptismRecord baptismRecord = getBaptismRecord(memberRequest, existing);
+            if (existing == null) {
+                savedMember.setBaptismRecord(baptismRecordService.save(baptismRecord));
+            } else {
+                savedMember.setBaptismRecord(baptismRecordService.update(existing.getId(), baptismRecord));
+            }
+        } else {
+            savedMember.setBaptismRecord(null);
         }
 
         Member updatedMember = memberRepository.save(savedMember);
@@ -159,6 +172,7 @@ public class MemberServiceImpl implements MemberService {
     public Page<MemberResponse> getAllChurchMembers(Long churchId, Pageable pageable) {
         log.info("Fetching all members of a church with id: {}, page: {}", churchId, pageable);
 
+        securityUtils.assertChurchScope(churchId);
         Page<Member> churchMembers = memberRepository.findAllByChurchId(churchId, pageable);
 
         return churchMembers.map(MemberMapper::toResponse);
@@ -168,6 +182,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse getChurchMember(Long churchId, Long memberId) {
         log.info("Getting church member with id: {} from church with id: {}", memberId, churchId);
 
+        securityUtils.assertChurchScope(churchId);
         Member member = findById(memberId, churchId);
 
         return MemberMapper.toResponse(member);
@@ -207,13 +222,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private static @NonNull BaptismRecord getBaptismRecord(UpdateMemberRequest memberRequest, BaptismRecord baptismRecord) {
-        baptismRecord.setWorshipCenter(memberRequest.getWorshipCenter());
-        baptismRecord.setDateOfBaptism(memberRequest.getDateOfBaptism());
-        baptismRecord.setSerialNumber(memberRequest.getSerialNumber());
-        baptismRecord.setBibleVerse(memberRequest.getBibleVerse());
-        baptismRecord.setBaptizedBy(memberRequest.getBaptisedBy());
-        baptismRecord.setRemark(memberRequest.getRemark());
-        return baptismRecord;
+        BaptismRecord br = baptismRecord != null ? baptismRecord : new BaptismRecord();
+        br.setWorshipCenter(memberRequest.getWorshipCenter());
+        br.setDateOfBaptism(memberRequest.getDateOfBaptism());
+        br.setSerialNumber(memberRequest.getSerialNumber());
+        br.setBibleVerse(memberRequest.getBibleVerse());
+        br.setBaptizedBy(memberRequest.getBaptisedBy());
+        br.setRemark(memberRequest.getRemark());
+        return br;
     }
 
     private Member findById(Long id, Long churchId) throws IllegalArgumentException, ResourceNotFoundException {
@@ -251,8 +267,9 @@ public class MemberServiceImpl implements MemberService {
                 .build();
 
         if (Boolean.TRUE.equals(isBaptised)) {
+            if (baptismalNumber == null || baptismalNumber.isBlank()) throw new IllegalArgumentException("Baptised member requires baptismal number");
             BaptismRecord baptismRecord = BaptismRecord.builder()
-                    .serialNumber(baptismalNumber != null ? Integer.parseInt(baptismalNumber) : 0)
+                    .serialNumber(Integer.parseInt(baptismalNumber))
                     .build();
             member.setBaptismRecord(baptismRecordService.save(baptismRecord));
         }

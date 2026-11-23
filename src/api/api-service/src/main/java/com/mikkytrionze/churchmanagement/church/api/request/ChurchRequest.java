@@ -23,4 +23,7 @@ public class ChurchRequest {
     private String telNumber;
 
     private Long parentChurchId;
+
+    // ACTIVE, SUSPENDED, INACTIVE, ARCHIVED
+    private String status;
 }

@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: Profile Hydration & Save Persistence API
+  version: 1.0.0
+  description: |
+    Authenticated current-user profile read/update contract for /profile.
+    Error responses follow standardized api-service ErrorResponse shape.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/profile:
+    get:
+      summary: Get current authenticated user profile
+      operationId: getCurrentProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current profile returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      summary: Update current authenticated user profile
+      operationId: updateCurrentProfile
+      description: |
+        Persists supported editable fields only: firstName, lastName, middleName, emailAddress, tel.
+        Partial-safe: unspecified/untouched fields must not be clobbered.
+        Concurrent valid saves use last-save-wins; latest persisted state is returned.
+        Duplicate email/phone conflicts return standardized HTTP 409 with code `PROFILE_CONTACT_CONFLICT` and a generic message that does not identify the conflicting field.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+      responses:
+        '200':
+          description: Profile updated; latest persisted profile returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ProfileResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phoneNumber:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+          readOnly: true
+    ProfileUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: Supported editable profile fields. Omitted fields must not be clobbered.
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        middleName:
+          type: string
+          nullable: true
+        emailAddress:
+          type: string
+          format: email
+          nullable: true
+          description: Optional; format-validated when provided.
+        tel:
+          type: string
+          pattern: '^(?=.*(?:\d.*){7,15})[+()\-\s\d]{7,20}$'
+          description: Required. Trimmed; 7-20 chars allowing digits/spaces/+/-/parentheses and containing 7-15 digits.
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        correlationId:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+  responses:
+    BadRequest:
+      description: Validation failure; no persistence.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Generic duplicate email/phone conflict; no conflicting field identified; no persistence. code=PROFILE_CONTACT_CONFLICT.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required/invalid/expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated but not authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Authenticated user/profile resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Request throttled.
+      headers:
+        Retry-After:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

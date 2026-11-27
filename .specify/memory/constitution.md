@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | **Name** | church-management-system |
-| **Constitution Version** | 1.1.0 |
+| **Constitution Version** | 1.2.0 |
 | **Ratified** | TODO(RATIFICATION_DATE): confirm original adoption date |
-| **Last Amended** | 2026-11-10 |
+| **Last Amended** | 2026-11-23 |
 
 ---
 
@@ -234,6 +234,13 @@ Every user-facing feature, UI workflow, and public-facing interaction in the web
 
 Work SHOULD follow spec-driven flow where applicable (spec → plan → tasks → implement → verify) with constitution compliance checked during planning and review.
 
+**Feature branching & spec creation (NON-NEGOTIABLE for `/speckit.specify`)**:
+
+- Every spec created using `/speckit.specify` MUST be created on a new feature branch; the command MUST NOT create or update feature specs directly on long-lived shared branches (`main`, `master`, `staging`, `develop`, or equivalent protected integration branches) unless an explicitly approved, documented exception is recorded.
+- The new feature branch MUST be created from the current branch by default. If the user explicitly requests a different base, the base MUST be `staging` or another explicitly named branch; the selected base MUST be recorded in the command/spec context.
+- Before writing spec artifacts, `/speckit.specify` MUST ensure the working tree is on the correct new feature branch (or create/switch to it through the approved `before_specify` hook/script flow). If branch creation/switching cannot be completed safely, the command MUST stop and report the blocker instead of writing spec files on an unintended branch.
+- The spec directory/feature metadata MAY follow the active Spec Kit feature-directory conventions, but branch isolation is mandatory regardless of directory naming.
+
 PRs MUST include:
 - change summary and risk assessment;
 - test evidence for required layers (unit/integration/contract/E2E as applicable); and
@@ -269,4 +276,4 @@ Compliance MUST be reviewed in planning and PR review. Exceptions MUST be rare, 
 
 ---
 
-**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-11-10
+**Version**: 1.2.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-11-23

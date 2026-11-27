@@ -12,3 +12,4 @@ coverage-json/
 .opencode/
 playwright-report/
 coverage/
+src/web/coverage/*

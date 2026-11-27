@@ -3,6 +3,7 @@ package com.mikkytrionze.churchmanagement.shared.exception.handler;
 import com.mikkytrionze.churchmanagement.shared.dto.response.ErrorResponse;
 import com.mikkytrionze.churchmanagement.shared.exception.BadRequestException;
 import com.mikkytrionze.churchmanagement.shared.exception.KafkaMessagingException;
+import com.mikkytrionze.churchmanagement.shared.exception.ProfileContactConflictException;
 import com.mikkytrionze.churchmanagement.shared.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleConflict(DataIntegrityViolationException exception, HttpServletRequest request) {
-        log.error("Database conflict: {}", exception.getMessage());
+        log.warn("Database conflict: {}", exception.getMostSpecificCause() != null ? exception.getMostSpecificCause().getMessage() : exception.getMessage());
         return build(HttpStatus.CONFLICT, "CONFLICT", "A record with these details already exists.", request, null);
+    }
+
+    @ExceptionHandler(ProfileContactConflictException.class)
+    public ResponseEntity<ErrorResponse> handleProfileContactConflict(ProfileContactConflictException ex, HttpServletRequest request) {
+        log.warn("Profile contact conflict: {}", ex.getMessage());
+        return build(HttpStatus.CONFLICT, "PROFILE_CONTACT_CONFLICT", "Unable to update profile with the provided information.", request, null);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

@@ -92,11 +92,33 @@ export function useProfile() {
   })
 }
 
+export interface ProfileSaveResult {
+  profile: ProfileResponse
+  confirmed: boolean
+  refreshFailed: boolean
+  refreshError?: string
+}
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: ProfileUpdateRequest) => unwrap(profileApi.updateProfile(data)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile'] }),
+    mutationFn: async (data: ProfileUpdateRequest): Promise<ProfileSaveResult> => {
+      const saved = await unwrap(profileApi.updateProfile(data))
+      try {
+        const refreshed = await unwrap(profileApi.getProfile())
+        queryClient.setQueryData(['profile'], refreshed)
+        return { profile: refreshed, confirmed: true, refreshFailed: false }
+      } catch (err) {
+        // Preserve confirmed save state; report refresh failure separately.
+        queryClient.setQueryData(['profile'], saved)
+        return {
+          profile: saved,
+          confirmed: true,
+          refreshFailed: true,
+          refreshError: err instanceof Error ? err.message : 'Failed to refresh profile after save',
+        }
+      }
+    },
   })
 }
 

@@ -7,6 +7,10 @@ interface User {
   username: string
   churchId?: string
   phoneNumber?: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  middleName?: string
   permissions?: string[]
   roles?: string[]
 }
@@ -18,6 +22,7 @@ interface AuthContextType {
   logout: () => Promise<void>
   hasPermission: (required: string | string[]) => boolean
   refreshPermissions: () => Promise<void>
+  updateProfileContext: (profile: Partial<User>) => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -117,9 +122,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logoutMut])
 
   const hasPermission = useCallback((required: string | string[]) => hasPerm(user?.permissions, required), [user])
+  const updateProfileContext = useCallback((profile: Partial<User>) => {
+    setUser((prev) => prev ? { ...prev, ...profile } : prev)
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, hasPermission, refreshPermissions }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, hasPermission, refreshPermissions, updateProfileContext }}>
       {children}
     </AuthContext.Provider>
   )

@@ -30,11 +30,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m FROM Member m WHERE m.tel = :identifier OR m.emailAddress = :identifier")
     Optional<Member> findByIdentifier(@Param("identifier") String identifier);
 
+    Optional<Member> findByUserId(Long userId);
+
     @Query("SELECT m FROM Member m WHERE m.tel = :tel")
     Optional<Member> findByTel(@Param("tel") String tel);
 
     @Query("SELECT m FROM Member m WHERE m.tel = :tel")
     boolean existsByTel(@Param("tel") String tel);
+
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m WHERE m.tel = :tel AND m.id <> :id")
+    boolean existsByTelAndIdNot(@Param("tel") String tel, @Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m WHERE LOWER(m.emailAddress) = LOWER(:emailAddress) AND m.id <> :id")
+    boolean existsByEmailAddressAndIdNot(@Param("emailAddress") String emailAddress, @Param("id") Long id);
 
     @Query("SELECT m FROM Member m WHERE m.church.id = :churchId AND " +
         "(" +

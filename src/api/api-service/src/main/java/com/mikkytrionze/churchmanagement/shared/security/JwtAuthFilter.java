@@ -52,6 +52,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 List<?> raw = jwtUtil.getClaim(token, "authorities", List.class);
                 List<SimpleGrantedAuthority> authorities = raw == null ? List.of() : raw.stream().map(a -> new SimpleGrantedAuthority(a.toString())).toList();
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(subject, null, authorities);
+                Map<String, Object> details = new HashMap<>();
+                if (uid != null) details.put("uid", uid);
+                authenticationToken.setDetails(details);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
             filterChain.doFilter(request, response);

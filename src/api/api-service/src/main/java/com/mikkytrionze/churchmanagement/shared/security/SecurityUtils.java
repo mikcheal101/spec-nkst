@@ -67,11 +67,28 @@ public class SecurityUtils {
      */
     public Member getLoggedInUser() throws ResourceNotFoundException {
         try {
-            String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null) throw new ResourceNotFoundException("Authentication context is missing");
+            String identifier = auth.getName();
 
-            return memberRepository.findByIdentifier(identifier)
-                    .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+            // Primary: resolve by token subject identifier (tel/email), preserving existing behavior.
+            var byIdentifier = memberRepository.findByIdentifier(identifier);
+            if (byIdentifier.isPresent()) return byIdentifier.get();
 
+            // Fallback: resolve by uid claim when present (helps accounts whose subject is not a member tel/email).
+            Object details = auth.getDetails();
+            if (details instanceof java.util.Map<?, ?> map) {
+                Object uidObj = map.get("uid");
+                Long uid = uidObj instanceof Number n ? n.longValue() : null;
+                if (uid != null) {
+                    var byUserId = memberRepository.findByUserId(uid);
+                    if (byUserId.isPresent()) return byUserId.get();
+                }
+            }
+
+            throw new ResourceNotFoundException("Authenticated user not found");
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (NullPointerException e) {
             throw new ResourceNotFoundException("Authentication context is missing");
         } catch (Exception e) {

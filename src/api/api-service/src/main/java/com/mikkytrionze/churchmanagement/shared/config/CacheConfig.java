@@ -1,5 +1,7 @@
 package com.mikkytrionze.churchmanagement.shared.config;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -15,12 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(RedisConnectionFactory.class)
 public class CacheConfig {
 
     @Bean
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(org.springframework.cache.CacheManager.class)
-    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(RedisConnectionFactory.class)
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(CacheManager.class)
+    public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
 
         Map<String, RedisCacheConfiguration> cacheConfigurationMap = new HashMap<>();
 
@@ -55,5 +57,11 @@ public class CacheConfig {
                 .cacheDefaults(baseConfiguration)
                 .withInitialCacheConfigurations(cacheConfigurationMap)
                 .build();
+    }
+
+    @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(CacheManager.class)
+    public CacheManager fallbackCacheManager() {
+        return new ConcurrentMapCacheManager();
     }
 }

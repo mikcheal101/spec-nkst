@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useProfile, useUpdateProfile, useChangePassword } from '../hooks/useAuth'
 import { authApi } from '../services/api'
 import type { ProfileUpdateRequest } from '../services/api'
+import { normalizeProfileUpdateRequest, validateProfileUpdate } from '../shared/utils/profile'
 import LoadingSpinner from '../shared/components/LoadingSpinner'
 
 const TABS = ['personalInfo', 'security'] as const
@@ -31,9 +32,9 @@ function InputWrap({ icon, children }: { icon: string; children: ReactNode }) {
 
 export default function Profile() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, updateProfileContext } = useAuth()
   const [tab, setTab] = useState<Tab>('personalInfo')
-  const { data: profile, isLoading: profileLoading } = useProfile()
+  const { data: profile, isLoading: profileLoading, isError: profileError, error: profileLoadError, refetch: refetchProfile } = useProfile()
   const updateProfileMut = useUpdateProfile()
   const changePwMut = useChangePassword()
 
@@ -45,6 +46,8 @@ export default function Profile() {
     emailAddress: '',
   })
   const [dirty, setDirty] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [refreshWarning, setRefreshWarning] = useState<string | null>(null)
 
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '', stepUpPassword: '' })
 
@@ -57,18 +60,45 @@ export default function Profile() {
         tel: profile.phoneNumber || user?.phoneNumber || '',
         emailAddress: profile.email || '',
       })
+      setDirty(false)
+      setFieldErrors({})
     }
-  }, [profile, user])
+  }, [profile, user?.phoneNumber])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const next = { ...form, [e.target.name]: e.target.value }
+    setForm(next)
     setDirty(true)
+    if (fieldErrors[e.target.name]) {
+      const copy = { ...fieldErrors }
+      delete copy[e.target.name]
+      setFieldErrors(copy)
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    setRefreshWarning(null)
+    const normalized = normalizeProfileUpdateRequest(form)
+    const errors = validateProfileUpdate(normalized)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      showErrorToast(Object.values(errors)[0])
+      return
+    }
     try {
-      await updateProfileMut.mutateAsync(form)
+      const result = await updateProfileMut.mutateAsync(normalized)
+      updateProfileContext({
+        phoneNumber: result.profile.phoneNumber || normalized.tel,
+        email: result.profile.email || normalized.emailAddress,
+        firstName: result.profile.firstName || normalized.firstName,
+        lastName: result.profile.lastName || normalized.lastName,
+        middleName: result.profile.middleName || normalized.middleName,
+        username: result.profile.username || user?.username,
+      })
+      if (result.confirmed && result.refreshFailed) {
+        setRefreshWarning(result.refreshError || 'Profile saved, but refreshing latest data failed.')
+      }
       showSuccessToast(t('profile.updateSuccess'))
       setDirty(false)
     } catch (err) {
@@ -143,8 +173,13 @@ export default function Profile() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
               <LoadingSpinner size={36} />
             </div>
+          ) : profileError ? (
+            <div className="alert alert-danger" role="alert" data-testid="profile-load-error">
+              <div>{profileLoadError instanceof Error ? profileLoadError.message : t('common.error')}</div>
+              <button type="button" className="btn btn-outline" style={{ marginTop: '0.75rem' }} onClick={() => void refetchProfile()}>{t('common.retry') || 'Retry'}</button>
+            </div>
           ) : (
-            <form onSubmit={handleSave}>
+            <form onSubmit={handleSave} noValidate>
               <div className="form-row">
                 <div className="form-group">
                   <label>{t('members.firstName')}</label>
@@ -168,14 +203,16 @@ export default function Profile() {
               <div className="form-group">
                 <label>{t('members.email')}</label>
                 <InputWrap icon="✉️">
-                  <input name="emailAddress" type="email" value={form.emailAddress} onChange={handleChange} style={{ paddingLeft: '2.25rem', width: '100%' }} />
+                  <input name="emailAddress" type="email" value={form.emailAddress} onChange={handleChange} aria-invalid={!!fieldErrors.emailAddress} style={{ paddingLeft: '2.25rem', width: '100%' }} />
                 </InputWrap>
+                {fieldErrors.emailAddress && <div className="form-error" role="alert">{fieldErrors.emailAddress}</div>}
               </div>
               <div className="form-group">
                 <label>{t('auth.phoneNumber')}</label>
                 <InputWrap icon="📞">
-                  <input name="tel" value={form.tel} onChange={handleChange} style={{ paddingLeft: '2.25rem', width: '100%' }} />
+                  <input name="tel" value={form.tel} onChange={handleChange} aria-invalid={!!fieldErrors.tel} style={{ paddingLeft: '2.25rem', width: '100%' }} />
                 </InputWrap>
+                {fieldErrors.tel && <div className="form-error" role="alert">{fieldErrors.tel}</div>}
               </div>
               <div className="form-group">
                 <label>{t('auth.username')}</label>
@@ -183,12 +220,29 @@ export default function Profile() {
                   <input value={user?.username || profile?.username || ''} disabled style={{ paddingLeft: '2.25rem', width: '100%' }} />
                 </InputWrap>
               </div>
+              {refreshWarning && (
+                <div className="alert alert-warning" role="status" data-testid="profile-refresh-warning" style={{ marginTop: '1rem' }}>
+                  <div>{refreshWarning}</div>
+                  <button type="button" className="btn btn-outline" style={{ marginTop: '0.5rem' }} onClick={() => { setRefreshWarning(null); void refetchProfile() }}>{t('common.retry') || 'Retry'}</button>
+                </div>
+              )}
               <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
-                <button type="submit" className="btn btn-primary" disabled={updateProfileMut.isPending || !dirty}>
+                <button type="submit" className="btn btn-primary" disabled={updateProfileMut.isPending || !dirty} data-testid="profile-save" data-dirty={dirty ? 'true' : 'false'}>
                   {updateProfileMut.isPending ? t('common.saving') : t('common.save')}
                 </button>
                 {dirty && (
-                  <button type="button" className="btn btn-outline" onClick={() => { setDirty(false); setForm({ firstName: '', lastName: '', middleName: '', tel: user?.phoneNumber || '', emailAddress: '' }) }}>
+                  <button type="button" className="btn btn-outline" onClick={() => {
+                    setDirty(false)
+                    setFieldErrors({})
+                    setRefreshWarning(null)
+                    setForm({
+                      firstName: profile?.firstName || '',
+                      lastName: profile?.lastName || '',
+                      middleName: profile?.middleName || '',
+                      tel: profile?.phoneNumber || user?.phoneNumber || '',
+                      emailAddress: profile?.email || '',
+                    })
+                  }}>
                     {t('common.cancel')}
                   </button>
                 )}

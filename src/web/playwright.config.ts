@@ -22,15 +22,15 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000', headless: true } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'], baseURL: 'http://localhost:3000', headless: true } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'], baseURL: 'http://localhost:3000', headless: true } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000', headless: true } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'], baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000', headless: true } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'], baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000', headless: true } },
     ...(hasMsEdge
-      ? [{ name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge' as const, baseURL: 'http://localhost:3000', headless: true } }]
+      ? [{ name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge' as const, baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000', headless: true } }]
       : []),
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',

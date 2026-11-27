@@ -231,6 +231,7 @@ export interface ProfileUpdateRequest {
   lastName: string
   middleName?: string
   tel: string
+  /** Optional; format-validated when provided */
   emailAddress?: string
 }
 
@@ -241,6 +242,24 @@ export interface ProfileResponse {
   email?: string
   phoneNumber?: string
   username?: string
+}
+
+export function normalizeProfileResponse(raw: unknown): ProfileResponse {
+  const obj = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {}
+  const data = (obj.data && typeof obj.data === 'object') ? obj.data as Record<string, unknown> : obj
+  const profile = (data.profile && typeof data.profile === 'object') ? data.profile as Record<string, unknown> : data
+  const pick = (...keys: string[]) => {
+    for (const k of keys) { const v = profile[k]; if (typeof v === 'string') return v.trim() }
+    return undefined
+  }
+  return {
+    firstName: pick('firstName', 'first_name'),
+    middleName: pick('middleName', 'middle_name'),
+    lastName: pick('lastName', 'last_name'),
+    email: pick('email', 'emailAddress', 'email_address'),
+    phoneNumber: pick('phoneNumber', 'tel', 'phone_number'),
+    username: pick('username', 'userName'),
+  }
 }
 
 export interface ChangePasswordRequest {
@@ -347,11 +366,13 @@ export const authApi = {
 
 /** Current-user profile endpoints (profile-service, `PROFILE_API_BASE`). */
 export const profileApi = {
-  getProfile() {
-    return request<ProfileResponse>('/api/v1/profile', {}, PROFILE_API_BASE)
+  async getProfile() {
+    const res = await request<ProfileResponse>('/api/v1/profile', {}, PROFILE_API_BASE)
+    return res.error ? res : { data: normalizeProfileResponse(res.data) }
   },
-  updateProfile(data: ProfileUpdateRequest) {
-    return request<ProfileResponse>('/api/v1/profile', { method: 'POST', body: JSON.stringify(data) }, PROFILE_API_BASE)
+  async updateProfile(data: ProfileUpdateRequest) {
+    const res = await request<ProfileResponse>('/api/v1/profile', { method: 'POST', body: JSON.stringify(data) }, PROFILE_API_BASE)
+    return res.error ? res : { data: normalizeProfileResponse(res.data) }
   },
 }
 
